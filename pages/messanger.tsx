@@ -260,7 +260,7 @@ export default function Index() {
 //     <div><a href="/">back</a></div>
 //     <h1>Deep.Foundation sdk example - messager</h1>
 //     <Button onClick={guest}>relogin new guest</Button>
-//     <ApolloClientTokenizedProvider options={{ client: '@deep-foundation/sdk', path: NEXT_PUBLIC_GQL_PATH, ssl: GQL_SSL, token: token, ws: !!process?.browser }}>
+//     <ApolloClientTokenizedProvider options={{ client: '@flakeed/tai', path: NEXT_PUBLIC_GQL_PATH, ssl: GQL_SSL, token: token, ws: !!process?.browser }}>
 //     {!!token && [<Content key={token}/>]}
 //     </ApolloClientTokenizedProvider>
 //   </div>;

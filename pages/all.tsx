@@ -101,7 +101,7 @@ function Page() {
       token of user link (copy from Deep.Case):
       <Input size="xs" value={tokenInput} onChange={e => setTokenInput(e.target.value)}/>
     </div>
-    <ApolloClientTokenizedProvider options={{ client: '@deep-foundation/sdk', path: gqlUrl, ssl: true, token: token, ws: !!process?.browser }}>
+    <ApolloClientTokenizedProvider options={{ client: '@flakeed/tai', path: gqlUrl, ssl: true, token: token, ws: !!process?.browser }}>
       {[<Content key={token+gqlUrl}/>]}
     </ApolloClientTokenizedProvider>
   </div>;
