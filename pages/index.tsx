@@ -19,7 +19,6 @@ import {
   Input,
   Button,
 } from '@chakra-ui/react';
-import { Provider } from '../imports/provider';
 import {
 
   useDeep,
@@ -38,9 +37,7 @@ import startAudioRec from '../imports/capacitor-voice-recorder/strart-recording'
 import stopAudioRec from '../imports/capacitor-voice-recorder/stop-recording';
 import getAudioRecPermission from '../imports/capacitor-voice-recorder/get-permission';
 import installPackage from '../imports/capacitor-voice-recorder/install-package';
-import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import ChatBubble from '../components/ChatBubble';
-
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
 function Content() {
@@ -88,20 +85,102 @@ function Content() {
     </Card>
   );
 
-  useEffect(() => {
-    const useRecords = async () => {
-      await uploadRecords(deep, deviceLinkId, sounds);
-      setSounds([]);
-    }
-    if (sounds.length > 0) useRecords();
-  }, [sounds])
-
   const toggleRecording = async () => {
+    
+    const PACKAGE_NAME="@deep-foundation/capacitor-voice-recorder";
+    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+    const audioRecordsLinkId = await deep.id(PACKAGE_NAME, "AudioRecords");
+    const soundTypeLinkId = await deep.id("@deep-foundation/sound", "Sound");
+    const recordTypeLinkId = await deep.id(PACKAGE_NAME, "Record");
+    const durationTypeLinkId = await deep.id(PACKAGE_NAME, "Duration");
+    const startTimeTypeLinkId = await deep.id(PACKAGE_NAME, "StartTime");
+    const endTimeTypeLinkId = await deep.id(PACKAGE_NAME, "EndTime");
+    const mimetypeTypeLinkId = await deep.id("@deep-foundation/sound", "MIME/type");
+    const formatTypeLinkId = await deep.id("@deep-foundation/sound", "Format");
+    // const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
+      
+    // const gcloudAuthKeyTypeLink = await deep.id(PACKAGE_NAME, "GoogleCloudAuthFile");
+    const userLink = await deep.id('deep', 'admin');
+    
     if (!recording) {
       await startAudioRec(deep);
     } else {
       const record = await stopAudioRec(deep);
       setSounds([...sounds, record]);
+  
+
+      const { data: [{ id: soundLinkId, }] }= await deep.insert(sounds.map((sound) => ({
+        type_id: recordTypeLinkId,
+        in: {
+          data: [{
+            type_id: containTypeLinkId,
+            from_id: audioRecordsLinkId,
+          }]
+        },
+        out: {
+          data: [
+            {
+              type_id: containTypeLinkId,
+              to: {
+                data: {
+                  type_id: soundTypeLinkId,
+                  string: { data: { value: sound.record ? sound.record["recordDataBase64"] : '' } },
+                  out: {
+                    data: [
+                      {
+                        type_id: containTypeLinkId,
+                        to: {
+                          data: {
+                            type_id: mimetypeTypeLinkId,
+                            string: { data: { value: sound.record ? sound.record["mimeType"] : '' } },
+                          }
+                        }
+                      },
+                      {
+                        type_id: containTypeLinkId,
+                        to: {
+                          data: {
+                            type_id: formatTypeLinkId,
+                            string: { data: { value: sound.record && sound.record["mimeType"] === "audio/webm;codecs=opus" ? "webm" : "aac" } },
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              type_id: containTypeLinkId,
+              to: {
+                data: {
+                  type_id: durationTypeLinkId,
+                  number: { data: { value: sound.record ? sound.record["msDuration"] : null } },
+                }
+              }
+            },
+            {
+              type_id: containTypeLinkId,
+              to: {
+                data: {
+                  type_id: startTimeTypeLinkId,
+                  string: { data: { value: sound.startTime } },
+                }
+              }
+            },
+            {
+              type_id: containTypeLinkId,
+              to: {
+                data: {
+                  type_id: endTimeTypeLinkId,
+                  string: { data: { value: sound.endTime } },
+                }
+              }
+            }]
+        }
+      })));
+
+      setSounds([]);
     }
     setRecording((prevRecording) => !prevRecording);
   };
