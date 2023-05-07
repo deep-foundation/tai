@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useLocalStore } from '@deep-foundation/store/local';
+import React, { useEffect, useState, useCallback,CSSProperties } from 'react';
+import { LocalStoreProvider, useLocalStore } from '@deep-foundation/store/local';
 import {
-  ChakraProvider,
+
   Text,
   Link,
   Stack,
@@ -16,212 +16,61 @@ import {
   Switch,
   FormControl,
   FormLabel,
+  Input,
+  Button,
 } from '@chakra-ui/react';
 import { Provider } from '../imports/provider';
 import {
-  DeepProvider,
+
   useDeep,
   useDeepSubscription,
 } from '@deep-foundation/deeplinks/imports/client';
-import NextLink from 'next/link';
-
-import { useRouter } from 'next/router';
-
-import DevicePage from './device';
-import CallHistoryPage from './call-history';
-import ContactsPage from './contacts';
-import TelegramPage from './telegram';
-import ActionSheetPage from './action-sheet';
-import DialogPage from './dialog';
-import ScreenReaderPage from './screen-reader';
-import OpenaiCompletionPage from './openai-completion';
-import BrowserExtensionPage from './browser-extension';
-import NetworkPage from './network';
-import CameraPage from './camera';
-import HapticsPage from './haptics';
-import AudioRecordPage from './audiorecord';
 import { DEEP_MEMO_PACKAGE_NAME as DEEP_MEMO_PACKAGE_NAME } from '../imports/deep-memo/package-name';
-import { saveDeviceData } from '../imports/device/save-device-data';
-import { Device } from '@capacitor/device';
-import { DEVICE_PACKAGE_NAME } from '../imports/device/package-name';
-import { useActionSheetSubscription } from '../imports/action-sheet/use-action-sheet-subscription';
-import { useDialogSubscription } from '../imports/dialog/use-dialog-subscription';
-import { useScreenReaderSubscription } from '../imports/screen-reader/use-screen-reader-subscription';
-import { useHapticsSubscription } from '../imports/haptics/use-haptics-vibrate-subscription';
-import { WithActionSheetSubscription } from '../components/action-sheet/with-action-sheet-subscription';
-import { WithDialogSubscription } from '../components/dialog/with-dialog-subscription';
-import { WithScreenReaderSubscription } from '../components/screen-reader/with-screen-reader-subscription';
-import { WithHapticsSubscription } from '../components/haptics/with-haptics-vibrate-subscription';
-import { insertDevice } from '../imports/device/insert-device';
-import { saveAllContacts } from '../imports/contact/contact';
-import { saveAllCallHistory } from '../imports/callhistory/callhistory';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
 import { WithSubscriptions } from '../components/deep-memo/with-subscriptions';
-import { initDeviceIfNotInitedAndSaveData } from '../imports/device/init-device-if-not-inited-and-save-data';
 import { useIsPackageInstalled } from '../imports/use-is-package-installed';
 import { WithInitDeviceIfNotInitedAndSaveData } from '../components/device/withInitDeviceIfNotInitedAndSaveData';
+import { NavBar } from '../components/navbar';
+import { Page } from '../components/page';
 
-function Page() {
+import startAudioRec from '../imports/capacitor-voice-recorder/strart-recording';
+import stopAudioRec from '../imports/capacitor-voice-recorder/stop-recording';
+import getAudioRecPermission from '../imports/capacitor-voice-recorder/get-permission';
+import installPackage from '../imports/capacitor-voice-recorder/install-package';
+import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
+import ChatBubble from '../components/ChatBubble';
+
+const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
+
+function Content() {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
 
   const deep = useDeep();
-  const router = useRouter();
-
-  const [adminLinkId, setAdminLinkId] = useState<number | undefined>(undefined);
+  const [recording, setRecording] = useState(false);
+  const [sounds, setSounds] = useLocalStore(CapacitorStoreKeys[CapacitorStoreKeys.Sounds], []);
+  const [records, setRecords] = useState([]);
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     CapacitorStoreKeys[CapacitorStoreKeys.DeviceLinkId],
     undefined
   );
 
-  const {data, loading ,error} = deep.useDeepSubscription({
-    type_id: 1
-  })
+  const { isPackageInstalled: isMemoPackageInstalled } = useIsPackageInstalled({ packageName: DEEP_MEMO_PACKAGE_NAME, shouldIgnoreResultWhenLoading: true, onError: ({ error }) => { console.error(error.message) } });
   useEffect(() => {
-    console.log({data, loading ,error})
-  }, [data, loading ,error])
-
-  // const [isMemoPackageInstalled, setIsMemoPackageInstalled] = useState<
-  //   boolean | undefined
-  // >(undefined);
-  // {
-  //   const { isPackageInstalled, loading, error } = useIsPackageInstalled({packageName: DEEP_MEMO_PACKAGE_NAME});
-  //   useEffect(() => {
-  //     if (loading) {
-  //       return;
-  //     }
-  //     if (error) {
-  //       console.error(error.message);
-  //     }
-  //     setIsMemoPackageInstalled(isPackageInstalled);
-  //   }, [isPackageInstalled, loading, error]);
-  // }
-
-  useEffect(() => {
-    self["deep"] = deep;
-    if (deep.linkId === 0) {
-      deep.guest();
-    }
-  }, []);
+    console.log({ isMemoPackageInstalled })
+  }, [isMemoPackageInstalled])
 
   useEffect(() => {
     new Promise(async () => {
-      if (deep.linkId === 0) {
+      if (deep.linkId !== 0) {
         return;
       }
-      if (adminLinkId !== undefined) {
-        return;
-      }
-      {
-        const adminLinkId = await deep.id('deep', 'admin');
-        setAdminLinkId(adminLinkId);
-        await deep.login({
-          linkId: adminLinkId,
-        });
-      }
-    });
-  }, [deep]);
-
-  const isDeepReady =
-    deep.linkId !== 0 &&
-    adminLinkId !== undefined &&
-    deep.linkId === adminLinkId;
-
-  const memoPackageIsNotInstalledAlert = (
-    <Alert status="error">
-      <AlertIcon />
-      <AlertTitle>Install {DEEP_MEMO_PACKAGE_NAME} to proceed!</AlertTitle>
-      <AlertDescription>
-        {DEEP_MEMO_PACKAGE_NAME} package contains all the packages required to
-        use this application. You can install it by using npm-packager-ui
-        located in deepcase or any other posibble way.
-      </AlertDescription>
-    </Alert>
-  );
-
-  const linksOfPages = (
-    <>
-      <div>
-        <Link as={NextLink} href="/settings">
-          Settings
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/device">
-          Device
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/call-history">
-          Call History
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/contacts">
-          Contacts
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/telegram">
-          Telegarm
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/action-sheet">
-          Action Sheet
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/dialog">
-          Dialog
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/screen-reader">
-          Screen Reader
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/openai-completion">
-          OpenAI Completion
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} replace href="/browser-extension">
-          Browser Extension
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/network">
-          Network
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/camera">
-          Camera
-        </Link>
-      </div>
-
-      <div>
-        <Link as={NextLink} href="/audiorecord">
-          Audiorecord
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/haptics">
-          Haptics
-        </Link>
-      </div>
-      <div>
-        <Link as={NextLink} href="/firebase-push-notification">
-          Firebase Push Notification
-        </Link>
-      </div>
-    </>
-  );
+      await deep.guest();
+    })
+  }, [deep])
 
   const generalInfoCard = (
     <Card>
@@ -239,40 +88,138 @@ function Page() {
     </Card>
   );
 
+  useEffect(() => {
+    const useRecords = async () => {
+      await uploadRecords(deep, deviceLinkId, sounds);
+      setSounds([]);
+    }
+    if (sounds.length > 0) useRecords();
+  }, [sounds])
+
+  const toggleRecording = async () => {
+    if (!recording) {
+      await startAudioRec(deep);
+    } else {
+      const record = await stopAudioRec(deep);
+      setSounds([...sounds, record]);
+    }
+    setRecording((prevRecording) => !prevRecording);
+  };
+
+  const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const ChatBubblesContainer = ({ children }) => {
+    const containerStyle: CSSProperties = {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+    };
+  
+    return <div style={containerStyle}>{children}</div>;
+  };
+
+
+  const generateRandomChatBubbles = (count) => {
+    const messages = [
+      "Hello!",
+      "How are you?",
+      "What are you doing?",
+      "Nice to meet you!",
+      "Have a good day!",
+    ];
+  
+    const sides = ["left", "right"];
+  
+    const bubbles = Array.from({ length: count }, (_, i) => (
+      <ChatBubble
+        key={i}
+        text={getRandom(messages)}
+        side={getRandom(sides)}
+        top={Math.floor(Math.random() * (window.innerHeight - 150))} // Увеличьте размер диапазона
+        left={Math.floor(Math.random() * (window.innerWidth - 150))} // Увеличьте размер диапазона
+      />
+    ));
+  
+    return bubbles;
+  };
+
   return (
     <Stack alignItems={'center'}>
-      <Heading as={'h1'}>DeepMemo</Heading>
+      <NavBar />
+      <Heading as={'h1'}>Tai</Heading>
       {generalInfoCard}
-      {isDeepReady ? (
-        // isMemoPackageInstalled ? (
-          false ? (
-          Boolean(deviceLinkId) ? (
-            <>
-            <WithSubscriptions deep={deep} />
+      {
+          <>
             <WithInitDeviceIfNotInitedAndSaveData deep={deep} deviceLinkId={deviceLinkId} setDeviceLinkId={setDeviceLinkId} />
-            {linksOfPages}
-            </>
-          ) : (
-            <Text>Initializing the device...</Text>
-          )
-        ) : (
-          memoPackageIsNotInstalledAlert
-        )
-      ) : (
-        <Text>Logging in...</Text>
-      )}
+            {
+              Boolean(deviceLinkId) ? (
+                <>
+                  <WithSubscriptions deep={deep} />
+                  <Pages />
+                </>
+              ) : (
+                <Text>Initializing the device...</Text>
+              )
+            }
+          </>
+       
+      }
+      <Button style={{ position: 'relative', zIndex: 1000 }} onClick={async () => await installPackage(deviceLinkId)}>
+      INSTALL PACKAGE
+    </Button>
+    <Button
+  style={{
+    position: 'absolute',
+    zIndex: 1000,
+    width: '350px',
+    height: '350px',
+    borderRadius: '50%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: '24px',
+    top:window.innerHeight/2,
+  }}
+  onClick={toggleRecording}
+>
+        {recording ? 'STOP RECORDING' : 'START RECORDING'}
+      </Button>
+        <Button style={{ position: 'relative', zIndex: 1000 }} onClick={async () => await getAudioRecPermission(deep, deviceLinkId)}>
+      GET RECORDING PERMISSION
+    </Button>
+    {records?.map((r) => <audio key={r.id} controls src={`data:${r.mimetype};base64,${r.sound}`} />)}
+<ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
+      
     </Stack>
   );
 }
 
-export default function Index() {
-  return (
-    <>
-      <ChakraProvider>
-        <Provider>
-            <Page />
-        </Provider>
-      </ChakraProvider>
-    </>
-  );
+export default function IndexPage() {
+  return <Page>
+    <Content />
+  </Page>
 }
+
+function MemoPackageIsNotInstalledAlert() {
+  // return <Text>Package is not installed</Text>
+  return <Alert status="error">
+    <AlertIcon />
+    <AlertTitle>Install {DEEP_MEMO_PACKAGE_NAME.toString()} to proceed!</AlertTitle>
+    <AlertDescription>
+      {DEEP_MEMO_PACKAGE_NAME.toString()} package contains all the packages required to
+      use this application. You can install it by using npm-packager-ui
+      located in deepcase or any other posibble way.
+    </AlertDescription>
+  </Alert>
+}
+
+function Pages() {
+  return <Stack>
+    {/* <Link as={NextLink} href="/audiorecord">
+      Audiorecord
+    </Link> */}
+
+  </Stack>
+}
+
