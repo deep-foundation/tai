@@ -136,8 +136,8 @@ function Content() {
         key={i}
         text={getRandom(messages)}
         side={getRandom(sides)}
-        top={Math.floor(Math.random() * (window.innerHeight - 150))} // Увеличьте размер диапазона
-        left={Math.floor(Math.random() * (window.innerWidth - 150))} // Увеличьте размер диапазона
+        top={Math.floor(Math.random() * (window.innerHeight - 150))}
+        left={Math.floor(Math.random() * (window.innerWidth - 150))}
       />
     ));
   
