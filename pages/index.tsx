@@ -18,6 +18,7 @@ import {
   FormLabel,
   Input,
   Button,
+  Box,
 } from '@chakra-ui/react';
 import {
 
@@ -48,6 +49,9 @@ function Content() {
   const deep = useDeep();
   const [sounds, setSounds] = useLocalStore("Sounds", []);
   const [isRecording, setIsRecording] = useState(false);
+  const [apiKey, setApiKey] = useState('');
+  const [googleAuth, setGoogleAuth] = useState('');
+  const [showInputFields, setShowInputFields] = useState(false);
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     'deviceLinkId',
@@ -200,8 +204,23 @@ await deep.insert(sounds.map((sound) => ({
     };
   }, [isRecording]);
 
+  const handleInputChange = (e, setInputValue) => {
+    setInputValue(e.target.value);
+  };
+
   const handleButtonClick = () => {
-    setIsRecording((prevIsRecording) => !prevIsRecording);
+    if (!showInputFields && (apiKey === '' || googleAuth === '')) {
+      setShowInputFields(true);
+    } else {
+      if (apiKey === '' || googleAuth === '') {
+        alert('Please fill both input fields before starting the recording.');
+        return;
+      }
+      setIsRecording((prevIsRecording) => !prevIsRecording);
+      if (apiKey !== '' && googleAuth !== '') {
+        setShowInputFields(false);
+      }
+    }
   };
 
   const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -283,6 +302,34 @@ await deep.insert(sounds.map((sound) => ({
 >
         {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
       </Button>
+      {showInputFields && (
+        <Box
+          position="absolute"
+          top="20%"
+          left="20%"
+          transform="translate(-50%, -50%)"
+          zIndex={1001}
+        >
+          <FormControl>
+            <FormLabel>Input OpenAI ApiKey:</FormLabel>
+            <Input
+              value={apiKey}
+              onChange={(e) => handleInputChange(e, setApiKey)}
+              width="300px" 
+              height="40px" 
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel>Input GoogleAuth object:</FormLabel>
+            <Input
+              value={googleAuth}
+              onChange={(e) => handleInputChange(e, setGoogleAuth)}
+              width="300px" 
+              height="40px" 
+            />
+          </FormControl>
+        </Box>
+      )}
         <Button style={{ position: 'relative', zIndex: 1000 }} onClick={async () => await getAudioRecPermission(deep, deviceLinkId)}>
       GET RECORDING PERMISSION
     </Button>
@@ -307,4 +354,3 @@ function Pages() {
 
   </Stack>
 }
-
