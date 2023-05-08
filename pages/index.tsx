@@ -213,7 +213,7 @@ const { data: [{ id: soundLinkId }] }  = await deep.insert(sounds.map((sound) =>
       in: {
         data: {
           type_id: containTypeLinkId,
-          from_id: deep.linkId,
+          from_id: await deep.id("@deep-foundation/capacitor-voice-recorder"),
         }
       }
     });
@@ -274,7 +274,7 @@ const { data: [isConversationLinkId ] } = await deep.select({
      });
 const { data: [{ id: messageLinkId }] } = await deep.insert({
   type_id: messageTypeLinkId,
-  string: { data: { value: "hello" } },
+  string: { data: { value: transcribedTextLinkId.value } },
   in: {
     data: {
       type_id: containTypeLinkId,
