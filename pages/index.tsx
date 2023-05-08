@@ -52,7 +52,6 @@ function Content() {
   const [apiKey, setApiKey] = useState('');
   const [googleAuth, setGoogleAuth] = useState('');
   const [showInputFields, setShowInputFields] = useState(false);
-  const [conversationLinkId, setConversationLinkId] = useState(null);
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     'deviceLinkId',
@@ -193,9 +192,10 @@ const { data: [{ id: soundLinkId }] }  = await deep.insert(sounds.map((sound) =>
      });
      console.log("googleauth",googleAuth);
      if(!isGcloudAuthKeyLinkId){
+      const parsedGoogleAuth = JSON.parse(googleAuth);
     await deep.insert({
       type_id: gcloudAuthKeyTypeLink,
-      object: { data: { value: googleAuth } },
+      object: { data: { value: parsedGoogleAuth } },
       in: {
         data: [
           {
@@ -251,9 +251,7 @@ const { data: [isConversationLinkId ] } = await deep.select({
     from_id: deep.linkId,
   },
  });
-    useEffect( () => {
       if (!isConversationLinkId) {
-        const fetchData = async () => {
           const { data: [{id: conversationLinkId}]}= await deep.insert({
           type_id: conversationTypeLinkId,
           string: { data: { value: "New chat" } },
@@ -264,21 +262,23 @@ const { data: [isConversationLinkId ] } = await deep.select({
             },
           },
         });
-        setConversationLinkId(conversationLinkId);
       };
-      fetchData();
-      }
-    }, [conversationLinkId]);
     console.log("flakeed7");
 
-
+    const { data: [ConversationLinkId ] } = await deep.select({
+      type_id:conversationTypeLinkId,
+      in: {
+        type_id: containTypeLinkId,
+        from_id: deep.linkId,
+      },
+     });
 const { data: [{ id: messageLinkId }] } = await deep.insert({
   type_id: messageTypeLinkId,
-  string: { data: { value: transcribedTextLinkId } },
+  string: { data: { value: "hello" } },
   in: {
     data: {
       type_id: containTypeLinkId,
-      from_id: await deep.id("@deep-foundation/messaging"),
+      from_id: deep.linkId,
     }
   },
 });
@@ -290,7 +290,7 @@ const { data: [{ id: messageLinkId }] } = await deep.insert({
     } = await deep.insert({
       type_id: replyTypeLinkId,
       from_id: messageLinkId,
-      to_id: conversationLinkId,
+      to_id: ConversationLinkId.id,
       in: {
         data: {
           type_id: containTypeLinkId,
@@ -334,8 +334,7 @@ const { data: [{ id: messageLinkId }] } = await deep.insert({
       setApiKey(value);
     } else if (field === 'googleAuth') {
       try {
-        const parsedGoogleAuth = JSON.parse(value);
-        setGoogleAuth(parsedGoogleAuth);
+        setGoogleAuth(value);
       } catch (error) {
         console.error('Invalid JSON:', error);
       }
@@ -406,7 +405,6 @@ const { data: [{ id: messageLinkId }] } = await deep.insert({
             {
               Boolean(deviceLinkId) ? (
                 <>
-                  <WithSubscriptions deep={deep} />
                   <Pages />
                 </>
               ) : (
