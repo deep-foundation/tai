@@ -46,19 +46,13 @@ function Content() {
   }, []);
 
   const deep = useDeep();
-  const [recording, setRecording] = useState(false);
-  const [sounds, setSounds] = useLocalStore(CapacitorStoreKeys[CapacitorStoreKeys.Sounds], []);
-  const [records, setRecords] = useState([]);
+  const [sounds, setSounds] = useLocalStore("Sounds", []);
+  const [isRecording, setIsRecording] = useState(false);
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
-    CapacitorStoreKeys[CapacitorStoreKeys.DeviceLinkId],
+    'deviceLinkId',
     undefined
   );
-
-  const { isPackageInstalled: isMemoPackageInstalled } = useIsPackageInstalled({ packageName: DEEP_MEMO_PACKAGE_NAME, shouldIgnoreResultWhenLoading: true, onError: ({ error }) => { console.error(error.message) } });
-  useEffect(() => {
-    console.log({ isMemoPackageInstalled })
-  }, [isMemoPackageInstalled])
 
   useEffect(() => {
     new Promise(async () => {
@@ -85,104 +79,129 @@ function Content() {
     </Card>
   );
 
-  const toggleRecording = async () => {
-    
-    const PACKAGE_NAME="@deep-foundation/capacitor-voice-recorder";
-    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-    const audioRecordsLinkId = await deep.id(PACKAGE_NAME, "AudioRecords");
-    const soundTypeLinkId = await deep.id("@deep-foundation/sound", "Sound");
-    const recordTypeLinkId = await deep.id(PACKAGE_NAME, "Record");
-    const durationTypeLinkId = await deep.id(PACKAGE_NAME, "Duration");
-    const startTimeTypeLinkId = await deep.id(PACKAGE_NAME, "StartTime");
-    const endTimeTypeLinkId = await deep.id(PACKAGE_NAME, "EndTime");
-    const mimetypeTypeLinkId = await deep.id("@deep-foundation/sound", "MIME/type");
-    const formatTypeLinkId = await deep.id("@deep-foundation/sound", "Format");
-    // const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
-      
-    // const gcloudAuthKeyTypeLink = await deep.id(PACKAGE_NAME, "GoogleCloudAuthFile");
-    const userLink = await deep.id('deep', 'admin');
-    
-    if (!recording) {
-      await startAudioRec(deep);
-    } else {
-      const record = await stopAudioRec(deep);
-      setSounds([...sounds, record]);
-  
+  useEffect(() => {
+    if (!isRecording) return;
 
-      const { data: [{ id: soundLinkId, }] }= await deep.insert(sounds.map((sound) => ({
-        type_id: recordTypeLinkId,
-        in: {
-          data: [{
-            type_id: containTypeLinkId,
-            from_id: audioRecordsLinkId,
-          }]
-        },
-        out: {
-          data: [
-            {
-              type_id: containTypeLinkId,
-              to: {
-                data: {
-                  type_id: soundTypeLinkId,
-                  string: { data: { value: sound.record ? sound.record["recordDataBase64"] : '' } },
-                  out: {
-                    data: [
-                      {
-                        type_id: containTypeLinkId,
-                        to: {
-                          data: {
-                            type_id: mimetypeTypeLinkId,
-                            string: { data: { value: sound.record ? sound.record["mimeType"] : '' } },
+    const useRecords = async () => {
+    const PACKAGE_NAME="@deep-foundation/capacitor-voice-recorder";
+     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+     const audioRecordsLinkId = await deep.id(PACKAGE_NAME, "AudioRecords");
+     const soundTypeLinkId = await deep.id("@deep-foundation/sound", "Sound");
+     const recordTypeLinkId = await deep.id(PACKAGE_NAME, "Record");
+     const durationTypeLinkId = await deep.id(PACKAGE_NAME, "Duration");
+     const startTimeTypeLinkId = await deep.id(PACKAGE_NAME, "StartTime");
+     const endTimeTypeLinkId = await deep.id(PACKAGE_NAME, "EndTime");
+     const mimetypeTypeLinkId = await deep.id("@deep-foundation/sound", "MIME/type");
+     const formatTypeLinkId = await deep.id("@deep-foundation/sound", "Format");
+     // const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
+     // const typeTypeLinkId = await deep.id('@deep-foundation/core', "Type");
+     // const gcloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
+     // const typeStringLinkId = await deep.id('@deep-foundation/core', "String");
+     // const typeValueLinkId = await deep.id('@deep-foundation/core', "Value");
+     // const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
+  	  // const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
+     // const userLink = await deep.id('deep', 'admin');
+await deep.insert(sounds.map((sound) => ({
+          type_id: recordTypeLinkId,
+          in: {
+             data: [{
+               type_id: containTypeLinkId,
+               from_id: audioRecordsLinkId,
+             }]
+           },
+           out: {
+             data: [
+               {
+                 type_id: containTypeLinkId,
+                 to: {
+                   data: {
+                     type_id: soundTypeLinkId,
+                     string: { data: { value:  sound.record["recordDataBase64"]  } },
+                     out: {
+                       data: [
+                         {
+                           type_id: containTypeLinkId,
+                           to: {
+                             data: {
+                               type_id: mimetypeTypeLinkId,
+                               string: { data: { value:  sound.record["mimeType"]   } },
+                             }
+                           }
+                        },
+                        {
+                          type_id: containTypeLinkId,
+                          to: {
+                            data: {
+                              type_id: formatTypeLinkId,
+                              string: { data: { value: sound.record["mimeType"] === "audio/webm;codecs=opus" ? "webm" : "aac" } },
+                            }
                           }
                         }
-                      },
-                      {
-                        type_id: containTypeLinkId,
-                        to: {
-                          data: {
-                            type_id: formatTypeLinkId,
-                            string: { data: { value: sound.record && sound.record["mimeType"] === "audio/webm;codecs=opus" ? "webm" : "aac" } },
-                          }
-                        }
-                      }
-                    ]
+                      ]
+                    }
                   }
                 }
-              }
-            },
-            {
-              type_id: containTypeLinkId,
-              to: {
-                data: {
-                  type_id: durationTypeLinkId,
-                  number: { data: { value: sound.record ? sound.record["msDuration"] : null } },
+              },
+              {
+                type_id: containTypeLinkId,
+                to: {
+                  data: {
+                    type_id: durationTypeLinkId,
+                    number: { data: { value:  sound.record["msDuration"]  } },
+                  }
                 }
-              }
-            },
-            {
-              type_id: containTypeLinkId,
-              to: {
-                data: {
-                  type_id: startTimeTypeLinkId,
-                  string: { data: { value: sound.startTime } },
+              },
+              {
+                type_id: containTypeLinkId,
+                to: {
+                  data: {
+                    type_id: startTimeTypeLinkId,
+                    string: { data: { value: sound.startTime } },
+                  }
                 }
-              }
-            },
-            {
-              type_id: containTypeLinkId,
-              to: {
-                data: {
-                  type_id: endTimeTypeLinkId,
-                  string: { data: { value: sound.endTime } },
+              },
+              {
+                type_id: containTypeLinkId,
+                to: {
+                  data: {
+                    type_id: endTimeTypeLinkId,
+                    string: { data: { value: sound.endTime } },
+                  }
                 }
-              }
-            }]
-        }
-      })));
+              }]
+          }
+        })));
 
       setSounds([]);
-    }
-    setRecording((prevRecording) => !prevRecording);
+    };
+
+    if (sounds.length > 0) useRecords();
+  }, [sounds, isRecording]);
+
+  useEffect(() => {
+    if (!isRecording) return;
+
+    let loop = true;
+    const startRecordingCycle = async (duration) => {
+      for (; isRecording && loop;) {
+        await startAudioRec(deep);
+        const startTime = new Date().toLocaleDateString();
+        await delay(duration);
+        const record = await stopAudioRec(deep);
+        const endTime = new Date().toLocaleDateString();
+        console.log({ record });
+        setSounds([...sounds, { record, startTime, endTime }]);
+      }
+    };
+
+    startRecordingCycle(5000);
+    return function stopCycle() {
+      loop = false;
+    };
+  }, [isRecording]);
+
+  const handleButtonClick = () => {
+    setIsRecording((prevIsRecording) => !prevIsRecording);
   };
 
   const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -244,9 +263,9 @@ function Content() {
           </>
        
       }
-      <Button style={{ position: 'relative', zIndex: 1000 }} onClick={async () => await installPackage(deviceLinkId)}>
+      {/* <Button style={{ position: 'relative', zIndex: 1000 }} onClick={async () => await installPackage(deviceLinkId)}>
       INSTALL PACKAGE
-    </Button>
+    </Button> */}
     <Button
   style={{
     position: 'absolute',
@@ -260,14 +279,14 @@ function Content() {
     fontSize: '24px',
     top:window.innerHeight/2,
   }}
-  onClick={toggleRecording}
+  onClick={handleButtonClick}
 >
-        {recording ? 'STOP RECORDING' : 'START RECORDING'}
+        {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
       </Button>
         <Button style={{ position: 'relative', zIndex: 1000 }} onClick={async () => await getAudioRecPermission(deep, deviceLinkId)}>
       GET RECORDING PERMISSION
     </Button>
-    {records?.map((r) => <audio key={r.id} controls src={`data:${r.mimetype};base64,${r.sound}`} />)}
+    {sounds?.map((r) => <audio key={r.id} controls src={`data:${r.mimetype};base64,${r.sound}`} />)}
 <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
       
     </Stack>
@@ -278,19 +297,6 @@ export default function IndexPage() {
   return <Page>
     <Content />
   </Page>
-}
-
-function MemoPackageIsNotInstalledAlert() {
-  // return <Text>Package is not installed</Text>
-  return <Alert status="error">
-    <AlertIcon />
-    <AlertTitle>Install {DEEP_MEMO_PACKAGE_NAME.toString()} to proceed!</AlertTitle>
-    <AlertDescription>
-      {DEEP_MEMO_PACKAGE_NAME.toString()} package contains all the packages required to
-      use this application. You can install it by using npm-packager-ui
-      located in deepcase or any other posibble way.
-    </AlertDescription>
-  </Alert>
 }
 
 function Pages() {
