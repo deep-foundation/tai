@@ -305,7 +305,7 @@ function Content() {
         }
       })));
       console.log("flakeed1");
-console.log("soundLinkId",soundLinkId)
+      console.log("soundLinkId", soundLinkId)
 
       const { data: [isGcloudAuthKeyLinkId] } = await deep.select({
         type_id: gcloudAuthKeyTypeLink,
@@ -331,48 +331,8 @@ console.log("soundLinkId",soundLinkId)
         })
       }
       console.log("flakeed3");
-      // await deep.insert({
-      //   type_id: transcribeTypeLinkId,
-      //   from_id: deep.linkId,
-      //   to_id: soundLinkId,
-      //   in: {
-      //     data: {
-      //       type_id: containTypeLinkId,
-      //       from_id: deep.linkId,
-      //     }
-      //   }
-      // })
-      // const { data: soundLinks } = await deep.select({
-      //   type_id: soundTypeLinkId
-      // });
-      // console.log("soundLinks",soundLinks)
-      // const soundLink = soundLinks.sort((a, b) => b.id - a.id);
-      // console.log("soundLink",soundLink)
-      //   const { data } = await deep.select({
-      //     up: {
-      //       parent: {
-      //         id: soundLink[0].id
-      //       },
-      //       link: {
-      //         type_id: {
-      //           _in:
-      //             [
-      //               soundTypeLinkId,
-      //               formatTypeLinkId,
-      //               mimetypeTypeLinkId,
-      //               transcriptionTypeLinkId
-      //             ]
-      //         }
-      //       }
-      //     },
-      //   })
 
-
-      //   const transcription = data.filter((link) => link.type_id === transcriptionTypeLinkId)[0]?.value.value
-      //   console.log("data.filter((link) => link.type_id === transcriptionTypeLinkId)[0]?.value.value",data.filter((link) => link.type_id === transcriptionTypeLinkId)[0]?.value.value)
-      // console.log("data",data)
-
-      const { data: [{ id: transcribeTextLinkId }] } = await deep.insert( {
+      const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
         type_id: transcribeTypeLinkId,
         from_id: deep.linkId,
         to_id: soundLinkId,
@@ -383,7 +343,7 @@ console.log("soundLinkId",soundLinkId)
           }
         }
       });
-      console.log("transcribeTextLinkId",transcribeTextLinkId)
+      console.log("transcribeTextLinkId", transcribeTextLinkId)
 
       await delay(5000);
       const { data: [transcribedTextLinkId] } = await deep.select({
@@ -393,7 +353,7 @@ console.log("soundLinkId",soundLinkId)
           from_id: soundLinkId
         },
       });
-      console.log("transcribedTextLinkId",transcribedTextLinkId)
+      console.log("transcribedTextLinkId", transcribedTextLinkId)
 
       const { data: [isApiKeyLinkId] } = await deep.select({
         type_id: apiKeyTypeLinkId,
@@ -416,7 +376,7 @@ console.log("soundLinkId",soundLinkId)
           }
         });
       }
-        
+
       console.log("flakeed6");
       const { data: [isConversationLinkId] } = await deep.select({
         type_id: conversationTypeLinkId,
@@ -426,20 +386,12 @@ console.log("soundLinkId",soundLinkId)
         },
       });
       if (isConversationLinkId) {
-        // const { data: [messagesWithAuthorLink] } = await deep.select({
-        //   type_id: messageLinks.parent.type_id,
-        //   out:
-        //   {
-        //     type_id: authorTypeLinkId,
-        //     to_id: chatGPTTypeLinkId,
-        //   },
-        // })
         const { data: replyLinks } = await deep.select({
           type_id: replyTypeLinkId,
         });
         const replyLink = replyLinks.sort((a, b) => b.from_id - a.from_id);
-        console.log("replyLinks",replyLinks)
-      
+        console.log("replyLinks", replyLinks)
+
         const { data: conversationLink } = await deep.select({
           tree_id: { _eq: messagingTreeId },
           parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
@@ -467,43 +419,36 @@ console.log("soundLinkId",soundLinkId)
             }
           }`
         })
-  
-         const messageLinks = conversationLink
-      .map(item => item.parent)
-      .filter(link => link && link.type_id === messageTypeLinkId);
 
-      const authorLinks = messageLinks
-  .filter(messageLink => messageLink.author && messageLink.author[0])
-  .map(messageLink => messageLink.author[0].from_id);
+        const messageLinks = conversationLink
+          .map(item => item.parent)
+          .filter(link => link && link.type_id === messageTypeLinkId);
+
+        const authorLinks = messageLinks
+          .filter(messageLink => messageLink.author && messageLink.author[0])
+          .map(messageLink => messageLink.author[0].from_id);
 
 
-      console.log("messageLinks", messageLinks);
-      console.log("authorLinks", authorLinks);
+        console.log("messageLinks", messageLinks);
+        console.log("authorLinks", authorLinks);
 
-      // const { data: [trascribedTextLinkId] } = await deep.select({
-      //   type_id: transcriptionTypeLinkId,
-      //   in: {
-      //     type_id: containTypeLinkId,
-      //     from_id: transcribeTextLinkId.to_id
-      //   }
-      // });
-      console.log("trascribedTextLinkId", transcribedTextLinkId.value?.value)
+        console.log("trascribedTextLinkId", transcribedTextLinkId.value?.value)
 
-      const { data: [{ id: messageLinkId }] } = await deep.insert({
-        type_id: messageTypeLinkId,
-        string: { data: { value: transcribedTextLinkId.value?.value } },
-        in: {
-          data: {
-            type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          }
-        },
-      });
+        const { data: [{ id: messageLinkId }] } = await deep.insert({
+          type_id: messageTypeLinkId,
+          string: { data: { value: transcribedTextLinkId.value?.value } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            }
+          },
+        });
 
         const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
           type_id: replyTypeLinkId,
           from_id: messageLinkId,
-          to_id: authorLinks[authorLinks.length-1],
+          to_id: authorLinks[authorLinks.length - 1],
           in: {
             data: {
               type_id: containTypeLinkId,
@@ -549,15 +494,6 @@ console.log("soundLinkId",soundLinkId)
             },
           },
         });
-        // const { data: [trascribedTextLinkId] } = await deep.select({
-        //   type_id: transcriptionTypeLinkId,
-        //   in: {
-        //     type_id: containTypeLinkId,
-        //     from_id: transcribeTextLinkId.to_id
-        //   }
-        // });
-        console.log("trascribedTextLinkId", transcribedTextLinkId.value?.value)
-  
         const { data: [{ id: messageLinkId }] } = await deep.insert({
           type_id: messageTypeLinkId,
           string: { data: { value: transcribedTextLinkId.value?.value } },
@@ -580,9 +516,7 @@ console.log("soundLinkId",soundLinkId)
           },
         });
       };
-
       console.log("flakeed8");
-
 
       setSounds([]);
     };
