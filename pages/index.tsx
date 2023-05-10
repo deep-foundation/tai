@@ -331,18 +331,18 @@ function Content() {
         })
       }
       console.log("flakeed3");
-      const { data: [{ id: transcribedTextLinkId }] } = await deep.insert( {
+      const { data: [{ id: transcribeTextLinkId }] } = await deep.insert( {
         type_id: transcribeTypeLinkId,
         from_id: deep.linkId,
         to_id: soundLinkId,
         in: {
           data: {
             type_id: containTypeLinkId,
-            from_id: await deep.id("@deep-foundation/capacitor-voice-recorder"),
+            from_id: deep.linkId,
           }
         }
       });
-      console.log("trascribedTextLinkId", transcribedTextLinkId.value)
+      console.log("transcribeTextLinkId",transcribeTextLinkId)
 
       const { data: [isApiKeyLinkId] } = await deep.select({
         type_id: apiKeyTypeLinkId,
@@ -365,17 +365,6 @@ function Content() {
           }
         });
       }
-
-      const { data: [{ id: messageLinkId }] } = await deep.insert({
-        type_id: messageTypeLinkId,
-        string: { data: { value: transcribedTextLinkId.value } },
-        in: {
-          data: {
-            type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          }
-        },
-      });
         
       console.log("flakeed6");
       const { data: [isConversationLinkId] } = await deep.select({
@@ -397,12 +386,13 @@ function Content() {
         const { data: replyLinks } = await deep.select({
           type_id: replyTypeLinkId,
         });
+        const replyLink = replyLinks.sort((a, b) => b.from_id - a.from_id);
         console.log("replyLinks",replyLinks)
       
         const { data: conversationLink } = await deep.select({
           tree_id: { _eq: messagingTreeId },
           parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
-          link: { id: { _eq: replyLinks[replyLinks.length-1].from_id } },
+          link: { id: { _eq: replyLink[0].from_id } },
         }, {
           table: 'tree',
           variables: { order_by: { depth: "asc" } },
@@ -439,6 +429,25 @@ function Content() {
       console.log("messageLinks", messageLinks);
       console.log("authorLinks", authorLinks);
 
+      const { data: [trascribedTextLinkId] } = await deep.select({
+        type_id: transcriptionTypeLinkId,
+        in: {
+          type_id: containTypeLinkId,
+          from_id: transcribeTextLinkId.to_id
+        }
+      });
+      console.log("trascribedTextLinkId", trascribedTextLinkId.value.value)
+
+      const { data: [{ id: messageLinkId }] } = await deep.insert({
+        type_id: messageTypeLinkId,
+        string: { data: { value: trascribedTextLinkId.value.value } },
+        in: {
+          data: {
+            type_id: containTypeLinkId,
+            from_id: deep.linkId,
+          }
+        },
+      });
 
         const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
           type_id: replyTypeLinkId,
@@ -489,7 +498,25 @@ function Content() {
             },
           },
         });
-
+        const { data: [trascribedTextLinkId] } = await deep.select({
+          type_id: transcriptionTypeLinkId,
+          in: {
+            type_id: containTypeLinkId,
+            from_id: transcribeTextLinkId.to_id
+          }
+        });
+        console.log("trascribedTextLinkId", trascribedTextLinkId.value.value)
+  
+        const { data: [{ id: messageLinkId }] } = await deep.insert({
+          type_id: messageTypeLinkId,
+          string: { data: { value: trascribedTextLinkId.value.value } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            }
+          },
+        });
         const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
           type_id: replyTypeLinkId,
           from_id: messageLinkId,
@@ -735,7 +762,7 @@ function Content() {
       }
     </Box>; */}
 
-      {sounds?.map((r) => <audio key={r.id} controls src={`data:${r.mimetype};base64,${r.sound}`} />)}
+      {/* {sounds?.map((r) => <audio key={r.id} controls src={`data:${r.mimetype};base64,${r.sound}`} />)} */}
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
 
     </Stack>
