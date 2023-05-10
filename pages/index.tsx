@@ -232,7 +232,7 @@ function Content() {
       const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
       const userLink = await deep.id('deep', 'admin');
 
-      console.log("sounds", sounds);
+      console.log("before insert sound link", sounds);
       console.log("flakeed2");
       const { data: [{ id: soundLinkId }] } = await deep.insert(sounds.map((sound) => ({
         type_id: recordTypeLinkId,
@@ -305,7 +305,7 @@ function Content() {
         }
       })));
       console.log("flakeed1");
-
+console.log("soundLinkId",soundLinkId)
 
       const { data: [isGcloudAuthKeyLinkId] } = await deep.select({
         type_id: gcloudAuthKeyTypeLink,
@@ -331,6 +331,47 @@ function Content() {
         })
       }
       console.log("flakeed3");
+      // await deep.insert({
+      //   type_id: transcribeTypeLinkId,
+      //   from_id: deep.linkId,
+      //   to_id: soundLinkId,
+      //   in: {
+      //     data: {
+      //       type_id: containTypeLinkId,
+      //       from_id: deep.linkId,
+      //     }
+      //   }
+      // })
+      // const { data: soundLinks } = await deep.select({
+      //   type_id: soundTypeLinkId
+      // });
+      // console.log("soundLinks",soundLinks)
+      // const soundLink = soundLinks.sort((a, b) => b.id - a.id);
+      // console.log("soundLink",soundLink)
+      //   const { data } = await deep.select({
+      //     up: {
+      //       parent: {
+      //         id: soundLink[0].id
+      //       },
+      //       link: {
+      //         type_id: {
+      //           _in:
+      //             [
+      //               soundTypeLinkId,
+      //               formatTypeLinkId,
+      //               mimetypeTypeLinkId,
+      //               transcriptionTypeLinkId
+      //             ]
+      //         }
+      //       }
+      //     },
+      //   })
+
+
+      //   const transcription = data.filter((link) => link.type_id === transcriptionTypeLinkId)[0]?.value.value
+      //   console.log("data.filter((link) => link.type_id === transcriptionTypeLinkId)[0]?.value.value",data.filter((link) => link.type_id === transcriptionTypeLinkId)[0]?.value.value)
+      // console.log("data",data)
+
       const { data: [{ id: transcribeTextLinkId }] } = await deep.insert( {
         type_id: transcribeTypeLinkId,
         from_id: deep.linkId,
@@ -343,6 +384,16 @@ function Content() {
         }
       });
       console.log("transcribeTextLinkId",transcribeTextLinkId)
+
+      await delay(5000);
+      const { data: [transcribedTextLinkId] } = await deep.select({
+        type_id: transcriptionTypeLinkId,
+        in: {
+          type_id: containTypeLinkId,
+          from_id: soundLinkId
+        },
+      });
+      console.log("transcribedTextLinkId",transcribedTextLinkId)
 
       const { data: [isApiKeyLinkId] } = await deep.select({
         type_id: apiKeyTypeLinkId,
@@ -429,18 +480,18 @@ function Content() {
       console.log("messageLinks", messageLinks);
       console.log("authorLinks", authorLinks);
 
-      const { data: [trascribedTextLinkId] } = await deep.select({
-        type_id: transcriptionTypeLinkId,
-        in: {
-          type_id: containTypeLinkId,
-          from_id: transcribeTextLinkId.to_id
-        }
-      });
-      console.log("trascribedTextLinkId", trascribedTextLinkId.value.value)
+      // const { data: [trascribedTextLinkId] } = await deep.select({
+      //   type_id: transcriptionTypeLinkId,
+      //   in: {
+      //     type_id: containTypeLinkId,
+      //     from_id: transcribeTextLinkId.to_id
+      //   }
+      // });
+      console.log("trascribedTextLinkId", transcribedTextLinkId.value?.value)
 
       const { data: [{ id: messageLinkId }] } = await deep.insert({
         type_id: messageTypeLinkId,
-        string: { data: { value: trascribedTextLinkId.value.value } },
+        string: { data: { value: transcribedTextLinkId.value?.value } },
         in: {
           data: {
             type_id: containTypeLinkId,
@@ -498,18 +549,18 @@ function Content() {
             },
           },
         });
-        const { data: [trascribedTextLinkId] } = await deep.select({
-          type_id: transcriptionTypeLinkId,
-          in: {
-            type_id: containTypeLinkId,
-            from_id: transcribeTextLinkId.to_id
-          }
-        });
-        console.log("trascribedTextLinkId", trascribedTextLinkId.value.value)
+        // const { data: [trascribedTextLinkId] } = await deep.select({
+        //   type_id: transcriptionTypeLinkId,
+        //   in: {
+        //     type_id: containTypeLinkId,
+        //     from_id: transcribeTextLinkId.to_id
+        //   }
+        // });
+        console.log("trascribedTextLinkId", transcribedTextLinkId.value?.value)
   
         const { data: [{ id: messageLinkId }] } = await deep.insert({
           type_id: messageTypeLinkId,
-          string: { data: { value: trascribedTextLinkId.value.value } },
+          string: { data: { value: transcribedTextLinkId.value?.value } },
           in: {
             data: {
               type_id: containTypeLinkId,
@@ -538,7 +589,6 @@ function Content() {
 
     if (sounds.length > 0) useRecords();
   }, [sounds, isRecording]);
-  console.log("flakeed9");
   useEffect(() => {
     if (!isRecording) return;
 
@@ -551,7 +601,7 @@ function Content() {
         const record = await stopAudioRec(deep);
         const endTime = new Date().toLocaleDateString();
         console.log({ record });
-        setSounds([...sounds, { record, startTime, endTime }]);
+        setSounds([{ record, startTime, endTime }]);
       }
     };
 
@@ -560,7 +610,6 @@ function Content() {
       loop = false;
     };
   }, [isRecording]);
-  console.log("flakeed10");
   const handleInputChange = useCallback((e, field) => {
     const value = e.target.value;
 
