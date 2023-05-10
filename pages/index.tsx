@@ -53,6 +53,10 @@ function Content() {
   const [apiKey, setApiKey] = useState('');
   const [googleAuth, setGoogleAuth] = useState('');
   const [showInputFields, setShowInputFields] = useState(false);
+  const [messages, setMessages] = useState([]);
+  // const messagesCount = messages?.length || 0;
+  let replyToMessageLinkId;
+  // let bg;
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     'deviceLinkId',
@@ -222,7 +226,12 @@ function Content() {
       const transcriptionTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcription");
       const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
       const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+      const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
+      const chatGPTTypeLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT')
+      const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
+      const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
       const userLink = await deep.id('deep', 'admin');
+
       console.log("sounds", sounds);
       console.log("flakeed2");
       const { data: [{ id: soundLinkId }] } = await deep.insert(sounds.map((sound) => ({
@@ -336,9 +345,9 @@ function Content() {
       console.log("flakeed4");
 
       const { data: [trascribedTextLinkId] } = await deep.select({
-        type_id: await deep.id("@deep-foundation/google-speech", "Transcription"),
+        type_id: transcriptionTypeLinkId,
         in: {
-          type_id: await deep.id("@deep-foundation/core", "Contain"),
+          type_id: containTypeLinkId,
           from_id: transcribeTextLinkId.to_id
         }
       });
@@ -366,7 +375,17 @@ function Content() {
         });
       }
 
-
+      const { data: [{ id: messageLinkId }] } = await deep.insert({
+        type_id: messageTypeLinkId,
+        string: { data: { value: trascribedTextLinkId.value.value } },
+        in: {
+          data: {
+            type_id: containTypeLinkId,
+            from_id: deep.linkId,
+          }
+        },
+      });
+        
       console.log("flakeed6");
       const { data: [isConversationLinkId] } = await deep.select({
         type_id: conversationTypeLinkId,
@@ -375,6 +394,104 @@ function Content() {
           from_id: deep.linkId,
         },
       });
+      if (isConversationLinkId) {
+        // const { data: [messagesWithAuthorLink] } = await deep.select({
+        //   type_id: messageLinks.parent.type_id,
+        //   out:
+        //   {
+        //     type_id: authorTypeLinkId,
+        //     to_id: chatGPTTypeLinkId,
+        //   },
+        // })
+        let messageLinks;
+        const { data: replyLinks } = await deep.select({
+          type_id: replyTypeLinkId,
+        });
+        console.log("replyLinks",replyLinks)
+        console.log("tree",{
+          tree_id: { _eq: messagingTreeId },
+          parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
+          link: { id: { _eq: replyLinks[0].from_id } },
+        }, {
+          table: 'tree',
+          variables: { order_by: { depth: "asc" } },
+          returning: `
+          id
+          depth
+          root_id
+          parent_id
+          link_id
+          parent {
+            id
+            from_id
+            type_id
+            to_id
+            value
+            author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
+              id
+              from_id
+              type_id
+              to_id
+            }
+          }`
+        })
+      
+        for (let replyLink of replyLinks) {
+        const { data: conversationLink } = await deep.select({
+          tree_id: { _eq: messagingTreeId },
+          parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
+          link: { id: { _eq: replyLink.from_id } },
+        }, {
+          table: 'tree',
+          variables: { order_by: { depth: "asc" } },
+          returning: `
+          id
+          depth
+          root_id
+          parent_id
+          link_id
+          parent {
+            id
+            from_id
+            type_id
+            to_id
+            value
+            author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
+              id
+              from_id
+              type_id
+              to_id
+            }
+          }`
+        })
+  
+         messageLinks = conversationLink
+      .map(item => item.parent)
+      .filter(link => link && link.type_id === messageTypeLinkId);
+      }
+      const authorLinks = messageLinks
+  .filter(messageLink => messageLink.author && messageLink.author[0])
+  .map(messageLink => messageLink.author[0].from_id).reverse();
+
+
+      console.log("messageLinks", messageLinks);
+      console.log("authorLinks", authorLinks);
+
+
+        const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
+          type_id: replyTypeLinkId,
+          from_id: messageLinkId,
+          to_id: authorLinks[0],
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+
+      }
+
       if (!isConversationLinkId) {
         const { data: [{ id: conversationLinkId }] } = await deep.insert({
           type_id: conversationTypeLinkId,
@@ -386,42 +503,46 @@ function Content() {
             },
           },
         });
+        console.log("flakeed7");
+
+        const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
+          type_id: messageTypeLinkId,
+          string: { data: { value: "ты сегодня продавец, вот твой список товара:'цибуля. майонез, картошка, огурцы, клубника, малина, смородина" } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            }
+          },
+        });
+
+        const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
+          type_id: systemTypeLinkId,
+          from_id: systemMessageLinkId,
+          to_id: conversationLinkId,
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+
+        const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
+          type_id: replyTypeLinkId,
+          from_id: messageLinkId,
+          to_id: conversationLinkId,
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
       };
-      console.log("flakeed7");
-
-      const { data: [ConversationLinkId] } = await deep.select({
-        type_id: conversationTypeLinkId,
-        in: {
-          type_id: containTypeLinkId,
-          from_id: deep.linkId,
-        },
-      });
-      const { data: [{ id: messageLinkId }] } = await deep.insert({
-        type_id: messageTypeLinkId,
-        string: { data: { value: trascribedTextLinkId.value.value } },
-        in: {
-          data: {
-            type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          }
-        },
-      });
-
 
       console.log("flakeed8");
-      const {
-        data: [{ id: replyToMessageLinkId }],
-      } = await deep.insert({
-        type_id: replyTypeLinkId,
-        from_id: messageLinkId,
-        to_id: ConversationLinkId.id,
-        in: {
-          data: {
-            type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          },
-        },
-      });
+
 
       setSounds([]);
     };
@@ -464,6 +585,47 @@ function Content() {
       }
     }
   }, []);
+
+  //  (async()=>{ 
+  //   const { Text, Box, Button, useColorModeValue } = require('@chakra-ui/react');
+  //   const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
+  //   const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
+  //   const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
+  //     useEffect(() => {
+  //       const fetchData = async() => {
+  //         const result = await deep.select({ 
+  //           tree_id: { _eq: messagingTreeId },
+  //           link: { type_id: { _eq: messageTypeLinkId} },
+  //           root_id: { _eq: replyToMessageLinkId },
+  //           self: {_eq: true}
+  //         }, { 
+  //           table: 'tree',
+  //           variables: { order_by: { depth: "asc" } },
+  //           returning: `
+  //             id
+  //             depth
+  //             root_id
+  //             parent_id
+  //             link_id
+  //             link {
+  //               id
+  //               from_id
+  //               type_id
+  //               to_id
+  //               value
+  //               author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
+  //                 id
+  //                 from_id
+  //                 type_id
+  //                 to_id
+  //               }
+  //             }`
+  //         });
+  //         setMessages(result?.data);
+  //       }
+  //       fetchData();
+  //     }, []);
+  //     bg = useColorModeValue('#eeeeee', '#1e1e1e');})();
 
   const handleButtonClick = useCallback(() => {
     if (!showInputFields && (apiKey === '' || googleAuth === '')) {
@@ -586,15 +748,30 @@ function Content() {
       <Button style={{ position: 'relative', zIndex: 1000 }} onClick={async () => await getAudioRecPermission(deep, deviceLinkId)}>
         GET RECORDING PERMISSION
       </Button>
-      {isChatGPTPackageInstalled && (
+      {!isChatGPTPackageInstalled && (
         <Button style={{ position: 'relative', zIndex: 1000 }} onClick={() => installChatGPTPackage()}>Install ChatGPT package</Button>
       )}
-      {isSpeechPackageInstalled && (
+      {!isSpeechPackageInstalled && (
         <Button style={{ position: 'relative', zIndex: 1000 }} onClick={() => installSpeechPackage()}>Install Speech package</Button>
       )}
-      {isRecordPackageInstalled && (
+      {!isRecordPackageInstalled && (
         <Button style={{ position: 'relative', zIndex: 1000 }} onClick={() => installRecordPackage()}>Install Record package</Button>
       )}
+      {/* <Box
+      overflowY="scroll"
+      height='500px' 
+      width='500px'
+      bg={bg}>
+      {messagesCount ? 
+        [
+          <Text>Conversation with {messagesCount} messages:</Text>,
+          (messages || []).map(message => <Box>
+            <Text borderTop="1px solid" borderBottom="1px dotted">{message?.link?.author?.[0]?.to_id == chatGptLinkId ? 'Assistant' : 'User'}:</Text>
+            <Text>{message?.link?.value?.value}</Text>
+          </Box>)
+        ] : []
+      }
+    </Box>; */}
 
       {sounds?.map((r) => <audio key={r.id} controls src={`data:${r.mimetype};base64,${r.sound}`} />)}
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
