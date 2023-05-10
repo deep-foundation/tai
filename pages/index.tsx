@@ -331,7 +331,7 @@ function Content() {
         })
       }
       console.log("flakeed3");
-      const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
+      const { data: [{ id: transcribedTextLinkId }] } = await deep.insert( {
         type_id: transcribeTypeLinkId,
         from_id: deep.linkId,
         to_id: soundLinkId,
@@ -342,16 +342,7 @@ function Content() {
           }
         }
       });
-      console.log("flakeed4");
-
-      const { data: [trascribedTextLinkId] } = await deep.select({
-        type_id: transcriptionTypeLinkId,
-        in: {
-          type_id: containTypeLinkId,
-          from_id: transcribeTextLinkId.to_id
-        }
-      });
-      console.log("trascribedTextLinkId", trascribedTextLinkId.value.value)
+      console.log("trascribedTextLinkId", transcribedTextLinkId.value)
 
       const { data: [isApiKeyLinkId] } = await deep.select({
         type_id: apiKeyTypeLinkId,
@@ -377,7 +368,7 @@ function Content() {
 
       const { data: [{ id: messageLinkId }] } = await deep.insert({
         type_id: messageTypeLinkId,
-        string: { data: { value: trascribedTextLinkId.value.value } },
+        string: { data: { value: transcribedTextLinkId.value } },
         in: {
           data: {
             type_id: containTypeLinkId,
@@ -403,44 +394,15 @@ function Content() {
         //     to_id: chatGPTTypeLinkId,
         //   },
         // })
-        let messageLinks;
         const { data: replyLinks } = await deep.select({
           type_id: replyTypeLinkId,
         });
         console.log("replyLinks",replyLinks)
-        console.log("tree",{
-          tree_id: { _eq: messagingTreeId },
-          parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
-          link: { id: { _eq: replyLinks[0].from_id } },
-        }, {
-          table: 'tree',
-          variables: { order_by: { depth: "asc" } },
-          returning: `
-          id
-          depth
-          root_id
-          parent_id
-          link_id
-          parent {
-            id
-            from_id
-            type_id
-            to_id
-            value
-            author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
-              id
-              from_id
-              type_id
-              to_id
-            }
-          }`
-        })
       
-        for (let replyLink of replyLinks) {
         const { data: conversationLink } = await deep.select({
           tree_id: { _eq: messagingTreeId },
           parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
-          link: { id: { _eq: replyLink.from_id } },
+          link: { id: { _eq: replyLinks[replyLinks.length-1].from_id } },
         }, {
           table: 'tree',
           variables: { order_by: { depth: "asc" } },
@@ -465,13 +427,13 @@ function Content() {
           }`
         })
   
-         messageLinks = conversationLink
+         const messageLinks = conversationLink
       .map(item => item.parent)
       .filter(link => link && link.type_id === messageTypeLinkId);
-      }
+
       const authorLinks = messageLinks
   .filter(messageLink => messageLink.author && messageLink.author[0])
-  .map(messageLink => messageLink.author[0].from_id).reverse();
+  .map(messageLink => messageLink.author[0].from_id);
 
 
       console.log("messageLinks", messageLinks);
@@ -481,7 +443,7 @@ function Content() {
         const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
           type_id: replyTypeLinkId,
           from_id: messageLinkId,
-          to_id: authorLinks[0],
+          to_id: authorLinks[authorLinks.length-1],
           in: {
             data: {
               type_id: containTypeLinkId,
