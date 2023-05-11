@@ -13,7 +13,7 @@ import {
   Button,
   Box,
 } from '@chakra-ui/react';
-import {  useDeep } from '@deep-foundation/deeplinks/imports/client';
+import { useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { useIsPackageInstalled } from '../imports/use-is-package-installed';
 import { WithInitDeviceIfNotInitedAndSaveData } from '../components/device/withInitDeviceIfNotInitedAndSaveData';
@@ -54,7 +54,7 @@ function Content() {
   }, [deep])
 
   const { isPackageInstalled: isRecordPackageInstalled } = useIsPackageInstalled({ packageName: "@deep-foundation/capacitor-voice-recorder", shouldIgnoreResultWhenLoading: true, onError: ({ error }) => { console.error(error.message) } });
-  
+
   const installRecordPackage = async () => {
     if (!isRecordPackageInstalled) {
       await deep.insert([
@@ -453,7 +453,7 @@ function Content() {
 
         const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
           type_id: messageTypeLinkId,
-          string: { data: { value: "ты сегодня продавец, вот твой список товара:'цибуля. майонез, картошка, огурцы, клубника, малина, смородина" } },
+          string: { data: { value: "Ты сегодня продавец, вот твой список товара: цибуля. майонез, картошка, огурцы, клубника, малина, смородина" } },
           in: {
             data: {
               type_id: containTypeLinkId,
@@ -687,7 +687,6 @@ function Content() {
             )
           }
         </>
-
       }
       <Button
         style={{
@@ -766,4 +765,3 @@ function Pages() {
 
   </Stack>
 }
-
