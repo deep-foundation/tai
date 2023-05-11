@@ -88,7 +88,6 @@ function Content() {
         }
       ]);
     };
-
     console.log("gello")
   };
 
@@ -129,6 +128,7 @@ function Content() {
     };
     console.log("gello")
   };
+
   if (isChatGPTPackageInstalled) {
     (async () => {
       const packageLinkId = await deep.id("@deep-foundation/chatgpt");
@@ -186,7 +186,6 @@ function Content() {
     })();
   };
 
-
   const generalInfoCard = (
     <Card>
       <CardHeader>
@@ -205,7 +204,6 @@ function Content() {
 
   useEffect(() => {
     if (!isRecording) return;
-
     const useRecords = async () => {
       const PACKAGE_NAME = "@deep-foundation/capacitor-voice-recorder";
       const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
@@ -218,20 +216,15 @@ function Content() {
       const mimetypeTypeLinkId = await deep.id("@deep-foundation/sound", "MIME/type");
       const formatTypeLinkId = await deep.id("@deep-foundation/sound", "Format");
       const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
-      const typeTypeLinkId = await deep.id('@deep-foundation/core', "Type");
       const gcloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
-      const typeStringLinkId = await deep.id('@deep-foundation/core', "String");
-      const typeValueLinkId = await deep.id('@deep-foundation/core', "Value");
       const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
       const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
       const transcriptionTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcription");
       const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
       const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
       const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
-      const chatGPTTypeLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT')
       const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
       const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
-      const userLink = await deep.id('deep', 'admin');
 
       console.log("before insert sound link", sounds);
       console.log("flakeed2");
@@ -315,6 +308,7 @@ function Content() {
           from_id: deep.linkId,
         },
       });
+
       console.log("googleauth", googleAuth);
       if (!isGcloudAuthKeyLinkId) {
         const parsedGoogleAuth = JSON.parse(googleAuth);
@@ -363,6 +357,7 @@ function Content() {
           from_id: deep.linkId,
         },
       });
+
       console.log("flakeed5");
       if (!isApiKeyLinkId) {
         await deep.insert({
@@ -390,6 +385,7 @@ function Content() {
         const { data: replyLinks } = await deep.select({
           type_id: replyTypeLinkId,
         });
+
         const replyLink = replyLinks.sort((a, b) => b.from_id - a.from_id);
         console.log("replyLinks", replyLinks)
 
@@ -457,8 +453,7 @@ function Content() {
             },
           },
         });
-        replyMessageLinkId=replyToMessageLinkId;
-
+        replyMessageLinkId = replyToMessageLinkId;
       }
 
       if (!isConversationLinkId) {
@@ -496,6 +491,7 @@ function Content() {
             },
           },
         });
+
         const { data: [{ id: messageLinkId }] } = await deep.insert({
           type_id: messageTypeLinkId,
           string: { data: { value: transcribedTextLinkId.value?.value } },
@@ -506,6 +502,7 @@ function Content() {
             }
           },
         });
+
         const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
           type_id: replyTypeLinkId,
           from_id: messageLinkId,
@@ -519,12 +516,12 @@ function Content() {
         });
       };
       console.log("flakeed8");
-
       setSounds([]);
     };
 
     if (sounds.length > 0) useRecords();
   }, [sounds, isRecording]);
+
   useEffect(() => {
     if (!isRecording) return;
 
@@ -546,6 +543,7 @@ function Content() {
       loop = false;
     };
   }, [isRecording]);
+
   const handleInputChange = useCallback((e, field) => {
     const value = e.target.value;
 
@@ -564,14 +562,14 @@ function Content() {
     const [messages, setMessages] = useState([]);
     const [messagesCount, setMessagesCount] = useState(0);
     let chatGptLinkId;
-    async()=>{ chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT')}
-  
+    async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
+
     useEffect(() => {
       (async () => {
         const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
         const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
         const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
-  
+
         const result = await deep.select({
           tree_id: { _eq: messagingTreeId },
           link: { type_id: { _eq: messageTypeLinkId } },
@@ -601,12 +599,12 @@ function Content() {
               }
             }`
         });
-        
+
         setMessages(result?.data);
         setMessagesCount(result?.data.length);
       })();
     }, [replyToMessageLinkId]);
-  
+
     return (
       <Box
         position="fixed"
@@ -614,19 +612,19 @@ function Content() {
         left={0}
         zIndex={1000}
         overflowY="scroll"
-        height='500px' 
+        height='500px'
         width='500px'
         bg={"grey"}
         p={3}
         borderRadius="20px"
       >
-        {messagesCount ? 
+        {messagesCount ?
           [
             <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
             ...messages.map((message, index) => (
               <Box key={index} mb={3} p={2} borderRadius="5px" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
                 <Text borderBottom="1px solid" pb={2}>
-                {index === 0 ? "System" : message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
+                  {index === 0 ? "System" : message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
                 </Text>
                 <Text>{message?.link?.value?.value}</Text>
               </Box>
@@ -653,6 +651,7 @@ function Content() {
   }, [apiKey, googleAuth, showInputFields]);
 
   const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
   const ChatBubblesContainer = ({ children }) => {
     const containerStyle: CSSProperties = {
       position: 'absolute',
@@ -664,7 +663,6 @@ function Content() {
 
     return <div style={containerStyle}>{children}</div>;
   };
-
 
   const generateRandomChatBubbles = (count) => {
     const messages = [
@@ -686,7 +684,6 @@ function Content() {
         left={Math.floor(Math.random() * (window.innerWidth - 150))}
       />
     ));
-
     return bubbles;
   };
 
@@ -767,22 +764,7 @@ function Content() {
       {!isRecordPackageInstalled && (
         <Button style={{ position: 'relative', zIndex: 1000 }} onClick={() => installRecordPackage()}>Install Record package</Button>
       )}
-      {/* <Box
-      overflowY="scroll"
-      height='500px' 
-      width='500px'
-      bg={bg}>
-      {messagesCount ? 
-        [
-          <Text>Conversation with {messagesCount} messages:</Text>,
-          (messages || []).map(message => <Box>
-            <Text borderTop="1px solid" borderBottom="1px dotted">{message?.link?.author?.[0]?.to_id == chatGptLinkId ? 'Assistant' : 'User'}:</Text>
-            <Text>{message?.link?.value?.value}</Text>
-          </Box>)
-        ] : []
-      }
-    </Box>; */}
-<ScreenChat replyToMessageLinkId={replyMessageLinkId} />
+      <ScreenChat replyToMessageLinkId={replyMessageLinkId} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
     </Stack>
   );
