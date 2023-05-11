@@ -526,20 +526,6 @@ function Content() {
     };
   }, [isRecording]);
 
-  const handleInputChange = useCallback((e, field) => {
-    const value = e.target.value;
-
-    if (field === 'apiKey') {
-      setApiKey(value);
-    } else if (field === 'googleAuth') {
-      try {
-        setGoogleAuth(value);
-      } catch (error) {
-        console.error('Invalid JSON:', error);
-      }
-    }
-  }, []);
-
   const ScreenChat = ({ replyToMessageLinkId }) => {
     const [messages, setMessages] = useState([]);
     const [messagesCount, setMessagesCount] = useState(0);
@@ -618,19 +604,8 @@ function Content() {
   }
 
   const handleButtonClick = useCallback(() => {
-    if (!showInputFields && (apiKey === '' || googleAuth === '')) {
-      setShowInputFields(true);
-    } else {
-      if (apiKey === '' || googleAuth === '') {
-        alert('Please fill both input fields before starting the recording.');
-        return;
-      }
       setIsRecording((prevIsRecording) => !prevIsRecording);
-      if (apiKey !== '' && googleAuth !== '') {
-        setShowInputFields(false);
-      }
-    }
-  }, [apiKey, googleAuth, showInputFields]);
+  }, []);
 
   const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -705,34 +680,6 @@ function Content() {
       >
         {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
       </Button>
-      {showInputFields && (
-        <Box
-          position="absolute"
-          top="20%"
-          left="20%"
-          transform="translate(-50%, -50%)"
-          zIndex={1001}
-        >
-          <FormControl>
-            <FormLabel>Input OpenAI ApiKey:</FormLabel>
-            <Input
-              value={apiKey}
-              onChange={(e) => handleInputChange(e, 'apiKey')}
-              width="300px"
-              height="40px"
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Input GoogleAuth object:</FormLabel>
-            <Input
-              value={googleAuth}
-              onChange={(e) => handleInputChange(e, 'googleAuth')}
-              width="300px"
-              height="40px"
-            />
-          </FormControl>
-        </Box>
-      )}
       <Button style={{ position: 'relative', zIndex: 1000 }} onClick={async () => await getAudioRecPermission(deep, deviceLinkId)}>
         GET RECORDING PERMISSION
       </Button>
