@@ -560,7 +560,7 @@ function Content() {
     }
   }, []);
 
-  const MyComponent = ({ replyToMessageLinkId }) => {
+  const ScreenChat = ({ replyToMessageLinkId }) => {
     const [messages, setMessages] = useState([]);
     const [messagesCount, setMessagesCount] = useState(0);
     let chatGptLinkId;
@@ -782,11 +782,8 @@ function Content() {
         ] : []
       }
     </Box>; */}
-<MyComponent replyToMessageLinkId={replyMessageLinkId} />
-W
-      {/* {sounds?.map((r) => <audio key={r.id} controls src={`data:${r.mimetype};base64,${r.sound}`} />)} */}
+<ScreenChat replyToMessageLinkId={replyMessageLinkId} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
-
     </Stack>
   );
 }
