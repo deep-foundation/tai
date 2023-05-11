@@ -1,45 +1,28 @@
 import React, { useEffect, useState, useCallback, CSSProperties } from 'react';
 import { LocalStoreProvider, useLocalStore } from '@deep-foundation/store/local';
 import {
-
   Text,
-  Link,
   Stack,
   Card,
   CardBody,
   Heading,
   CardHeader,
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
-  Switch,
   FormControl,
   FormLabel,
   Input,
   Button,
   Box,
-  useColorModeValue
 } from '@chakra-ui/react';
-import {
-
-  useDeep,
-  useDeepSubscription,
-} from '@deep-foundation/deeplinks/imports/client';
-import { DEEP_MEMO_PACKAGE_NAME as DEEP_MEMO_PACKAGE_NAME } from '../imports/deep-memo/package-name';
+import {  useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
-import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
-import { WithSubscriptions } from '../components/deep-memo/with-subscriptions';
 import { useIsPackageInstalled } from '../imports/use-is-package-installed';
 import { WithInitDeviceIfNotInitedAndSaveData } from '../components/device/withInitDeviceIfNotInitedAndSaveData';
 import { NavBar } from '../components/navbar';
 import { Page } from '../components/page';
-
 import startAudioRec from '../imports/capacitor-voice-recorder/strart-recording';
 import stopAudioRec from '../imports/capacitor-voice-recorder/stop-recording';
 import getAudioRecPermission from '../imports/capacitor-voice-recorder/get-permission';
 import ChatBubble from '../components/ChatBubble';
-import { getIsPackageInstalled } from "../imports/get-is-package-installed";
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
 function Content() {
@@ -54,10 +37,7 @@ function Content() {
   const [apiKey, setApiKey] = useState('');
   const [googleAuth, setGoogleAuth] = useState('');
   const [showInputFields, setShowInputFields] = useState(false);
-  const [messages, setMessages] = useState([]);
-  // const messagesCount = messages?.length || 0;
   let replyMessageLinkId;
-  // let bg;
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     'deviceLinkId',
@@ -72,7 +52,9 @@ function Content() {
       await deep.guest();
     })
   }, [deep])
+
   const { isPackageInstalled: isRecordPackageInstalled } = useIsPackageInstalled({ packageName: "@deep-foundation/capacitor-voice-recorder", shouldIgnoreResultWhenLoading: true, onError: ({ error }) => { console.error(error.message) } });
+  
   const installRecordPackage = async () => {
     if (!isRecordPackageInstalled) {
       await deep.insert([
