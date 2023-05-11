@@ -15,13 +15,11 @@ import {
 } from '@chakra-ui/react';
 import { useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
-import { useIsPackageInstalled } from '../imports/use-is-package-installed';
 import { WithInitDeviceIfNotInitedAndSaveData } from '../components/device/withInitDeviceIfNotInitedAndSaveData';
 import { NavBar } from '../components/navbar';
 import { Page } from '../components/page';
 import startAudioRec from '../imports/capacitor-voice-recorder/strart-recording';
 import stopAudioRec from '../imports/capacitor-voice-recorder/stop-recording';
-import getAudioRecPermission from '../imports/capacitor-voice-recorder/get-permission';
 import ChatBubble from '../components/ChatBubble';
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
@@ -34,9 +32,8 @@ function Content() {
 
   const [sounds, setSounds] = useLocalStore("Sounds", []);
   const [isRecording, setIsRecording] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [googleAuth, setGoogleAuth] = useState('');
-  const [showInputFields, setShowInputFields] = useState(false);
+  const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
+  const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
   let replyMessageLinkId;
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
@@ -52,121 +49,6 @@ function Content() {
       await deep.guest();
     })
   }, [deep])
-
-  const { isPackageInstalled: isRecordPackageInstalled } = useIsPackageInstalled({ packageName: "@deep-foundation/capacitor-voice-recorder", shouldIgnoreResultWhenLoading: true, onError: ({ error }) => { console.error(error.message) } });
-
-  const installRecordPackage = async () => {
-    if (!isRecordPackageInstalled) {
-      await deep.insert([
-        {
-          type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
-          from_id: deep.linkId,
-          to: {
-            data: {
-              type_id: await deep.id('@deep-foundation/core', 'PackageQuery'),
-              string: { data: { value: "@deep-foundation/capacitor-voice-recorder" } }
-            }
-          },
-        }
-      ]);
-    };
-    console.log("gello")
-  };
-
-  if (isRecordPackageInstalled) {
-    (async () => {
-      const packageLinkId = await deep.id("@deep-foundation/capacitor-voice-recorder");
-      await deep.insert([
-        {
-          type_id: await deep.id("@deep-foundation/core", "Join"),
-          from_id: packageLinkId,
-          to_id: await deep.id('deep', 'users', 'packages'),
-        },
-        {
-          type_id: await deep.id("@deep-foundation/core", "Join"),
-          from_id: packageLinkId,
-          to_id: await deep.id('deep', 'admin'),
-        },
-      ]);
-      console.log("hello")
-    })();
-  };
-
-  const { isPackageInstalled: isChatGPTPackageInstalled } = useIsPackageInstalled({ packageName: "@deep-foundation/chatgpt", shouldIgnoreResultWhenLoading: true, onError: ({ error }) => { console.error(error.message) } });
-  const installChatGPTPackage = async () => {
-    if (!isChatGPTPackageInstalled) {
-      await deep.insert([
-        {
-          type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
-          from_id: deep.linkId,
-          to: {
-            data: {
-              type_id: await deep.id('@deep-foundation/core', 'PackageQuery'),
-              string: { data: { value: "@deep-foundation/chatgpt" } }
-            }
-          },
-        }
-      ]);
-    };
-    console.log("gello")
-  };
-
-  if (isChatGPTPackageInstalled) {
-    (async () => {
-      const packageLinkId = await deep.id("@deep-foundation/chatgpt");
-      await deep.insert([
-        {
-          type_id: await deep.id("@deep-foundation/core", "Join"),
-          from_id: packageLinkId,
-          to_id: await deep.id('deep', 'users', 'packages'),
-        },
-        {
-          type_id: await deep.id("@deep-foundation/core", "Join"),
-          from_id: packageLinkId,
-          to_id: await deep.id('deep', 'admin'),
-        },
-      ]);
-      console.log("hello")
-    })();
-  };
-
-  const { isPackageInstalled: isSpeechPackageInstalled } = useIsPackageInstalled({ packageName: "@deep-foundation/google-speech", shouldIgnoreResultWhenLoading: true, onError: ({ error }) => { console.error(error.message) } });
-  const installSpeechPackage = async () => {
-    if (!isSpeechPackageInstalled) {
-      await deep.insert([
-        {
-          type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
-          from_id: deep.linkId,
-          to: {
-            data: {
-              type_id: await deep.id('@deep-foundation/core', 'PackageQuery'),
-              string: { data: { value: "@deep-foundation/google-speech" } }
-            }
-          },
-        }
-      ]);
-    };
-    console.log("gello")
-  };
-
-  if (isSpeechPackageInstalled) {
-    (async () => {
-      const packageLinkId = await deep.id("@deep-foundation/google-speech");
-      await deep.insert([
-        {
-          type_id: await deep.id("@deep-foundation/core", "Join"),
-          from_id: packageLinkId,
-          to_id: await deep.id('deep', 'users', 'packages'),
-        },
-        {
-          type_id: await deep.id("@deep-foundation/core", "Join"),
-          from_id: packageLinkId,
-          to_id: await deep.id('deep', 'admin'),
-        },
-      ]);
-      console.log("hello")
-    })();
-  };
 
   const generalInfoCard = (
     <Card>
@@ -322,7 +204,7 @@ function Content() {
       });
       console.log("transcribeTextLinkId", transcribeTextLinkId)
 
-      await delay(5000);
+      await delay(8000);
       const { data: [transcribedTextLinkId] } = await deep.select({
         type_id: transcriptionTypeLinkId,
         in: {
@@ -680,18 +562,6 @@ function Content() {
       >
         {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
       </Button>
-      <Button style={{ position: 'relative', zIndex: 1000 }} onClick={async () => await getAudioRecPermission(deep, deviceLinkId)}>
-        GET RECORDING PERMISSION
-      </Button>
-      {!isChatGPTPackageInstalled && (
-        <Button style={{ position: 'relative', zIndex: 1000 }} onClick={() => installChatGPTPackage()}>Install ChatGPT package</Button>
-      )}
-      {!isSpeechPackageInstalled && (
-        <Button style={{ position: 'relative', zIndex: 1000 }} onClick={() => installSpeechPackage()}>Install Speech package</Button>
-      )}
-      {!isRecordPackageInstalled && (
-        <Button style={{ position: 'relative', zIndex: 1000 }} onClick={() => installRecordPackage()}>Install Record package</Button>
-      )}
       <ScreenChat replyToMessageLinkId={replyMessageLinkId} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
     </Stack>
