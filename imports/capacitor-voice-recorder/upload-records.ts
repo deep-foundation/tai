@@ -1,8 +1,8 @@
-import { PACKAGE_NAME } from "./install-package";
+const PACKAGE_NAME="@deep-foundation/capacitor-voice-recorder";
 
 export default async function uploadRecords(deep, deviceLinkId, sounds) {
   const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-  const audioRecordsLinkId = await deep.id(PACKAGE_NAME, "AudioRecords");
+  const audioRecordsLinkId = await deep.id(deviceLinkId, "AudioRecords");
   const soundTypeLinkId = await deep.id("@deep-foundation/sound", "Sound");
   const recordTypeLinkId = await deep.id(PACKAGE_NAME, "Record");
   const durationTypeLinkId = await deep.id(PACKAGE_NAME, "Duration");
@@ -11,7 +11,7 @@ export default async function uploadRecords(deep, deviceLinkId, sounds) {
   const mimetypeTypeLinkId = await deep.id("@deep-foundation/sound", "MIME/type");
   const formatTypeLinkId = await deep.id("@deep-foundation/sound", "Format");
 
-  await deep.insert(sounds.map((sound) => ({
+  const { data: [{ id: soundLinkId }] } = await deep.insert(sounds.map((sound) => ({
     type_id: recordTypeLinkId,
     in: {
       data: [{
@@ -26,7 +26,7 @@ export default async function uploadRecords(deep, deviceLinkId, sounds) {
           to: {
             data: {
               type_id: soundTypeLinkId,
-              string: { data: { value: sound.record ? sound.record["recordDataBase64"] : '' } },
+              string: { data: { value: sound.record["recordDataBase64"] } },
               out: {
                 data: [
                   {
@@ -34,7 +34,7 @@ export default async function uploadRecords(deep, deviceLinkId, sounds) {
                     to: {
                       data: {
                         type_id: mimetypeTypeLinkId,
-                        string: { data: { value: sound.record ? sound.record["mimeType"] : '' } },
+                        string: { data: { value: sound.record["mimeType"] } },
                       }
                     }
                   },
@@ -43,7 +43,7 @@ export default async function uploadRecords(deep, deviceLinkId, sounds) {
                     to: {
                       data: {
                         type_id: formatTypeLinkId,
-                        string: { data: { value: sound.record && sound.record["mimeType"] === "audio/webm;codecs=opus" ? "webm" : "aac" } },
+                        string: { data: { value: sound.record["mimeType"] === "audio/webm;codecs=opus" ? "webm" : "aac" } },
                       }
                     }
                   }
@@ -57,7 +57,7 @@ export default async function uploadRecords(deep, deviceLinkId, sounds) {
           to: {
             data: {
               type_id: durationTypeLinkId,
-              number: { data: { value: sound.record ? sound.record["msDuration"] : null } },
+              number: { data: { value: sound.record["msDuration"] } },
             }
           }
         },
@@ -81,4 +81,5 @@ export default async function uploadRecords(deep, deviceLinkId, sounds) {
         }]
     }
   })));
+  return soundLinkId;
 }
