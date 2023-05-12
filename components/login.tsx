@@ -21,6 +21,7 @@ export function Setup(arg: {
   const [isSpeechPackageInstalledPressed, setIsSpeechPackageInstalledPressed] = useState(false);
   const [isGetPermissionPressed, setIsGetPermissionPressed] = useState(false);
   const [isSendDataPressed, setIsSendDataPressed] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   let isRecordPackageInstalled;
   let isChatGPTPackageInstalled;
   let isSpeechPackageInstalled;
@@ -30,15 +31,12 @@ export function Setup(arg: {
   );
 
   const installRecordPackage = async () => {
-    try {
       isRecordPackageInstalled = useIsPackageInstalled({
         packageName: "@deep-foundation/capacitor-voice-recorder",
         shouldIgnoreResultWhenLoading: true,
         onError: ({ error }) => { console.error(error.message) }
       });
-    } catch (error) {
-      console.error('Error useIsPackageInstalled for @deep-foundation/capacitor-voice-recorder', error);
-    }
+   
     if (!isRecordPackageInstalled) {
       await deep.insert([
         {
@@ -77,15 +75,13 @@ export function Setup(arg: {
 
 
   const installChatGPTPackage = async () => {
-    try {
+
       isChatGPTPackageInstalled = useIsPackageInstalled({
         packageName: "@deep-foundation/chatgpt",
         shouldIgnoreResultWhenLoading: true,
         onError: ({ error }) => { console.error(error.message) }
       });
-    } catch (error) {
-      console.error('Errorе useIsPackageInstalled for @deep-foundation/chatgpt', error);
-    }
+
     if (!isChatGPTPackageInstalled) {
       await deep.insert([
         {
@@ -123,15 +119,13 @@ export function Setup(arg: {
   };
   
   const installSpeechPackage = async () => {
-    try {
+
       isSpeechPackageInstalled = useIsPackageInstalled({
         packageName: "@deep-foundation/google-speech",
         shouldIgnoreResultWhenLoading: true,
         onError: ({ error }) => { console.error(error.message) }
       });
-    } catch (error) {
-      console.error('Error useIsPackageInstalled for @deep-foundation/google-speech', error);
-    } 
+
     if (!isSpeechPackageInstalled) {
       await deep.insert([
         {
@@ -169,22 +163,25 @@ export function Setup(arg: {
   };
 
   const submitForm = () => {
-    if (!isSpeechPackageInstalledPressed) {
-      alert("'Install Speech package' button was not pressed.");
-      return;
-    }
-    if (!isChatGPTPackageInstalledPressed) {
-      alert('Install ChatGPT package button was not pressed.');
-      return;
-    }
-    if (!isRecordPackageInstalledPressed) {
-      alert('Install Record package button was not pressed.');
-      return;
-    }
-    if (!isGetPermissionPressed) {
-      alert('GET RECORDING PERMISSION button was not pressed.');
-      return;
-    }
+    let error = '';
+    if(!isSpeechPackageInstalled && !isRecordPackageInstalled && !isChatGPTPackageInstalled){
+      if (!isSpeechPackageInstalledPressed ) {
+        error += 'Install Speech package, ';
+      }
+      if (!isChatGPTPackageInstalledPressed) {
+        error += 'Install ChatGPT package, ';
+      }
+      if (!isRecordPackageInstalledPressed) {
+        error += 'Install Record package, ';
+      }
+      if (!isGetPermissionPressed) {
+        error += 'GET RECORDING PERMISSION';
+      }
+      if (error !== '') {
+        alert(`${error} were not pressed.`);
+        return;
+      }
+  }
   }
 
   return <Card>
@@ -232,18 +229,44 @@ export function Setup(arg: {
           token,
         })
         setIsSendDataPressed(true)
+
       }}>
         Sent Data
       </Button>
       <Button onClick={() => {
-        submitForm();
-        if (!isSpeechPackageInstalledPressed || !isChatGPTPackageInstalledPressed || !isRecordPackageInstalledPressed || !isGetPermissionPressed) {
-          return;
-        }
+              submitForm();
+              if(!isSpeechPackageInstalled && !isRecordPackageInstalled && !isChatGPTPackageInstalled && !isGetPermissionPressed){
+              if (!isRecordPackageInstalledPressed && !isChatGPTPackageInstalledPressed && !isSpeechPackageInstalledPressed) {
+                return; 
+              }}
         arg.onSubmit({
           apiKey,
           googleAuth
-      })
+      }),
+      (async()=>{const parsedGoogleAuth = JSON.parse(googleAuth);
+        await deep.insert({
+          type_id: await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile"),
+          object: { data: { value: parsedGoogleAuth } },
+          in: {
+            data: [
+              {
+                type_id: await deep.id("@deep-foundation/core", "Contain"),
+                from_id: deep.linkId,
+              }
+            ]
+          }
+        })})(),
+        (async()=>{ await deep.insert({
+          type_id: await deep.id("@deep-foundation/openai", "ApiKey"),
+          string: { data: { value: apiKey } },
+          in: {
+            data: [
+              {
+                type_id: await deep.id('@deep-foundation/core', "Contain"),
+                from_id: deep.linkId,
+              }]
+          }
+        })})()
 }}>
   Submit
 </Button>
