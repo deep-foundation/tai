@@ -20,6 +20,7 @@ import { NavBar } from '../components/navbar';
 import { Page } from '../components/page';
 import startAudioRec from '../imports/capacitor-voice-recorder/strart-recording';
 import stopAudioRec from '../imports/capacitor-voice-recorder/stop-recording';
+import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import ChatBubble from '../components/ChatBubble';
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
@@ -69,22 +70,11 @@ function Content() {
   useEffect(() => {
     if (!isRecording) return;
     const useRecords = async () => {
-      const PACKAGE_NAME = "@deep-foundation/capacitor-voice-recorder";
       const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-      const audioRecordsLinkId = await deep.id(PACKAGE_NAME, "AudioRecords");
-      const soundTypeLinkId = await deep.id("@deep-foundation/sound", "Sound");
-      const recordTypeLinkId = await deep.id(PACKAGE_NAME, "Record");
-      const durationTypeLinkId = await deep.id(PACKAGE_NAME, "Duration");
-      const startTimeTypeLinkId = await deep.id(PACKAGE_NAME, "StartTime");
-      const endTimeTypeLinkId = await deep.id(PACKAGE_NAME, "EndTime");
-      const mimetypeTypeLinkId = await deep.id("@deep-foundation/sound", "MIME/type");
-      const formatTypeLinkId = await deep.id("@deep-foundation/sound", "Format");
       const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
-      const gcloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
       const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
       const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
       const transcriptionTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcription");
-      const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
       const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
       const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
       const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
@@ -92,103 +82,12 @@ function Content() {
 
       console.log("before insert sound link", sounds);
       console.log("flakeed2");
-      const { data: [{ id: soundLinkId }] } = await deep.insert(sounds.map((sound) => ({
-        type_id: recordTypeLinkId,
-        in: {
-          data: [{
-            type_id: containTypeLinkId,
-            from_id: audioRecordsLinkId,
-          }]
-        },
-        out: {
-          data: [
-            {
-              type_id: containTypeLinkId,
-              to: {
-                data: {
-                  type_id: soundTypeLinkId,
-                  string: { data: { value: sound.record["recordDataBase64"] } },
-                  out: {
-                    data: [
-                      {
-                        type_id: containTypeLinkId,
-                        to: {
-                          data: {
-                            type_id: mimetypeTypeLinkId,
-                            string: { data: { value: sound.record["mimeType"] } },
-                          }
-                        }
-                      },
-                      {
-                        type_id: containTypeLinkId,
-                        to: {
-                          data: {
-                            type_id: formatTypeLinkId,
-                            string: { data: { value: sound.record["mimeType"] === "audio/webm;codecs=opus" ? "webm" : "aac" } },
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
-              }
-            },
-            {
-              type_id: containTypeLinkId,
-              to: {
-                data: {
-                  type_id: durationTypeLinkId,
-                  number: { data: { value: sound.record["msDuration"] } },
-                }
-              }
-            },
-            {
-              type_id: containTypeLinkId,
-              to: {
-                data: {
-                  type_id: startTimeTypeLinkId,
-                  string: { data: { value: sound.startTime } },
-                }
-              }
-            },
-            {
-              type_id: containTypeLinkId,
-              to: {
-                data: {
-                  type_id: endTimeTypeLinkId,
-                  string: { data: { value: sound.endTime } },
-                }
-              }
-            }]
-        }
-      })));
+      const soundLinkId = await uploadRecords(deep, deviceLinkId, sounds);
       console.log("flakeed1");
       console.log("soundLinkId", soundLinkId)
 
-      const { data: [isGcloudAuthKeyLinkId] } = await deep.select({
-        type_id: gcloudAuthKeyTypeLink,
-        in: {
-          type_id: containTypeLinkId,
-          from_id: deep.linkId,
-        },
-      });
-
       console.log("googleauth", googleAuth);
-      if (!isGcloudAuthKeyLinkId) {
-        const parsedGoogleAuth = JSON.parse(googleAuth);
-        await deep.insert({
-          type_id: gcloudAuthKeyTypeLink,
-          object: { data: { value: parsedGoogleAuth } },
-          in: {
-            data: [
-              {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-              }
-            ]
-          }
-        })
-      }
+
       console.log("flakeed3");
 
       const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
@@ -204,48 +103,31 @@ function Content() {
       });
       console.log("transcribeTextLinkId", transcribeTextLinkId)
 
-      await delay(8000);
-      const { data: [transcribedTextLinkId] } = await deep.select({
-        type_id: transcriptionTypeLinkId,
-        in: {
-          type_id: containTypeLinkId,
-          from_id: soundLinkId
-        },
-      });
-      console.log("transcribedTextLinkId", transcribedTextLinkId)
+      let transcribedTextLinkId;
 
-      const { data: [isApiKeyLinkId] } = await deep.select({
-        type_id: apiKeyTypeLinkId,
-        in: {
-          type_id: containTypeLinkId,
-          from_id: deep.linkId,
-        },
-      });
-
-      console.log("flakeed5");
-      if (!isApiKeyLinkId) {
-        await deep.insert({
-          type_id: apiKeyTypeLinkId,
-          string: { data: { value: apiKey } },
+      for (let i = 0; i < 10; i++) {
+        if (transcribedTextLinkId) break;
+        transcribedTextLinkId = await deep.select({
+          type_id: transcriptionTypeLinkId,
           in: {
-            data: [
-              {
-                type_id: await deep.id('@deep-foundation/core', "Contain"),
-                from_id: deep.linkId,
-              }]
-          }
+            type_id: containTypeLinkId,
+            from_id: soundLinkId
+          },
         });
       }
+      if (!transcribedTextLinkId) throw new Error("Transcription not found")
+
+      console.log("transcribedTextLinkId", transcribedTextLinkId)
 
       console.log("flakeed6");
-      const { data: [isConversationLinkId] } = await deep.select({
+      const { data: [conversationLinkId] } = await deep.select({
         type_id: conversationTypeLinkId,
         in: {
           type_id: containTypeLinkId,
           from_id: deep.linkId,
         },
       });
-      if (isConversationLinkId) {
+      if (conversationLinkId) {
         const { data: replyLinks } = await deep.select({
           type_id: replyTypeLinkId,
         });
@@ -320,7 +202,7 @@ function Content() {
         replyMessageLinkId = replyToMessageLinkId;
       }
 
-      if (!isConversationLinkId) {
+      if (!conversationLinkId) {
         const { data: [{ id: conversationLinkId }] } = await deep.insert({
           type_id: conversationTypeLinkId,
           string: { data: { value: "New chat" } },
@@ -486,7 +368,7 @@ function Content() {
   }
 
   const handleButtonClick = useCallback(() => {
-      setIsRecording((prevIsRecording) => !prevIsRecording);
+    setIsRecording((prevIsRecording) => !prevIsRecording);
   }, []);
 
   const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
