@@ -8,7 +8,7 @@ import { useIsPackageInstalled } from '../imports/use-is-package-installed';
 import checkAudioRecPermission from '../imports/capacitor-voice-recorder/check-permission'
 export function Setup(arg: {
   onAuthorize: (arg: { gqlPath: string, token: string }) => void,
-  onSubmit: (arg: { apiKey: string, googleAuth: string }) => void
+  onSubmit: (arg: { apiKey: string, googleAuth: string, systemMsg: string  }) => void
 }) {
   // const defaultGqlPath = "3006-deepfoundation-dev-mst16p4n7jz.ws-eu96b.gitpod.io/gql";
   // const defaultToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwczovL2hhc3VyYS5pby9qd3QvY2xhaW1zIjp7IngtaGFzdXJhLWFsbG93ZWQtcm9sZXMiOlsiYWRtaW4iXSwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiYWRtaW4iLCJ4LWhhc3VyYS11c2VyLWlkIjoiMzc4In0sImlhdCI6MTY4MzQ4MDUyMH0.rp9HzhnRMEA-hKf_2aReoJvBI6aSlItNSQ-cop58w5U";
@@ -17,6 +17,7 @@ export function Setup(arg: {
   const [token, setToken] = useLocalStore("token", undefined);
   const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
   const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
+  const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
   const [isRecordPackageInstalledPressed, setIsRecordPackageInstalledPressed] = useState(false);
   const [isChatGPTPackageInstalledPressed, setIsChatGPTPackageInstalledPressed] = useState(false);
   const [isSpeechPackageInstalledPressed, setIsSpeechPackageInstalledPressed] = useState(false);
@@ -213,7 +214,8 @@ export function Setup(arg: {
     } else {
       arg.onSubmit({
         apiKey,
-        googleAuth
+        googleAuth,
+        systemMsg
       });
         const parsedGoogleAuth = JSON.parse(googleAuth);
         await deep.insert({
@@ -271,6 +273,12 @@ export function Setup(arg: {
         <FormLabel>Google Auth</FormLabel>
         <Input type="text" onChange={(newGoogleAuth) => {
           setGoogleAuth(newGoogleAuth.target.value)
+        }} />
+        </FormControl>
+      <FormControl id="System Message">
+        <FormLabel>System Message</FormLabel>
+        <Input type="text" onChange={(newSystemMsg) => {
+          setSystemMsg(newSystemMsg.target.value)
         }} />
 
         <Button disabled={!isSendDataPressed || isChatGPTPackageInstalledPressed || isChatGPTPackageInstalled} style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installChatGPTPackage(); setIsChatGPTPackageInstalledPressed(true); }}>Install ChatGPT package</Button>
