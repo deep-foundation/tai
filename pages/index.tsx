@@ -33,7 +33,6 @@ function Content() {
 
   const [sounds, setSounds] = useLocalStore("Sounds", []);
   const [isRecording, setIsRecording] = useState(false);
-  const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
   const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
   let replyMessageLinkId;
@@ -104,19 +103,15 @@ function Content() {
       });
       console.log("transcribeTextLinkId", transcribeTextLinkId)
 
-      let transcribedTextLinkId;
-
-      for (let i = 0; i < 10; i++) {
-        if (transcribedTextLinkId) break;
-        transcribedTextLinkId = await deep.select({
+      await delay(8000)
+      
+      const { data: [transcribedTextLinkId] } = await deep.select({
           type_id: transcriptionTypeLinkId,
           in: {
             type_id: containTypeLinkId,
             from_id: soundLinkId
           },
         });
-      }
-      if (!transcribedTextLinkId) throw new Error("Transcription not found")
 
       console.log("transcribedTextLinkId", transcribedTextLinkId)
 
@@ -204,7 +199,7 @@ function Content() {
       }
 
       if (!conversationLinkId) {
-        const { data: [{ id: conversationLinkId }] } = await deep.insert({
+        const { data: [{ id: conversationLink }] } = await deep.insert({
           type_id: conversationTypeLinkId,
           string: { data: { value: "New chat" } },
           in: {
@@ -231,7 +226,7 @@ function Content() {
         const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
           type_id: systemTypeLinkId,
           from_id: systemMessageLinkId,
-          to_id: conversationLinkId,
+          to_id: conversationLink,
           in: {
             data: {
               type_id: containTypeLinkId,
@@ -254,7 +249,7 @@ function Content() {
         const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
           type_id: replyTypeLinkId,
           from_id: messageLinkId,
-          to_id: conversationLinkId,
+          to_id: conversationLink,
           in: {
             data: {
               type_id: containTypeLinkId,
