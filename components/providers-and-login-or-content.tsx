@@ -10,6 +10,7 @@ export function ProvidersAndLoginOrContent({ children }: { children: JSX.Element
   const [gqlPath, setGqlPath] = useLocalStore(CapacitorStoreKeys[CapacitorStoreKeys.GraphQlPath], undefined)
   const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
   const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
+  const [systemMgs, setSystemMsg] = useLocalStore("systemMsg", undefined);
 
   return (
     <>
@@ -38,6 +39,11 @@ export function ProvidersAndLoginOrContent({ children }: { children: JSX.Element
                 setGoogleAuth={(newGoogleAuth) => {
                   console.log({ newGoogleAuth })
                   setGoogleAuth(newGoogleAuth)
+                }}
+                systemMsg={systemMgs}
+                setSystemMsg={(newSystemMsg) => {
+                  console.log({ newSystemMsg })
+                  setSystemMsg(newSystemMsg)
                 }}
               >
                 {children}
