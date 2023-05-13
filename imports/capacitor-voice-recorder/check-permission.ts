@@ -42,5 +42,5 @@ export default async function checkAudioRecPermission(deep: DeepClient, deviceLi
             }]
         }
     })
+    return permission;
 }
-
