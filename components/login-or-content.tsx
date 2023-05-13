@@ -2,11 +2,11 @@ import { useDeep } from "@deep-foundation/deeplinks/imports/client";
 import { useState, useEffect } from "react";
 import { Setup } from "./login";
 
-export function LoginOrContent({ gqlPath, setGqlPath, children,apiKey,googleAuth,setApiKey,setGoogleAuth }: { gqlPath: string | undefined, setGqlPath: (gqlPath: string | undefined) => void, children: JSX.Element, apiKey: string|undefined,setApiKey: (apiKey: string | undefined)=>void, googleAuth:string|undefined,setGoogleAuth: (googleAuth: string | undefined)=>void }) {
+export function LoginOrContent({ gqlPath, setGqlPath, children, apiKey, googleAuth, setApiKey, setGoogleAuth }: { gqlPath: string | undefined, setGqlPath: (gqlPath: string | undefined) => void, children: JSX.Element, apiKey: string | undefined, setApiKey: (apiKey: string | undefined) => void, googleAuth: string | undefined, setGoogleAuth: (googleAuth: string | undefined) => void }) {
   const deep = useDeep();
   const [isAuthorized, setIsAuthorized] = useState(undefined);
   const [isSubmitted, setIsSubmitted] = useState(false);
-
+  const [isGetPermissionPressed, setIsGetPermissionPressed] = useState(false);
 
   useEffect(() => {
     self["deep"] = deep
@@ -17,9 +17,17 @@ export function LoginOrContent({ gqlPath, setGqlPath, children,apiKey,googleAuth
     }
   }, [deep]);
 
+  useEffect(() => {
+    const isSubmitted = localStorage.getItem('isSubmitted');
+    if (isSubmitted === 'true') {
+      setIsSubmitted(true);
+    }
+  }, []);
+
   console.log({ isAuthorized, gqlPath })
-  return isAuthorized && gqlPath && isSubmitted ? children : (
+  return isAuthorized && gqlPath && googleAuth && apiKey && isSubmitted ? children : (
     <Setup
+
       onAuthorize={(arg) => {
         console.log({ arg })
         setGqlPath(arg.gqlPath);
@@ -27,12 +35,14 @@ export function LoginOrContent({ gqlPath, setGqlPath, children,apiKey,googleAuth
           token: arg.token
         })
       }}
-      
+
       onSubmit={(arg) => {
         setApiKey(arg.apiKey);
         setGoogleAuth(arg.googleAuth);
+        localStorage.setItem('isSubmitted', 'true');
         setIsSubmitted(true);
       }}
+
     />
   );
 }
