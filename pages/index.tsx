@@ -35,6 +35,7 @@ function Content() {
   const [isRecording, setIsRecording] = useState(false);
   const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
   const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
+  const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
   let replyMessageLinkId;
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
@@ -217,7 +218,7 @@ function Content() {
 
         const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
           type_id: messageTypeLinkId,
-          string: { data: { value: "Ты сегодня продавец, вот твой список товара: цибуля. майонез, картошка, огурцы, клубника, малина, смородина" } },
+          string: { data: { value: systemMsg} },
           in: {
             data: {
               type_id: containTypeLinkId,
@@ -225,6 +226,7 @@ function Content() {
             }
           },
         });
+        console.log("systemMsg",systemMsg)
 
         const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
           type_id: systemTypeLinkId,
