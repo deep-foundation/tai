@@ -199,7 +199,7 @@ function Content() {
       }
 
       if (!conversationLinkId) {
-        const { data: [{ id: conversationLink }] } = await deep.insert({
+        const { data: [{ id: conversationLinkId }] } = await deep.insert({
           type_id: conversationTypeLinkId,
           string: { data: { value: "New chat" } },
           in: {
@@ -226,7 +226,7 @@ function Content() {
         const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
           type_id: systemTypeLinkId,
           from_id: systemMessageLinkId,
-          to_id: conversationLink,
+          to_id: conversationLinkId,
           in: {
             data: {
               type_id: containTypeLinkId,
@@ -249,7 +249,7 @@ function Content() {
         const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
           type_id: replyTypeLinkId,
           from_id: messageLinkId,
-          to_id: conversationLink,
+          to_id: conversationLinkId,
           in: {
             data: {
               type_id: containTypeLinkId,
