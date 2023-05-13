@@ -31,15 +31,29 @@ export function Setup(arg: {
     undefined
   );
 
+  const recordPackageStatus = useIsPackageInstalled({
+    packageName: "@deep-foundation/capacitor-voice-recorder",
+    shouldIgnoreResultWhenLoading: true,
+    onError: ({ error }) => { console.error(error.message) }
+  });
+
+  const chatGPTPackageStatus = useIsPackageInstalled({
+    packageName: "@deep-foundation/chatgpt",
+    shouldIgnoreResultWhenLoading: true,
+    onError: ({ error }) => { console.error(error.message) }
+  });
+
+  const speechPackageStatus = useIsPackageInstalled({
+    packageName: "@deep-foundation/google-speech",
+    shouldIgnoreResultWhenLoading: true,
+    onError: ({ error }) => { console.error(error.message) }
+  });
+
 
   const installRecordPackage = async () => {
+    let isRecordPackageInstalled = recordPackageStatus;
+    console.log("isRecordPackageInstalled",isRecordPackageInstalled)
     do {
-      isRecordPackageInstalled = useIsPackageInstalled({
-        packageName: "@deep-foundation/capacitor-voice-recorder",
-        shouldIgnoreResultWhenLoading: true,
-        onError: ({ error }) => { console.error(error.message) }
-      });
-
       if (!isRecordPackageInstalled) {
         await deep.insert([
           {
@@ -82,13 +96,9 @@ export function Setup(arg: {
   }
 
   const installChatGPTPackage = async () => {
+    let isChatGPTPackageInstalled = chatGPTPackageStatus;
+    console.log("isChatGPTPackageInstalled",isChatGPTPackageInstalled)
     do {
-      isChatGPTPackageInstalled = useIsPackageInstalled({
-        packageName: "@deep-foundation/chatgpt",
-        shouldIgnoreResultWhenLoading: true,
-        onError: ({ error }) => { console.error(error.message) }
-      });
-
       if (!isChatGPTPackageInstalled) {
         await deep.insert([
           {
@@ -129,13 +139,9 @@ export function Setup(arg: {
   }
 
   const installSpeechPackage = async () => {
+    let isSpeechPackageInstalled = speechPackageStatus;
+    console.log("isSpeechPackageInstalled",isSpeechPackageInstalled)
     do {
-      isSpeechPackageInstalled = useIsPackageInstalled({
-        packageName: "@deep-foundation/google-speech",
-        shouldIgnoreResultWhenLoading: true,
-        onError: ({ error }) => { console.error(error.message) }
-      });
-
       if (!isSpeechPackageInstalled) {
         await deep.insert([
           {
@@ -183,19 +189,19 @@ export function Setup(arg: {
       error += 'GET RECORDING PERMISSION, ';
     }
 
-    if (!isSpeechPackageInstalled) {
+    if (isSpeechPackageInstalled) {
       if (!isSpeechPackageInstalledPressed) {
         error += 'Install Speech package, ';
       }
     }
 
-    if (!isChatGPTPackageInstalled) {
+    if (isChatGPTPackageInstalled) {
       if (!isChatGPTPackageInstalledPressed) {
         error += 'Install ChatGPT package, ';
       }
     }
 
-    if (!isRecordPackageInstalled) {
+    if (isRecordPackageInstalled) {
       if (!isRecordPackageInstalledPressed) {
         error += 'Install Record package, ';
       }
