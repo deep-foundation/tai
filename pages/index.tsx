@@ -21,6 +21,7 @@ import { Page } from '../components/page';
 import startRecording from '../imports/capacitor-voice-recorder/strart-recording';
 import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
+import createContainer from '../imports/capacitor-voice-recorder/create-container';
 import ChatBubble from '../components/ChatBubble';
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
@@ -35,15 +36,19 @@ function Content() {
   const [isRecording, setIsRecording] = useState(false);
   const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
-
-  const startTime = useRef('');
-
-  let replyMessageLinkId;
+  const [containerLinkId, setContainerLinkId] = useLocalStore(
+    'containerLinkId',
+    undefined
+  );
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     'deviceLinkId',
     undefined
   );
+  
+  const startTime = useRef('');
+
+  let replyMessageLinkId;
 
   useEffect(() => {
     new Promise(async () => {
@@ -53,6 +58,15 @@ function Content() {
       await deep.guest();
     })
   }, [deep])
+
+  useEffect(() => {
+    if (!containerLinkId) {
+      const initializeContainerLink = async () => {
+        setContainerLinkId(await createContainer(deep));
+      };
+      initializeContainerLink();
+    }
+  }, [])
 
   const generalInfoCard = (
     <Card>
