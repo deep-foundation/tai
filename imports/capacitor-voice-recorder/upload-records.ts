@@ -24,7 +24,7 @@ export default async function uploadRecords({deep, containerLinkId, records}:IUp
   const formatTypeLinkId = await deep.id("@deep-foundation/sound", "Format");
   const soundTypeLinkId = await deep.id("@deep-foundation/sound", "Sound");
 
-  await deep.insert(records.map((record) => ({
+  const { data: [{ id: soundLinkId }] } = await deep.insert(records.map((record) => ({
     type_id: recordTypeLinkId,
     in: {
       data: [{
@@ -94,4 +94,5 @@ export default async function uploadRecords({deep, containerLinkId, records}:IUp
         }]
     }
   })));
+  return soundLinkId;
 }
