@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, CSSProperties } from 'react';
+import React, { useEffect, useState, useCallback, CSSProperties, useRef } from 'react';
 import { LocalStoreProvider, useLocalStore } from '@deep-foundation/store/local';
 import {
   Text,
@@ -18,8 +18,8 @@ import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { WithInitDeviceIfNotInitedAndSaveData } from '../components/device/withInitDeviceIfNotInitedAndSaveData';
 import { NavBar } from '../components/navbar';
 import { Page } from '../components/page';
-import startAudioRec from '../imports/capacitor-voice-recorder/strart-recording';
-import stopAudioRec from '../imports/capacitor-voice-recorder/stop-recording';
+import startRecording from '../imports/capacitor-voice-recorder/strart-recording';
+import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import ChatBubble from '../components/ChatBubble';
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
@@ -35,6 +35,9 @@ function Content() {
   const [isRecording, setIsRecording] = useState(false);
   const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
+
+  const startTime = useRef('');
+
   let replyMessageLinkId;
 
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
@@ -70,6 +73,97 @@ function Content() {
   useEffect(() => {
     if (!isRecording) return;
     const useRecords = async () => {
+
+    };
+
+    if (sounds.length > 0) useRecords();
+  }, [sounds, isRecording]);
+
+
+  const ScreenChat = ({ replyToMessageLinkId }) => {
+    const [messages, setMessages] = useState([]);
+    const [messagesCount, setMessagesCount] = useState(0);
+    let chatGptLinkId;
+    async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
+
+    useEffect(() => {
+      (async () => {
+        const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
+        const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
+        const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
+
+        const result = await deep.select({
+          tree_id: { _eq: messagingTreeId },
+          link: { type_id: { _eq: messageTypeLinkId } },
+          root_id: { _eq: replyMessageLinkId },
+          // @ts-ignore
+          self: { _eq: true },
+        }, {
+          table: 'tree',
+          variables: { order_by: { depth: "asc" } },
+          returning: `
+            id
+            depth
+            root_id
+            parent_id
+            link_id
+            link {
+              id
+              from_id
+              type_id
+              to_id
+              value
+              author: out (where: { type_id: { _eq: ${authorTypeLinkId} } }) { 
+                id
+                from_id
+                type_id
+                to_id
+              }
+            }`
+        });
+
+        setMessages(result?.data);
+        setMessagesCount(result?.data.length);
+      })();
+    }, [replyToMessageLinkId]);
+
+    return (
+      <Box
+        position="fixed"
+        bottom={0}
+        left={0}
+        zIndex={1000}
+        overflowY="scroll"
+        height='500px'
+        width='500px'
+        bg={"grey"}
+        p={3}
+        borderRadius="20px"
+      >
+        {messagesCount ?
+          [
+            <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
+            ...messages.map((message, index) => (
+              <Box key={index} mb={3} p={2} borderRadius="5px" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
+                <Text borderBottom="1px solid" pb={2}>
+                  {index === 0 ? "System" : message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
+                </Text>
+                <Text>{message?.link?.value?.value}</Text>
+              </Box>
+            ))
+          ] : []
+        }
+      </Box>
+    );
+  }
+
+  const toggleRecording = useCallback(async () => {
+    if (!isRecording) {
+      setSounds([]);
+      startTime.current = new Date().toLocaleDateString();
+      await startRecording(deep);
+      setIsRecording(true);
+    } else {
       const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
       const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
       const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
@@ -82,7 +176,7 @@ function Content() {
 
       console.log("before insert sound link", sounds);
       console.log("flakeed2");
-      const soundLinkId = await uploadRecords(deep, deviceLinkId, sounds);
+      const soundLinkId = await uploadRecords({deep, containerLinkId, records:[{ sound, startTime, endTime }]});
       console.log("flakeed1");
       console.log("soundLinkId", soundLinkId)
 
@@ -104,14 +198,14 @@ function Content() {
       console.log("transcribeTextLinkId", transcribeTextLinkId)
 
       await delay(8000)
-      
+
       const { data: [transcribedTextLinkId] } = await deep.select({
-          type_id: transcriptionTypeLinkId,
-          in: {
-            type_id: containTypeLinkId,
-            from_id: soundLinkId
-          },
-        });
+        type_id: transcriptionTypeLinkId,
+        in: {
+          type_id: containTypeLinkId,
+          from_id: soundLinkId
+        },
+      });
 
       console.log("transcribedTextLinkId", transcribedTextLinkId)
 
@@ -213,7 +307,7 @@ function Content() {
 
         const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
           type_id: messageTypeLinkId,
-          string: { data: { value: systemMsg} },
+          string: { data: { value: systemMsg } },
           in: {
             data: {
               type_id: containTypeLinkId,
@@ -221,7 +315,7 @@ function Content() {
             }
           },
         });
-        console.log("systemMsg",systemMsg)
+        console.log("systemMsg", systemMsg)
 
         const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
           type_id: systemTypeLinkId,
@@ -259,114 +353,13 @@ function Content() {
         });
       };
       console.log("flakeed8");
-      setSounds([]);
-    };
-
-    if (sounds.length > 0) useRecords();
-  }, [sounds, isRecording]);
-
-  useEffect(() => {
-    if (!isRecording) return;
-
-    let loop = true;
-    const startRecordingCycle = async (duration) => {
-      for (; isRecording && loop;) {
-        await startAudioRec(deep);
-        const startTime = new Date().toLocaleDateString();
-        await delay(duration);
-        const record = await stopAudioRec(deep);
-        const endTime = new Date().toLocaleDateString();
-        console.log({ record });
-        setSounds([{ record, startTime, endTime }]);
-      }
-    };
-
-    startRecordingCycle(5000);
-    return function stopCycle() {
-      loop = false;
-    };
+      const record = await stopAudioRec(deep);
+      const endTime = new Date().toLocaleDateString();
+      console.log({ record });
+      setSounds([{ record, startTime: startTime.current, endTime }]);
+      setIsRecording(false);
+    }
   }, [isRecording]);
-
-  const ScreenChat = ({ replyToMessageLinkId }) => {
-    const [messages, setMessages] = useState([]);
-    const [messagesCount, setMessagesCount] = useState(0);
-    let chatGptLinkId;
-    async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
-
-    useEffect(() => {
-      (async () => {
-        const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
-        const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
-        const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
-
-        const result = await deep.select({
-          tree_id: { _eq: messagingTreeId },
-          link: { type_id: { _eq: messageTypeLinkId } },
-          root_id: { _eq: replyMessageLinkId },
-          // @ts-ignore
-          self: { _eq: true },
-        }, {
-          table: 'tree',
-          variables: { order_by: { depth: "asc" } },
-          returning: `
-            id
-            depth
-            root_id
-            parent_id
-            link_id
-            link {
-              id
-              from_id
-              type_id
-              to_id
-              value
-              author: out (where: { type_id: { _eq: ${authorTypeLinkId} } }) { 
-                id
-                from_id
-                type_id
-                to_id
-              }
-            }`
-        });
-
-        setMessages(result?.data);
-        setMessagesCount(result?.data.length);
-      })();
-    }, [replyToMessageLinkId]);
-
-    return (
-      <Box
-        position="fixed"
-        bottom={0}
-        left={0}
-        zIndex={1000}
-        overflowY="scroll"
-        height='500px'
-        width='500px'
-        bg={"grey"}
-        p={3}
-        borderRadius="20px"
-      >
-        {messagesCount ?
-          [
-            <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
-            ...messages.map((message, index) => (
-              <Box key={index} mb={3} p={2} borderRadius="5px" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
-                <Text borderBottom="1px solid" pb={2}>
-                  {index === 0 ? "System" : message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
-                </Text>
-                <Text>{message?.link?.value?.value}</Text>
-              </Box>
-            ))
-          ] : []
-        }
-      </Box>
-    );
-  }
-
-  const handleButtonClick = useCallback(() => {
-    setIsRecording((prevIsRecording) => !prevIsRecording);
-  }, []);
 
   const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -437,7 +430,7 @@ function Content() {
           fontSize: '24px',
           top: window.innerHeight / 2,
         }}
-        onClick={handleButtonClick}
+        onClick={toggleRecording}
       >
         {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
       </Button>
