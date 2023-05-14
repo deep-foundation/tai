@@ -25,29 +25,11 @@ export function Setup(arg: {
   const [isSendDataPressed, setIsSendDataPressed] = useState(false);
   // let isRecordPackageInstalled,chatGPTPackageStatus,speechPackageStatus;
   let audioPermission;
+  let isRecordPackageInstalled,isChatGPTPackageInstalled,isSpeechPackageInstalled
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     'deviceLinkId',
     undefined
   );
-
-  const { isPackageInstalled: isRecordPackageInstalled } = useIsPackageInstalled({
-    packageName: "@deep-foundation/capacitor-voice-recorder",
-    shouldIgnoreResultWhenLoading: true,
-    onError: ({ error }) => { console.error(error.message) }
-  });
-
-  const { isPackageInstalled: isChatGPTPackageInstalled } = useIsPackageInstalled({
-    packageName: "@deep-foundation/chatgpt",
-    shouldIgnoreResultWhenLoading: true,
-    onError: ({ error }) => { console.error(error.message) }
-  });
-
-  const { isPackageInstalled: isSpeechPackageInstalled } = useIsPackageInstalled({
-    packageName: "@deep-foundation/google-speech",
-    shouldIgnoreResultWhenLoading: true,
-    onError: ({ error }) => { console.error(error.message) }
-  });
-
 
   const installRecordPackage = async () => {
     if (!isRecordPackageInstalled) {
@@ -282,6 +264,24 @@ export function Setup(arg: {
           gqlPath,
           token,
         })
+        isRecordPackageInstalled= useIsPackageInstalled({
+          packageName: "@deep-foundation/capacitor-voice-recorder",
+          shouldIgnoreResultWhenLoading: true,
+          onError: ({ error }) => { console.error(error.message) }
+        });
+      
+        isChatGPTPackageInstalled = useIsPackageInstalled({
+          packageName: "@deep-foundation/chatgpt",
+          shouldIgnoreResultWhenLoading: true,
+          onError: ({ error }) => { console.error(error.message) }
+        });
+      
+        isSpeechPackageInstalled = useIsPackageInstalled({
+          packageName: "@deep-foundation/google-speech",
+          shouldIgnoreResultWhenLoading: true,
+          onError: ({ error }) => { console.error(error.message) }
+        });
+      
         setIsSendDataPressed(true)
       }}>
         Sent Data
