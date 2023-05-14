@@ -14,13 +14,20 @@ interface IStopRecording {
   startTime: string;
 }
 
+interface IStopRecordingResult {
+  sound: ISound;
+  soundLinkId: number; // Assuming soundLinkId is a number
+}
+
 export default async function stopRecording({
   deep,
   containerLinkId,
   startTime,
-}: IStopRecording): Promise<ISound> {
+}: IStopRecording): Promise<IStopRecordingResult> {
   const { value: sound } = await VoiceRecorder.stopRecording();
   const endTime = new Date().toLocaleDateString();
-  await uploadRecords({deep, containerLinkId, records:[{ sound, startTime, endTime }]});
-  return sound;
+  
+  const soundLinkId = await uploadRecords({deep, containerLinkId, records:[{ sound, startTime, endTime }]});
+  
+  return { sound, soundLinkId };
 }
