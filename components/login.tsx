@@ -3,9 +3,8 @@ import { useState } from "react";
 import { useDeep } from "@deep-foundation/deeplinks/imports/client";
 import { StoreProvider } from './store-provider';
 import { useLocalStore } from "@deep-foundation/store/local";
-import getAudioRecPermission from '../imports/capacitor-voice-recorder/get-permission';
 import { useIsPackageInstalled } from '../imports/use-is-package-installed';
-import checkAudioRecPermission from '../imports/capacitor-voice-recorder/check-permission'
+import { VoiceRecorder } from 'capacitor-voice-recorder';
 export function Setup(arg: {
   onAuthorize: (arg: { gqlPath: string, token: string }) => void,
   onSubmit: (arg: { apiKey: string, googleAuth: string, systemMsg: string  }) => void
@@ -23,6 +22,7 @@ export function Setup(arg: {
   const [isSpeechPackageInstalledPressed, setIsSpeechPackageInstalledPressed] = useState(false);
   const [isGetPermissionPressed, setIsGetPermissionPressed] = useState(false);
   const [isSendDataPressed, setIsSendDataPressed] = useState(false);
+  const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean | undefined>(undefined)
   // let isRecordPackageInstalled,chatGPTPackageStatus,speechPackageStatus;
   let audioPermission;
   let isRecordPackageInstalled,isChatGPTPackageInstalled,isSpeechPackageInstalled
@@ -153,10 +153,8 @@ export function Setup(arg: {
 
 
   const submitForm = async () => {
-    let error = '';
-
-    audioPermission = await checkAudioRecPermission(deep, deviceLinkId);
-    if (!audioPermission) {
+    let error = '';;
+    if (!arePermissionsGranted) {
       error += 'GET RECORDING PERMISSION, ';
     }
 
@@ -256,7 +254,8 @@ export function Setup(arg: {
 
         <Button disabled={!isSendDataPressed } style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installRecordPackage(); setIsRecordPackageInstalledPressed(true); }}>Install Record package</Button>
 
-        <Button disabled={!isSendDataPressed || isGetPermissionPressed || audioPermission} style={{ position: 'relative', zIndex: 1000 }} onClick={async () => { await getAudioRecPermission(deep, deviceLinkId); setIsGetPermissionPressed(true); }} >GET RECORDING PERMISSION</Button>
+        <Button disabled={!isSendDataPressed || isGetPermissionPressed || audioPermission} style={{ position: 'relative', zIndex: 1000 }} onClick={async () => { const { value: arePermissionsGranted } = await VoiceRecorder.requestAudioRecordingPermission();
+          setArePermissionsGranted(arePermissionsGranted); setIsGetPermissionPressed(true); }} >GET RECORDING PERMISSION</Button>
       
       </FormControl>
       <Button onClick={() => {
