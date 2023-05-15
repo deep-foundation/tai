@@ -22,6 +22,7 @@ import startRecording from '../imports/capacitor-voice-recorder/strart-recording
 import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
+import loadRecords from '../imports/capacitor-voice-recorder/load-records';
 import ChatBubble from '../components/ChatBubble';
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
@@ -84,215 +85,223 @@ function Content() {
     </Card>
   );
 
-  
-  const toggleRecording = useCallback(async () => {
+
+
+  const handleClick = async () => {
     if (!isRecording) {
-      setSounds([]);
-      startTime.current = await startRecording()
-      setIsRecording(true);
+      // Start recording
+      try {
+        startTime.current = await startRecording();
+        setIsRecording(true);
+      } catch (error) {
+        console.log('Error starting recording:', error);
+      }
     } else {
-      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-      const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
-      const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
-      const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
-      const transcriptionTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcription");
-      const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
-      const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
-      const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
-      const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
-
-      console.log("before insert sound link", sounds);
-      console.log("flakeed2");
-      const soundLinkId =  await uploadRecords(deep, containerLinkId, sounds)
-      console.log("flakeed1");
-      console.log("soundLinkId", soundLinkId)
-
-      console.log("googleauth", googleAuth);
-
-      console.log("flakeed3");
-
-      const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
-        type_id: transcribeTypeLinkId,
-        from_id: deep.linkId,
-        to_id: soundLinkId,
-        in: {
-          data: {
+      // Stop recording and process
+      try {
+        const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+        const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
+        const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
+        const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
+        const transcriptionTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcription");
+        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+        const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
+        const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
+        const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
+        await stopRecording(deep, containerLinkId, startTime.current);
+        console.log("before insert sound link", sounds);
+        console.log("flakeed2");
+        console.log("flakeed1");
+        const soundLinkId = await loadRecords(deep)
+        console.log("soundLinkId", soundLinkId)
+  
+        console.log("googleauth", googleAuth);
+  
+        console.log("flakeed3");
+  
+        const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
+          type_id: transcribeTypeLinkId,
+          from_id: deep.linkId,
+          to_id: soundLinkId,
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            }
+          }
+        });
+        console.log("transcribeTextLinkId", transcribeTextLinkId)
+  
+        await delay(8000)
+  
+        const { data: [transcribedTextLinkId] } = await deep.select({
+          type_id: transcriptionTypeLinkId,
+          in: {
+            type_id: containTypeLinkId,
+            from_id: soundLinkId
+          },
+        });
+  
+        console.log("transcribedTextLinkId", transcribedTextLinkId)
+  
+        console.log("flakeed6");
+        const { data: [conversationLinkId] } = await deep.select({
+          type_id: conversationTypeLinkId,
+          in: {
             type_id: containTypeLinkId,
             from_id: deep.linkId,
-          }
-        }
-      });
-      console.log("transcribeTextLinkId", transcribeTextLinkId)
-
-      await delay(8000)
-
-      const { data: [transcribedTextLinkId] } = await deep.select({
-        type_id: transcriptionTypeLinkId,
-        in: {
-          type_id: containTypeLinkId,
-          from_id: soundLinkId
-        },
-      });
-
-      console.log("transcribedTextLinkId", transcribedTextLinkId)
-
-      console.log("flakeed6");
-      const { data: [conversationLinkId] } = await deep.select({
-        type_id: conversationTypeLinkId,
-        in: {
-          type_id: containTypeLinkId,
-          from_id: deep.linkId,
-        },
-      });
-      if (conversationLinkId) {
-        const { data: replyLinks } = await deep.select({
-          type_id: replyTypeLinkId,
+          },
         });
-
-        const replyLink = replyLinks.sort((a, b) => {
-          if (b.from_id !== undefined && a.from_id !== undefined) {
-              return b.from_id - a.from_id;
-          } else {
-              return 0;
-          }
-      });
-      
-        console.log("replyLinks", replyLinks)
-
-        const { data: conversationLink } = await deep.select({
-          tree_id: { _eq: messagingTreeId },
-          parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
-          link: { id: { _eq: replyLink[0].from_id } },
-        }, {
-          table: 'tree',
-          variables: { order_by: { depth: "asc" } },
-          returning: `
-          id
-          depth
-          root_id
-          parent_id
-          link_id
-          parent {
+        if (conversationLinkId) {
+          const { data: replyLinks } = await deep.select({
+            type_id: replyTypeLinkId,
+          });
+  
+          const replyLink = replyLinks.sort((a, b) => {
+            if (b.from_id !== undefined && a.from_id !== undefined) {
+                return b.from_id - a.from_id;
+            } else {
+                return 0;
+            }
+        });
+        
+          console.log("replyLinks", replyLinks)
+  
+          const { data: conversationLink } = await deep.select({
+            tree_id: { _eq: messagingTreeId },
+            parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
+            link: { id: { _eq: replyLink[0].from_id } },
+          }, {
+            table: 'tree',
+            variables: { order_by: { depth: "asc" } },
+            returning: `
             id
-            from_id
-            type_id
-            to_id
-            value
-            author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
+            depth
+            root_id
+            parent_id
+            link_id
+            parent {
               id
               from_id
               type_id
               to_id
-            }
-          }`
-        })
-
-        const messageLinks = conversationLink
-          .map(item => item.parent)
-          .filter(link => link && link.type_id === messageTypeLinkId);
-
-        const authorLinks = messageLinks
-          .filter(messageLink => messageLink.author && messageLink.author[0])
-          .map(messageLink => messageLink.author[0].from_id);
-
-
-        console.log("messageLinks", messageLinks);
-        console.log("authorLinks", authorLinks);
-
-        console.log("trascribedTextLinkId", transcribedTextLinkId.value?.value)
-
-        const { data: [{ id: messageLinkId }] } = await deep.insert({
-          type_id: messageTypeLinkId,
-          string: { data: { value: transcribedTextLinkId.value?.value } },
-          in: {
-            data: {
-              type_id: containTypeLinkId,
-              from_id: deep.linkId,
-            }
-          },
-        });
-
-        const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
-          type_id: replyTypeLinkId,
-          from_id: messageLinkId,
-          to_id: authorLinks[authorLinks.length - 1],
-          in: {
-            data: {
-              type_id: containTypeLinkId,
-              from_id: deep.linkId,
+              value
+              author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
+                id
+                from_id
+                type_id
+                to_id
+              }
+            }`
+          })
+  
+          const messageLinks = conversationLink
+            .map(item => item.parent)
+            .filter(link => link && link.type_id === messageTypeLinkId);
+  
+          const authorLinks = messageLinks
+            .filter(messageLink => messageLink.author && messageLink.author[0])
+            .map(messageLink => messageLink.author[0].from_id);
+  
+  
+          console.log("messageLinks", messageLinks);
+          console.log("authorLinks", authorLinks);
+  
+          console.log("trascribedTextLinkId", transcribedTextLinkId.value?.value)
+  
+          const { data: [{ id: messageLinkId }] } = await deep.insert({
+            type_id: messageTypeLinkId,
+            string: { data: { value: transcribedTextLinkId.value?.value } },
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              }
             },
-          },
-        });
-        replyMessageLinkId = replyToMessageLinkId;
+          });
+  
+          const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
+            type_id: replyTypeLinkId,
+            from_id: messageLinkId,
+            to_id: authorLinks[authorLinks.length - 1],
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              },
+            },
+          });
+          replyMessageLinkId = replyToMessageLinkId;
+        }
+  
+        if (!conversationLinkId) {
+          const { data: [{ id: conversationLinkId }] } = await deep.insert({
+            type_id: conversationTypeLinkId,
+            string: { data: { value: "New chat" } },
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              },
+            },
+          });
+          console.log("flakeed7");
+  
+          const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
+            type_id: messageTypeLinkId,
+            string: { data: { value: systemMsg } },
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              }
+            },
+          });
+          console.log("systemMsg", systemMsg)
+  
+          const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
+            type_id: systemTypeLinkId,
+            from_id: systemMessageLinkId,
+            to_id: conversationLinkId,
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              },
+            },
+          });
+  
+          const { data: [{ id: messageLinkId }] } = await deep.insert({
+            type_id: messageTypeLinkId,
+            string: { data: { value: transcribedTextLinkId.value?.value } },
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              }
+            },
+          });
+  
+          const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
+            type_id: replyTypeLinkId,
+            from_id: messageLinkId,
+            to_id: conversationLinkId,
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              },
+            },
+          });
+        };
+        console.log("flakeed8");
+        setSounds([]);
+        setIsRecording(false);
+      } catch (error) {
+        console.log('Error stopping recording:', error);
       }
-
-      if (!conversationLinkId) {
-        const { data: [{ id: conversationLinkId }] } = await deep.insert({
-          type_id: conversationTypeLinkId,
-          string: { data: { value: "New chat" } },
-          in: {
-            data: {
-              type_id: containTypeLinkId,
-              from_id: deep.linkId,
-            },
-          },
-        });
-        console.log("flakeed7");
-
-        const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
-          type_id: messageTypeLinkId,
-          string: { data: { value: systemMsg } },
-          in: {
-            data: {
-              type_id: containTypeLinkId,
-              from_id: deep.linkId,
-            }
-          },
-        });
-        console.log("systemMsg", systemMsg)
-
-        const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
-          type_id: systemTypeLinkId,
-          from_id: systemMessageLinkId,
-          to_id: conversationLinkId,
-          in: {
-            data: {
-              type_id: containTypeLinkId,
-              from_id: deep.linkId,
-            },
-          },
-        });
-
-        const { data: [{ id: messageLinkId }] } = await deep.insert({
-          type_id: messageTypeLinkId,
-          string: { data: { value: transcribedTextLinkId.value?.value } },
-          in: {
-            data: {
-              type_id: containTypeLinkId,
-              from_id: deep.linkId,
-            }
-          },
-        });
-
-        const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
-          type_id: replyTypeLinkId,
-          from_id: messageLinkId,
-          to_id: conversationLinkId,
-          in: {
-            data: {
-              type_id: containTypeLinkId,
-              from_id: deep.linkId,
-            },
-          },
-        });
-      };
-      console.log("flakeed8");
-      await stopRecording(deep, containerLinkId, startTime.current)}
-      const endTime = new Date().toLocaleDateString();
-      setIsRecording(false);
-    }, [isRecording]);
-
-
+    }
+  };
 
   const ScreenChat = ({ replyToMessageLinkId }) => {
     const [messages, setMessages] = useState<Array<any>>([]);
@@ -440,7 +449,7 @@ function Content() {
           fontSize: '24px',
           top: window.innerHeight / 2,
         }}
-        onClick={toggleRecording}
+        onClick={handleClick}
       >
         {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
       </Button>
