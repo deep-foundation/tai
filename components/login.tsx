@@ -12,11 +12,11 @@ export function Setup(arg: {
   // const defaultGqlPath = "3006-deepfoundation-dev-mst16p4n7jz.ws-eu96b.gitpod.io/gql";
   // const defaultToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwczovL2hhc3VyYS5pby9qd3QvY2xhaW1zIjp7IngtaGFzdXJhLWFsbG93ZWQtcm9sZXMiOlsiYWRtaW4iXSwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiYWRtaW4iLCJ4LWhhc3VyYS11c2VyLWlkIjoiMzc4In0sImlhdCI6MTY4MzQ4MDUyMH0.rp9HzhnRMEA-hKf_2aReoJvBI6aSlItNSQ-cop58w5U";
   const deep = useDeep();
-  const [gqlPath, setGqlPath] = useLocalStore("gqlPath", undefined);
-  const [token, setToken] = useLocalStore("token", undefined);
-  const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
-  const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
-  const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
+  const [gqlPath, setGqlPath] = useLocalStore<string>("gqlPath", "");
+  const [token, setToken] = useLocalStore<string>("token", "");
+  const [apiKey, setApiKey] = useLocalStore<string>("apikey", "");
+  const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", "");
+  const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
   const [isRecordPackageInstalledPressed, setIsRecordPackageInstalledPressed] = useState(false);
   const [isChatGPTPackageInstalledPressed, setIsChatGPTPackageInstalledPressed] = useState(false);
   const [isSpeechPackageInstalledPressed, setIsSpeechPackageInstalledPressed] = useState(false);
@@ -263,22 +263,16 @@ export function Setup(arg: {
           gqlPath,
           token,
         })
-        isRecordPackageInstalled= useIsPackageInstalled({
+        isRecordPackageInstalled = useIsPackageInstalled({
           packageName: "@deep-foundation/capacitor-voice-recorder",
-          shouldIgnoreResultWhenLoading: true,
-          onError: ({ error }) => { console.error(error.message) }
         });
-      
+              
         isChatGPTPackageInstalled = useIsPackageInstalled({
           packageName: "@deep-foundation/chatgpt",
-          shouldIgnoreResultWhenLoading: true,
-          onError: ({ error }) => { console.error(error.message) }
         });
-      
+              
         isSpeechPackageInstalled = useIsPackageInstalled({
           packageName: "@deep-foundation/google-speech",
-          shouldIgnoreResultWhenLoading: true,
-          onError: ({ error }) => { console.error(error.message) }
         });
       
         setIsSendDataPressed(true)
