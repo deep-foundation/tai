@@ -65,7 +65,7 @@ export default async function uploadRecords(deep, containerLinkId, sounds) {
           to: {
             data: {
               type_id: startTimeTypeLinkId,
-              string: { data: { value: sound.startTime } },
+             string: { data: { value: sound.startTime.current } },
             }
           }
         },
