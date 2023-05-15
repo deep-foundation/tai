@@ -84,98 +84,11 @@ function Content() {
     </Card>
   );
 
-  useEffect(() => {
-    if (!isRecording) return;
-    const useRecords = async () => {
-
-    };
-
-    if (sounds.length > 0) useRecords();
-  }, [sounds, isRecording]);
-
-
-  const ScreenChat = ({ replyToMessageLinkId }) => {
-    const [messages, setMessages] = useState([]);
-    const [messagesCount, setMessagesCount] = useState(0);
-    let chatGptLinkId;
-    async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
-
-    useEffect(() => {
-      (async () => {
-        const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
-        const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
-        const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
-
-        const result = await deep.select({
-          tree_id: { _eq: messagingTreeId },
-          link: { type_id: { _eq: messageTypeLinkId } },
-          root_id: { _eq: replyMessageLinkId },
-          // @ts-ignore
-          self: { _eq: true },
-        }, {
-          table: 'tree',
-          variables: { order_by: { depth: "asc" } },
-          returning: `
-            id
-            depth
-            root_id
-            parent_id
-            link_id
-            link {
-              id
-              from_id
-              type_id
-              to_id
-              value
-              author: out (where: { type_id: { _eq: ${authorTypeLinkId} } }) { 
-                id
-                from_id
-                type_id
-                to_id
-              }
-            }`
-        });
-
-        setMessages(result?.data);
-        setMessagesCount(result?.data.length);
-      })();
-    }, [replyToMessageLinkId]);
-
-    return (
-      <Box
-        position="fixed"
-        bottom={0}
-        left={0}
-        zIndex={1000}
-        overflowY="scroll"
-        height='500px'
-        width='500px'
-        bg={"grey"}
-        p={3}
-        borderRadius="20px"
-      >
-        {messagesCount ?
-          [
-            <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
-            ...messages.map((message, index) => (
-              <Box key={index} mb={3} p={2} borderRadius="5px" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
-                <Text borderBottom="1px solid" pb={2}>
-                  {index === 0 ? "System" : message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
-                </Text>
-                <Text>{message?.link?.value?.value}</Text>
-              </Box>
-            ))
-          ] : []
-        }
-      </Box>
-    );
-  }
-
+  
   const toggleRecording = useCallback(async () => {
     if (!isRecording) {
       setSounds([]);
-      startTime.current = new Date().toLocaleDateString();
-      await startRecording(deep);
+      startTime.current = await startRecording()
       setIsRecording(true);
     } else {
       const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
@@ -190,7 +103,7 @@ function Content() {
 
       console.log("before insert sound link", sounds);
       console.log("flakeed2");
-      const soundLinkId = await uploadRecords({deep, containerLinkId, records:[{ sounds, startTime, endTime }]});
+      const soundLinkId =  await uploadRecords(deep, containerLinkId, sounds)
       console.log("flakeed1");
       console.log("soundLinkId", soundLinkId)
 
@@ -374,6 +287,93 @@ function Content() {
       setIsRecording(false);
     }
   }, [isRecording]);
+
+  useEffect(() => {
+    if (!isRecording) return;
+    const useRecords = async () => {
+
+    };
+
+    if (sounds.length > 0) useRecords();
+  }, [sounds, isRecording]);
+
+
+  const ScreenChat = ({ replyToMessageLinkId }) => {
+    const [messages, setMessages] = useState([]);
+    const [messagesCount, setMessagesCount] = useState(0);
+    let chatGptLinkId;
+    async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
+
+    useEffect(() => {
+      (async () => {
+        const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
+        const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
+        const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
+
+        const result = await deep.select({
+          tree_id: { _eq: messagingTreeId },
+          link: { type_id: { _eq: messageTypeLinkId } },
+          root_id: { _eq: replyMessageLinkId },
+          // @ts-ignore
+          self: { _eq: true },
+        }, {
+          table: 'tree',
+          variables: { order_by: { depth: "asc" } },
+          returning: `
+            id
+            depth
+            root_id
+            parent_id
+            link_id
+            link {
+              id
+              from_id
+              type_id
+              to_id
+              value
+              author: out (where: { type_id: { _eq: ${authorTypeLinkId} } }) { 
+                id
+                from_id
+                type_id
+                to_id
+              }
+            }`
+        });
+
+        setMessages(result?.data);
+        setMessagesCount(result?.data.length);
+      })();
+    }, [replyToMessageLinkId]);
+
+    return (
+      <Box
+        position="fixed"
+        bottom={0}
+        left={0}
+        zIndex={1000}
+        overflowY="scroll"
+        height='500px'
+        width='500px'
+        bg={"grey"}
+        p={3}
+        borderRadius="20px"
+      >
+        {messagesCount ?
+          [
+            <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
+            ...messages.map((message, index) => (
+              <Box key={index} mb={3} p={2} borderRadius="5px" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
+                <Text borderBottom="1px solid" pb={2}>
+                  {index === 0 ? "System" : message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
+                </Text>
+                <Text>{message?.link?.value?.value}</Text>
+              </Box>
+            ))
+          ] : []
+        }
+      </Box>
+    );
+  }
 
   const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
