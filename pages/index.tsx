@@ -41,9 +41,9 @@ function Content() {
     undefined
   );
 
-  const [deviceLinkId, setDeviceLinkId] = useLocalStore(
+  const [deviceLinkId, setDeviceLinkId] = useLocalStore<number>(
     'deviceLinkId',
-    undefined
+    0
   );
 
   const startTime = useRef('');
@@ -149,7 +149,14 @@ function Content() {
           type_id: replyTypeLinkId,
         });
 
-        const replyLink = replyLinks.sort((a, b) => b.from_id - a.from_id);
+        const replyLink = replyLinks.sort((a, b) => {
+          if (b.from_id !== undefined && a.from_id !== undefined) {
+              return b.from_id - a.from_id;
+          } else {
+              return 0;
+          }
+      });
+      
         console.log("replyLinks", replyLinks)
 
         const { data: conversationLink } = await deep.select({
@@ -280,26 +287,15 @@ function Content() {
         });
       };
       console.log("flakeed8");
-      const record = await stopRecording({deep, containerLinkId, startTime: startTime.current})
+      await stopRecording(deep, containerLinkId, startTime.current)}
       const endTime = new Date().toLocaleDateString();
-      console.log({ record });
-      setSounds([{ record, startTime: startTime.current, endTime }]);
       setIsRecording(false);
-    }
-  }, [isRecording]);
+    }, [isRecording]);
 
-  useEffect(() => {
-    if (!isRecording) return;
-    const useRecords = async () => {
-
-    };
-
-    if (sounds.length > 0) useRecords();
-  }, [sounds, isRecording]);
 
 
   const ScreenChat = ({ replyToMessageLinkId }) => {
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<Array<any>>([]);
     const [messagesCount, setMessagesCount] = useState(0);
     let chatGptLinkId;
     async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
