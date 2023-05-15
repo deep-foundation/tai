@@ -108,11 +108,23 @@ function Content() {
         const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
         const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
         const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
-        await stopRecording(deep, containerLinkId, startTime.current);
+        console.log("1")
+        const record = await stopRecording(deep, containerLinkId, startTime.current);
+        console.log("2")
+        const endTime = new Date().toLocaleDateString();
+        console.log("3")
+        //console.log("await uploadRecords(deep, containerLinkId, [{record, startTime, endTime}])",await uploadRecords(deep, containerLinkId, [{record, startTime, endTime}]))
+        console.log("deep, containerLinkId, [{record, startTime, endTime}]",deep, containerLinkId, [{record, startTime, endTime}])
+        console.log("[{record, startTime, endTime}]", [{record, startTime, endTime}])
+        console.log("record, startTime, endTime", record, startTime, endTime)
+        console.log("record", record)
+        console.log("startTime", startTime)
+        console.log("endTime" , endTime)
+        const soundLinkId = await uploadRecords(deep, containerLinkId, [{record, startTime, endTime}])
+        console.log("4")
         console.log("before insert sound link", sounds);
         console.log("flakeed2");
         console.log("flakeed1");
-        const soundLinkId = await loadRecords(deep)
         console.log("soundLinkId", soundLinkId)
   
         console.log("googleauth", googleAuth);
