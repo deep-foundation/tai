@@ -45,7 +45,7 @@ function Content() {
     'deviceLinkId',
     undefined
   );
-  
+
   const startTime = useRef('');
 
   let replyMessageLinkId;
@@ -190,7 +190,7 @@ function Content() {
 
       console.log("before insert sound link", sounds);
       console.log("flakeed2");
-      const soundLinkId = await uploadRecords({deep, containerLinkId, records:[{ sound, startTime, endTime }]});
+      const soundLinkId = await uploadRecords({deep, containerLinkId, records:[{ sounds, startTime, endTime }]});
       console.log("flakeed1");
       console.log("soundLinkId", soundLinkId)
 
@@ -367,7 +367,7 @@ function Content() {
         });
       };
       console.log("flakeed8");
-      const record = await stopAudioRec(deep);
+      const record = await stopRecording({deep, containerLinkId, startTime: startTime.current})
       const endTime = new Date().toLocaleDateString();
       console.log({ record });
       setSounds([{ record, startTime: startTime.current, endTime }]);
