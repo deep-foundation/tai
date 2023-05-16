@@ -28,7 +28,9 @@ export function Setup(arg: {
   const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean | undefined>(undefined)
   // let isRecordPackageInstalled,chatGPTPackageStatus,speechPackageStatus;
   let audioPermission;
-  let isRecordPackageInstalled,isChatGPTPackageInstalled,isSpeechPackageInstalled
+  let isRecordPackageInstalled=true;
+  let isChatGPTPackageInstalled=true;
+  let isSpeechPackageInstalled=true;
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     'deviceLinkId',
     undefined
@@ -260,11 +262,11 @@ export function Setup(arg: {
           setSystemMsg(newSystemMsg.target.value)
         }} />
 
-        <Button disabled={!isSendDataPressed || isChatGPTPackageInstalledPressed || isChatGPTPackageInstalled} style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installChatGPTPackage(); setIsChatGPTPackageInstalledPressed(true); }}>Install ChatGPT package</Button>
+        <Button disabled={!isSendDataPressed || isChatGPTPackageInstalled} style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installChatGPTPackage(); setIsChatGPTPackageInstalledPressed(true); }}>Install ChatGPT package</Button>
         
-        <Button disabled={!isSendDataPressed || isSpeechPackageInstalledPressed || isSpeechPackageInstalled} style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installSpeechPackage(); setIsSpeechPackageInstalledPressed(true); }}>Install Speech package</Button>
+        <Button disabled={!isSendDataPressed || isSpeechPackageInstalled} style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installSpeechPackage(); setIsSpeechPackageInstalledPressed(true); }}>Install Speech package</Button>
 
-        <Button disabled={!isSendDataPressed } style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installRecordPackage(); setIsRecordPackageInstalledPressed(true); }}>Install Record package</Button>
+        <Button disabled={!isSendDataPressed || isRecordPackageInstalled} style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installRecordPackage(); setIsRecordPackageInstalledPressed(true); }}>Install Record package</Button>
 
         <Button disabled={!isSendDataPressed || isGetPermissionPressed || audioPermission} style={{ position: 'relative', zIndex: 1000 }} onClick={async () => { const { value: arePermissionsGranted } = await VoiceRecorder.requestAudioRecordingPermission();
           setArePermissionsGranted(arePermissionsGranted); setIsGetPermissionPressed(true); }} >GET RECORDING PERMISSION</Button>
@@ -297,7 +299,21 @@ export function Setup(arg: {
           
           renderIfNotInstalled={(packageNames) => (
             <>
-              <PackageIsNotInstalledAlert packageName={packageNames} />
+                {packageNames.map(packageName => {
+                    if(packageName === '@deep-foundation/google-speech'){
+                      isSpeechPackageInstalled=false;
+                      installSpeechPackage();
+                    }
+                    if(packageName === '@deep-foundation/chatgpt'){
+                      isChatGPTPackageInstalled=false;
+                      installChatGPTPackage();
+                    }
+                    if(packageName === '@deep-foundation/capacitor-voice-recorder'){
+                      isRecordPackageInstalled=false;
+                      installRecordPackage();
+                    }
+                  return <PackageIsNotInstalledAlert packageName={packageName} />
+              })}
             </>
           )}
           renderIfLoading={() => (
