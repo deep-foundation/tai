@@ -58,6 +58,7 @@
     "@chakra-ui/react": "^2.5.5",
     "@deep-foundation/deeplinks": "0.0.143",
     "@deep-foundation/react-hasura": "^0.0.14",
+    "@deep-foundation/react-with-packages-installed": "^0.2.0",
     "@deep-foundation/store": "^0.0.18",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
