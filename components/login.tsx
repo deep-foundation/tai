@@ -53,7 +53,6 @@ export function Setup(arg: {
       console.log("gello")
     }
 
-      let retryCount = 0;
       while (!isRecordPackageInstalled) {
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
@@ -93,7 +92,6 @@ export function Setup(arg: {
       console.log("gello")
     }
 
-      let retryCount = 0;
       while (!isChatGPTPackageInstalled ) {
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
@@ -133,7 +131,6 @@ export function Setup(arg: {
       console.log("gello")
     }
 
-      let retryCount = 0;
       while (!isSpeechPackageInstalled ) {
         await new Promise(resolve => setTimeout(resolve, 5000));
       }
