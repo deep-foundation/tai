@@ -1,10 +1,13 @@
-import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
+import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button, Alert, AlertTitle, AlertIcon, Text, AlertDescription } from "@chakra-ui/react";
 import { useState } from "react";
 import { useDeep } from "@deep-foundation/deeplinks/imports/client";
 import { StoreProvider } from './store-provider';
 import { useLocalStore } from "@deep-foundation/store/local";
 import { useIsPackageInstalled } from '../imports/use-is-package-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
+import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
+import { Page } from '../components/page';
+import { Fragment } from 'react';
 export function Setup(arg: {
   onAuthorize: (arg: { gqlPath: string, token: string }) => void,
   onSubmit: (arg: { apiKey: string, googleAuth: string, systemMsg: string  }) => void
@@ -211,13 +214,22 @@ export function Setup(arg: {
         });
   }
 
-  return <Card>
-    <CardHeader>
-      <Heading>
-        Setup
-      </Heading>
-    </CardHeader>
-    <CardBody>
+  function PackageIsNotInstalledAlert({packageName}) {
+    return <Alert status="error">
+      <AlertIcon />
+      <AlertTitle>Install {packageName.toString()} to proceed!</AlertTitle>
+    </Alert>
+  }
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <Heading>
+            Setup
+          </Heading>
+        </CardHeader>
+        <CardBody>
       <FormControl id="gql-path">
         <FormLabel>GraphQL Path</FormLabel>
         <Input type="text" onChange={(newGqlPath) => {
@@ -259,31 +271,51 @@ export function Setup(arg: {
       
       </FormControl>
       <Button onClick={() => {
-        arg.onAuthorize({
-          gqlPath,
-          token,
-        })
-        isRecordPackageInstalled = useIsPackageInstalled({
-          packageName: "@deep-foundation/capacitor-voice-recorder",
-        });
-              
-        isChatGPTPackageInstalled = useIsPackageInstalled({
-          packageName: "@deep-foundation/chatgpt",
-        });
-              
-        isSpeechPackageInstalled = useIsPackageInstalled({
-          packageName: "@deep-foundation/google-speech",
-        });
-      
-        setIsSendDataPressed(true)
-      }}>
-        Sent Data
-      </Button>
-      <Button onClick={() => {
-        submitForm();
-      }}>
-        Submit
-      </Button>
-    </CardBody>
-  </Card>
+          arg.onAuthorize({
+            gqlPath,
+            token,
+          })
+          setIsSendDataPressed(true)
+        }}>
+          Send Data
+        </Button>
+        <Button onClick={() => {
+          submitForm();
+        }}>
+          Submit
+        </Button>
+        {isSendDataPressed && (
+          <WithPackagesInstalled
+          packageNames={["@deep-foundation/google-speech", "@deep-foundation/capacitor-voice-recorder", "@deep-foundation/chatgpt"]}
+          renderIfError={(error) => (
+            <Alert status="error">
+              <AlertIcon />
+              <AlertTitle>Something went wrong!</AlertTitle>
+              <AlertDescription>{error && error.message}</AlertDescription>
+            </Alert>
+          )}
+          
+          renderIfNotInstalled={(packageNames) => (
+            <>
+              <PackageIsNotInstalledAlert packageName={packageNames} />
+            </>
+          )}
+          renderIfLoading={() => (
+            <>
+              <Loading />
+            </>
+          )}
+          shouldIgnoreResultWhenLoading={true}
+        >
+          <Text>Package installation check complete!</Text>
+        </WithPackagesInstalled>
+        )}
+      </CardBody>
+    </Card>
+  </>
+);
+}
+
+function Loading() {
+  return <Text>Loading...</Text>;
 }
