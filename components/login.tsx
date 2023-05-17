@@ -22,6 +22,10 @@ export function Setup(arg: {
   const [isGetPermissionPressed, setIsGetPermissionPressed] = useState(false);
   const [isSendDataPressed, setIsSendDataPressed] = useState(false);
   const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean | undefined>(undefined)
+  const [isVoiceRecorderInstallStarted, setIsVoiceRecorderInstallStarted] = useState(false);
+  const [isGoogleSpeechInstallStarted, setIsGoogleSpeechInstallStarted] = useState(false);
+  const [isChatGPTInstallStarted, setIsChatGPTInstallStarted] = useState(false);
+
   // let isRecordPackageInstalled,chatGPTPackageStatus,speechPackageStatus;
   let audioPermission;
   let isRecordPackageInstalled=true;
@@ -41,6 +45,19 @@ export function Setup(arg: {
   const installPackage = async (packageName) => {
     console.log(`Installing ${packageName}`, installedPackages[packageName]);
     if (!installedPackages[packageName]) {
+      switch (packageName) {
+        case "@deep-foundation/capacitor-voice-recorder":
+          setIsVoiceRecorderInstallStarted(true);
+          break;
+        case "@deep-foundation/google-speech":
+          setIsGoogleSpeechInstallStarted(true);
+          break;
+        case "@deep-foundation/chatgpt":
+          setIsChatGPTInstallStarted(true);
+          break;
+        default:
+          break;
+      }
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
@@ -202,17 +219,17 @@ export function Setup(arg: {
             return (
               <div>
                 {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
-                {!installedPackages["@deep-foundation/capacitor-voice-recorder"] &&
+                {!installedPackages["@deep-foundation/capacitor-voice-recorder"] && !isVoiceRecorderInstallStarted &&
                   <Button onClick={() => installPackage("@deep-foundation/capacitor-voice-recorder")}>
                     Install @deep-foundation/capacitor-voice-recorder
                   </Button>
                 }
-                {!installedPackages["@deep-foundation/google-speech"] && 
+                {!installedPackages["@deep-foundation/google-speech"] && !isGoogleSpeechInstallStarted &&
                   <Button onClick={() => installPackage("@deep-foundation/google-speech")}>
                     Install @deep-foundation/google-speech
                   </Button>
                 }
-                {!installedPackages["@deep-foundation/chatgpt"] && 
+                {!installedPackages["@deep-foundation/chatgpt"] && !isChatGPTInstallStarted &&
                   <Button onClick={() => installPackage("@deep-foundation/chatgpt")}>
                     Install @deep-foundation/chatgpt
                   </Button>
