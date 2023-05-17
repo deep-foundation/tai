@@ -39,7 +39,7 @@ export function Setup(arg: {
   const installRecordPackage = async () => {
     console.log("isRecordPackageInstalled",isRecordPackageInstalled)
     if (!isRecordPackageInstalled) {
-      const { data: [{ id: recorderPackageLinkId }] } = await deep.insert([
+      await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
           from_id: deep.linkId,
@@ -52,27 +52,35 @@ export function Setup(arg: {
         }
       ]);
       console.log("gello")
-
+      let packageLinkId;
+        while (!packageLinkId) {
+          try {
+            packageLinkId = await deep.id("@deep-foundation/capacitor-voice-recorder");
+          } catch (error) {
+            console.log("Package not installed yet, retrying in 1 second...");
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
         await deep.insert([
           {
             type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: recorderPackageLinkId,
+            from_id: packageLinkId,
             to_id: await deep.id('deep', 'users', 'packages'),
           },
           {
             type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: recorderPackageLinkId,
+            from_id: packageLinkId,
             to_id: await deep.id('deep', 'admin'),
           },
         ]);
         console.log("hello")
       }
-  }
-
+    }
+  
   const installChatGPTPackage = async () => {
     console.log("isChatGPTPackageInstalled",isChatGPTPackageInstalled)
     if (!isChatGPTPackageInstalled) {
-      const { data: [{ id: chatGPTPackageLinkId }] }= await deep.insert([
+      await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
           from_id: deep.linkId,
@@ -85,15 +93,25 @@ export function Setup(arg: {
         }
       ]);
       console.log("gello")
+      
+      let packageLinkId;
+      while (!packageLinkId) {
+        try {
+          packageLinkId = await deep.id("@deep-foundation/chatgpt");
+        } catch (error) {
+          console.log("Package not installed yet, retrying in 1 second...");
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
       await deep.insert([
         {
           type_id: await deep.id("@deep-foundation/core", "Join"),
-          from_id: chatGPTPackageLinkId,
+          from_id: packageLinkId,
           to_id: await deep.id('deep', 'users', 'packages'),
         },
         {
           type_id: await deep.id("@deep-foundation/core", "Join"),
-          from_id: chatGPTPackageLinkId,
+          from_id: packageLinkId,
           to_id: await deep.id('deep', 'admin'),
         },
       ]);
@@ -104,7 +122,7 @@ export function Setup(arg: {
   const installSpeechPackage = async () => {
     console.log("isSpeechPackageInstalled",isSpeechPackageInstalled)
     if (!isSpeechPackageInstalled) {
-      const { data: [{ id: speechPackageLinkId }] } = await deep.insert([
+      await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
           from_id: deep.linkId,
@@ -117,21 +135,30 @@ export function Setup(arg: {
         }
       ]);
       console.log("gello")
+      let packageLinkId;
+      while (!packageLinkId) {
+        try {
+          packageLinkId = await deep.id("@deep-foundation/google-speech");
+        } catch (error) {
+          console.log("Package not installed yet, retrying in 1 second...");
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
         await deep.insert([
           {
             type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: speechPackageLinkId,
+            from_id: packageLinkId,
             to_id: await deep.id('deep', 'users', 'packages'),
           },
           {
             type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: speechPackageLinkId,
+            from_id: packageLinkId,
             to_id: await deep.id('deep', 'admin'),
           },
         ]);
         console.log("hello")
       }
-  }
+    }
 
 
   const submitForm = async () => {
