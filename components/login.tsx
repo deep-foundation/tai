@@ -1,13 +1,9 @@
 import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button, Alert, AlertTitle, AlertIcon, Text, AlertDescription } from "@chakra-ui/react";
 import { useState } from "react";
 import { useDeep } from "@deep-foundation/deeplinks/imports/client";
-import { StoreProvider } from './store-provider';
 import { useLocalStore } from "@deep-foundation/store/local";
-import { useIsPackageInstalled } from '../imports/use-is-package-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
-import { Page } from '../components/page';
-import { Fragment } from 'react';
 export function Setup(arg: {
   onAuthorize: (arg: { gqlPath: string, token: string }) => void,
   onSubmit: (arg: { apiKey: string, googleAuth: string, systemMsg: string  }) => void
@@ -31,14 +27,20 @@ export function Setup(arg: {
   let isRecordPackageInstalled=true;
   let isChatGPTPackageInstalled=true;
   let isSpeechPackageInstalled=true;
+  const [installedPackages, setInstalledPackages] = useState({
+    "@deep-foundation/capacitor-voice-recorder": false,
+    "@deep-foundation/google-speech": false,
+    "@deep-foundation/chatgpt": false,
+  });
+
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     'deviceLinkId',
     undefined
   );
 
-  const installRecordPackage = async () => {
-    console.log("isRecordPackageInstalled",isRecordPackageInstalled)
-    if (!isRecordPackageInstalled) {
+  const installPackage = async (packageName) => {
+    console.log(`Installing ${packageName}`, installedPackages[packageName]);
+    if (!installedPackages[packageName]) {
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
@@ -46,63 +48,22 @@ export function Setup(arg: {
           to: {
             data: {
               type_id: await deep.id('@deep-foundation/core', 'PackageQuery'),
-              string: { data: { value: "@deep-foundation/capacitor-voice-recorder" } }
+              string: { data: { value: packageName } }
             }
           },
         }
       ]);
-      console.log("gello")
-      let packageLinkId;
-        while (!packageLinkId) {
-          try {
-            packageLinkId = await deep.id("@deep-foundation/capacitor-voice-recorder");
-          } catch (error) {
-            console.log("Package not installed yet, retrying in 1 second...");
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
-        await deep.insert([
-          {
-            type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: packageLinkId,
-            to_id: await deep.id('deep', 'users', 'packages'),
-          },
-          {
-            type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: packageLinkId,
-            to_id: await deep.id('deep', 'admin'),
-          },
-        ]);
-        console.log("hello")
-      }
-    }
   
-  const installChatGPTPackage = async () => {
-    console.log("isChatGPTPackageInstalled",isChatGPTPackageInstalled)
-    if (!isChatGPTPackageInstalled) {
-      await deep.insert([
-        {
-          type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
-          from_id: deep.linkId,
-          to: {
-            data: {
-              type_id: await deep.id('@deep-foundation/core', 'PackageQuery'),
-              string: { data: { value: "@deep-foundation/chatgpt" } }
-            }
-          },
-        }
-      ]);
-      console.log("gello")
-      
       let packageLinkId;
       while (!packageLinkId) {
         try {
-          packageLinkId = await deep.id("@deep-foundation/chatgpt");
+          packageLinkId = await deep.id(packageName);
         } catch (error) {
-          console.log("Package not installed yet, retrying in 1 second...");
+          console.log(`Package ${packageName} not installed yet, retrying in 1 second...`);
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
+      
       await deep.insert([
         {
           type_id: await deep.id("@deep-foundation/core", "Join"),
@@ -115,51 +76,13 @@ export function Setup(arg: {
           to_id: await deep.id('deep', 'admin'),
         },
       ]);
-      console.log("hello")
+  
+      setInstalledPackages(prevPackages => ({
+        ...prevPackages,
+        [packageName]: true
+      }));
     }
   }
-
-  const installSpeechPackage = async () => {
-    console.log("isSpeechPackageInstalled",isSpeechPackageInstalled)
-    if (!isSpeechPackageInstalled) {
-      await deep.insert([
-        {
-          type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
-          from_id: deep.linkId,
-          to: {
-            data: {
-              type_id: await deep.id('@deep-foundation/core', 'PackageQuery'),
-              string: { data: { value: "@deep-foundation/google-speech" } }
-            }
-          },
-        }
-      ]);
-      console.log("gello")
-      let packageLinkId;
-      while (!packageLinkId) {
-        try {
-          packageLinkId = await deep.id("@deep-foundation/google-speech");
-        } catch (error) {
-          console.log("Package not installed yet, retrying in 1 second...");
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-        await deep.insert([
-          {
-            type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: packageLinkId,
-            to_id: await deep.id('deep', 'users', 'packages'),
-          },
-          {
-            type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: packageLinkId,
-            to_id: await deep.id('deep', 'admin'),
-          },
-        ]);
-        console.log("hello")
-      }
-    }
-
 
   const submitForm = async () => {
     let error = '';;
@@ -168,25 +91,6 @@ export function Setup(arg: {
       error += 'GET RECORDING PERMISSION, ';
       }
     }
-
-    if (!isSpeechPackageInstalled) {
-      if (!isSpeechPackageInstalledPressed) {
-        error += 'Install Speech package, ';
-      }
-    }
-
-    if (!isChatGPTPackageInstalled) {
-      if (!isChatGPTPackageInstalledPressed) {
-        error += 'Install ChatGPT package, ';
-      }
-    }
-
-    if (!isRecordPackageInstalled) {
-      if (!isRecordPackageInstalledPressed) {
-        error += 'Install Record package, ';
-      }
-    }
-
     if (error !== '') {
       alert(`${error} were not pressed or installed.`);
       return;
@@ -260,13 +164,6 @@ export function Setup(arg: {
         <Input type="text" onChange={(newSystemMsg) => {
           setSystemMsg(newSystemMsg.target.value)
         }} />
-
-        <Button disabled={!isSendDataPressed || isChatGPTPackageInstalled} style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installChatGPTPackage(); setIsChatGPTPackageInstalledPressed(true); }}>Install ChatGPT package</Button>
-        
-        <Button disabled={!isSendDataPressed || isSpeechPackageInstalled} style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installSpeechPackage(); setIsSpeechPackageInstalledPressed(true); }}>Install Speech package</Button>
-
-        <Button disabled={!isSendDataPressed || isRecordPackageInstalled} style={{ position: 'relative', zIndex: 1000 }} onClick={() => { installRecordPackage(); setIsRecordPackageInstalledPressed(true); }}>Install Record package</Button>
-
         <Button disabled={!isSendDataPressed || audioPermission} style={{ position: 'relative', zIndex: 1000 }} onClick={async () => { const { value: arePermissionsGranted } = await VoiceRecorder.requestAudioRecordingPermission();
           setArePermissionsGranted(arePermissionsGranted); setIsGetPermissionPressed(true); }} >GET RECORDING PERMISSION</Button>
       
@@ -289,86 +186,46 @@ export function Setup(arg: {
         </Button>
         {isSendDataPressed && (
           <WithPackagesInstalled
-          packageNames={["@deep-foundation/chatgpt"]}
-          renderIfError={(error) => (
-            <Alert status="error">
-              <AlertIcon />
-              <AlertTitle>Something went wrong!</AlertTitle>
-              <AlertDescription>{error && error.message}</AlertDescription>
-            </Alert>
-          )}
-          renderIfNotInstalled={() => {
-            isChatGPTPackageInstalled=false
-            return <Alert status="error">
-              <AlertIcon />
-              <AlertTitle>Install '@deep-foundation/chatgpt' to proceed!</AlertTitle>
-            </Alert>
-          }}
+          packageNames={["@deep-foundation/capacitor-voice-recorder", "@deep-foundation/google-speech","@deep-foundation/chatgpt"]}
+          renderIfError={(error) => <div>{error.message}</div>}
+          renderIfNotInstalled={(packageNames) => {
+            setInstalledPackages(prevState => {
+              const updatedPackages = { ...prevState };
           
+              for (const packageName of packageNames) {
+                updatedPackages[packageName] = false;
+              }
+          
+              return updatedPackages;
+            });
+          
+            return (
+              <div>
+                {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
+                {!installedPackages["@deep-foundation/capacitor-voice-recorder"] &&
+                  <Button onClick={() => installPackage("@deep-foundation/capacitor-voice-recorder")}>
+                    Install @deep-foundation/capacitor-voice-recorder
+                  </Button>
+                }
+                {!installedPackages["@deep-foundation/google-speech"] && 
+                  <Button onClick={() => installPackage("@deep-foundation/google-speech")}>
+                    Install @deep-foundation/google-speech
+                  </Button>
+                }
+                {!installedPackages["@deep-foundation/chatgpt"] && 
+                  <Button onClick={() => installPackage("@deep-foundation/chatgpt")}>
+                    Install @deep-foundation/chatgpt
+                  </Button>
+                }
+              </div>
+            );
+          }}
           renderIfLoading={() => (
-            <>
-              <Loading />
-            </>
+            <Text>Checking if deep packages are installed...</Text>
           )}
           shouldIgnoreResultWhenLoading={true}
         >
-          <Text>Package installation check complete!</Text>
-        </WithPackagesInstalled>
-        )}
-        {isSendDataPressed && (
-          <WithPackagesInstalled
-          packageNames={["@deep-foundation/google-speech"]}
-          renderIfError={(error) => (
-            <Alert status="error">
-              <AlertIcon />
-              <AlertTitle>Something went wrong!</AlertTitle>
-              <AlertDescription>{error && error.message}</AlertDescription>
-            </Alert>
-          )}
-          renderIfNotInstalled={() => {
-            isSpeechPackageInstalled=false
-            return <Alert status="error">
-              <AlertIcon />
-              <AlertTitle>Install '@deep-foundation/google-speech' to proceed!</AlertTitle>
-            </Alert>
-          }}
-          
-          renderIfLoading={() => (
-            <>
-              <Loading />
-            </>
-          )}
-          shouldIgnoreResultWhenLoading={true}
-        >
-          <Text>Package installation check complete!</Text>
-        </WithPackagesInstalled>
-        )}
-        {isSendDataPressed && (
-          <WithPackagesInstalled
-          packageNames={["@deep-foundation/capacitor-voice-recorder"]}
-          renderIfError={(error) => (
-            <Alert status="error">
-              <AlertIcon />
-              <AlertTitle>Something went wrong!</AlertTitle>
-              <AlertDescription>{error && error.message}</AlertDescription>
-            </Alert>
-          )}
-          renderIfNotInstalled={() => {
-            isRecordPackageInstalled=false
-            return <Alert status="error">
-              <AlertIcon />
-              <AlertTitle>Install '@deep-foundation/capacitor-voice-recorder' to proceed!</AlertTitle>
-            </Alert>
-          }}
-          
-          renderIfLoading={() => (
-            <>
-              <Loading />
-            </>
-          )}
-          shouldIgnoreResultWhenLoading={true}
-        >
-          <Text>Package installation check complete!</Text>
+           <Text>Package installation check complete!</Text>
         </WithPackagesInstalled>
         )}
       </CardBody>
