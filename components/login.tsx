@@ -28,9 +28,9 @@ export function Setup(arg: {
   const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean | undefined>(undefined)
   // let isRecordPackageInstalled,chatGPTPackageStatus,speechPackageStatus;
   let audioPermission;
-  let isRecordPackageInstalled=false;
-  let isChatGPTPackageInstalled=false;
-  let isSpeechPackageInstalled=false;
+  let isRecordPackageInstalled=true;
+  let isChatGPTPackageInstalled=true;
+  let isSpeechPackageInstalled=true;
   const [deviceLinkId, setDeviceLinkId] = useLocalStore(
     'deviceLinkId',
     undefined
@@ -164,7 +164,9 @@ export function Setup(arg: {
   const submitForm = async () => {
     let error = '';;
     if (!arePermissionsGranted) {
+      if(!isGetPermissionPressed){
       error += 'GET RECORDING PERMISSION, ';
+      }
     }
 
     if (!isSpeechPackageInstalled) {
@@ -296,7 +298,7 @@ export function Setup(arg: {
             </Alert>
           )}
           renderIfNotInstalled={() => {
-            isChatGPTPackageInstalled=true
+            isChatGPTPackageInstalled=false
             return <Alert status="error">
               <AlertIcon />
               <AlertTitle>Install '@deep-foundation/chatgpt' to proceed!</AlertTitle>
@@ -324,7 +326,7 @@ export function Setup(arg: {
             </Alert>
           )}
           renderIfNotInstalled={() => {
-            isSpeechPackageInstalled=true
+            isSpeechPackageInstalled=false
             return <Alert status="error">
               <AlertIcon />
               <AlertTitle>Install '@deep-foundation/google-speech' to proceed!</AlertTitle>
@@ -352,7 +354,7 @@ export function Setup(arg: {
             </Alert>
           )}
           renderIfNotInstalled={() => {
-            isRecordPackageInstalled=true
+            isRecordPackageInstalled=false
             return <Alert status="error">
               <AlertIcon />
               <AlertTitle>Install '@deep-foundation/capacitor-voice-recorder' to proceed!</AlertTitle>
