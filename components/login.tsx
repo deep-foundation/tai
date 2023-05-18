@@ -1,4 +1,4 @@
-import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button, Alert, AlertTitle, AlertIcon, Text, AlertDescription } from "@chakra-ui/react";
+import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button, Text} from "@chakra-ui/react";
 import { useState } from "react";
 import { useDeep } from "@deep-foundation/deeplinks/imports/client";
 import { useLocalStore } from "@deep-foundation/store/local";
