@@ -217,7 +217,6 @@ export function Setup(arg: {
         onClick={async () => {
             const { value: arePermissionsGranted } = await VoiceRecorder.requestAudioRecordingPermission();
             setArePermissionsGranted(arePermissionsGranted);
-            setIsGetPermissionPressed(true);
         }}
     >
         GET RECORDING PERMISSION
