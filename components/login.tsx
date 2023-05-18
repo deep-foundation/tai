@@ -231,7 +231,3 @@ export function Setup(arg: {
   </>
 );
 }
-
-function Loading() {
-  return <Text>Loading...</Text>;
-}
