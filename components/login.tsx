@@ -8,8 +8,6 @@ export function Setup(arg: {
   onAuthorize: (arg: { gqlPath: string, token: string }) => void,
   onSubmit: (arg: { apiKey: string, googleAuth: string, systemMsg: string }) => void
 }) {
-  // const defaultGqlPath = "3006-deepfoundation-dev-mst16p4n7jz.ws-eu96b.gitpod.io/gql";
-  // const defaultToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwczovL2hhc3VyYS5pby9qd3QvY2xhaW1zIjp7IngtaGFzdXJhLWFsbG93ZWQtcm9sZXMiOlsiYWRtaW4iXSwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiYWRtaW4iLCJ4LWhhc3VyYS11c2VyLWlkIjoiMzc4In0sImlhdCI6MTY4MzQ4MDUyMH0.rp9HzhnRMEA-hKf_2aReoJvBI6aSlItNSQ-cop58w5U";
   const deep = useDeep();
   const [gqlPath, setGqlPath] = useLocalStore<string>("gqlPath", "");
   const [token, setToken] = useLocalStore<string>("token", "");
@@ -34,6 +32,7 @@ export function Setup(arg: {
 
   const installPackage = async (packageName) => {
     console.log(`Installing ${packageName}`, installedPackages[packageName]);
+
     if (!installedPackages[packageName]) {
       switch (packageName) {
         case "@deep-foundation/capacitor-voice-recorder":
@@ -48,6 +47,7 @@ export function Setup(arg: {
         default:
           break;
       }
+
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
@@ -90,7 +90,6 @@ export function Setup(arg: {
       }));
     }
   }
-
 
   const submitForm = async () => {
     arg.onSubmit({
