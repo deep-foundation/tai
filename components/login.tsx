@@ -205,17 +205,7 @@ export function Setup(arg: {
           <WithPackagesInstalled
           packageNames={["@deep-foundation/capacitor-voice-recorder", "@deep-foundation/google-speech","@deep-foundation/chatgpt"]}
           renderIfError={(error) => <div>{error.message}</div>}
-          renderIfNotInstalled={(packageNames) => {
-            setInstalledPackages(prevState => {
-              const updatedPackages = { ...prevState };
-          
-              for (const packageName of packageNames) {
-                updatedPackages[packageName] = false;
-              }
-          
-              return updatedPackages;
-            });
-          
+          renderIfNotInstalled={(packageNames) => {          
             return (
               <div>
                 {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
