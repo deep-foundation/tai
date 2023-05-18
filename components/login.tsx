@@ -16,18 +16,11 @@ export function Setup(arg: {
   const [apiKey, setApiKey] = useLocalStore<string>("apikey", "");
   const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", "");
   const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
-  const [isRecordPackageInstalledPressed, setIsRecordPackageInstalledPressed] = useState(false);
-  const [isChatGPTPackageInstalledPressed, setIsChatGPTPackageInstalledPressed] = useState(false);
-  const [isSpeechPackageInstalledPressed, setIsSpeechPackageInstalledPressed] = useState(false);
-  const [isGetPermissionPressed, setIsGetPermissionPressed] = useState(false);
   const [isSendDataPressed, setIsSendDataPressed] = useState(false);
   const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(false)
   const [isVoiceRecorderInstallStarted, setIsVoiceRecorderInstallStarted] = useState(false);
   const [isGoogleSpeechInstallStarted, setIsGoogleSpeechInstallStarted] = useState(false);
   const [isChatGPTInstallStarted, setIsChatGPTInstallStarted] = useState(false);
-  const [recordPackageInstalled, setRecordPackageInstalled] = useState(false);
-  // let isRecordPackageInstalled,chatGPTPackageStatus,speechPackageStatus;
-  let audioPermission;
   const [installedPackages, setInstalledPackages] = useState({
     "@deep-foundation/capacitor-voice-recorder": false,
     "@deep-foundation/google-speech": false,
