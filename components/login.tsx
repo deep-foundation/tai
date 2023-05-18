@@ -24,12 +24,7 @@ export function Setup(arg: {
     "@deep-foundation/google-speech": false,
     "@deep-foundation/chatgpt": false,
   });
-
-  const [deviceLinkId, setDeviceLinkId] = useLocalStore(
-    'deviceLinkId',
-    undefined
-  );
-
+  
   const installPackage = async (packageName) => {
     console.log(`Installing ${packageName}`, installedPackages[packageName]);
 
