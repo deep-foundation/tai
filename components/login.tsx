@@ -21,16 +21,13 @@ export function Setup(arg: {
   const [isSpeechPackageInstalledPressed, setIsSpeechPackageInstalledPressed] = useState(false);
   const [isGetPermissionPressed, setIsGetPermissionPressed] = useState(false);
   const [isSendDataPressed, setIsSendDataPressed] = useState(false);
-  const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean | undefined>(undefined)
+  const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(false)
   const [isVoiceRecorderInstallStarted, setIsVoiceRecorderInstallStarted] = useState(false);
   const [isGoogleSpeechInstallStarted, setIsGoogleSpeechInstallStarted] = useState(false);
   const [isChatGPTInstallStarted, setIsChatGPTInstallStarted] = useState(false);
-
+  const [recordPackageInstalled, setRecordPackageInstalled] = useState(false);
   // let isRecordPackageInstalled,chatGPTPackageStatus,speechPackageStatus;
   let audioPermission;
-  let isRecordPackageInstalled=true;
-  let isChatGPTPackageInstalled=true;
-  let isSpeechPackageInstalled=true;
   const [installedPackages, setInstalledPackages] = useState({
     "@deep-foundation/capacitor-voice-recorder": false,
     "@deep-foundation/google-speech": false,
@@ -97,21 +94,12 @@ export function Setup(arg: {
       setInstalledPackages(prevPackages => ({
         ...prevPackages,
         [packageName]: true
-      }));
-    }
+    }));
   }
+}
+
 
   const submitForm = async () => {
-    let error = '';;
-    if (!arePermissionsGranted) {
-      if(!isGetPermissionPressed){
-      error += 'GET RECORDING PERMISSION, ';
-      }
-    }
-    if (error !== '') {
-      alert(`${error} were not pressed or installed.`);
-      return;
-    }
       arg.onSubmit({
         apiKey,
         googleAuth,
@@ -181,9 +169,6 @@ export function Setup(arg: {
         <Input type="text" onChange={(newSystemMsg) => {
           setSystemMsg(newSystemMsg.target.value)
         }} />
-        <Button disabled={!isSendDataPressed || audioPermission} style={{ position: 'relative', zIndex: 1000 }} onClick={async () => { const { value: arePermissionsGranted } = await VoiceRecorder.requestAudioRecordingPermission();
-          setArePermissionsGranted(arePermissionsGranted); setIsGetPermissionPressed(true); }} >GET RECORDING PERMISSION</Button>
-      
       </FormControl>
       <Button onClick={() => {
           arg.onAuthorize({
@@ -208,23 +193,23 @@ export function Setup(arg: {
           renderIfNotInstalled={(packageNames) => {          
             return (
               <div>
-                {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
-                {!installedPackages["@deep-foundation/capacitor-voice-recorder"] && !isVoiceRecorderInstallStarted &&
-                  <Button onClick={() => installPackage("@deep-foundation/capacitor-voice-recorder")}>
-                    Install @deep-foundation/capacitor-voice-recorder
-                  </Button>
-                }
-                {!installedPackages["@deep-foundation/google-speech"] && !isGoogleSpeechInstallStarted &&
-                  <Button onClick={() => installPackage("@deep-foundation/google-speech")}>
-                    Install @deep-foundation/google-speech
-                  </Button>
-                }
-                {!installedPackages["@deep-foundation/chatgpt"] && !isChatGPTInstallStarted &&
-                  <Button onClick={() => installPackage("@deep-foundation/chatgpt")}>
-                    Install @deep-foundation/chatgpt
-                  </Button>
-                }
-              </div>
+        {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
+        {!installedPackages["@deep-foundation/capacitor-voice-recorder"] && !isVoiceRecorderInstallStarted &&
+          <Button onClick={() => installPackage("@deep-foundation/capacitor-voice-recorder")}>
+            Install @deep-foundation/capacitor-voice-recorder
+          </Button>
+        }
+        {!installedPackages["@deep-foundation/google-speech"] && !isGoogleSpeechInstallStarted &&
+          <Button onClick={() => installPackage("@deep-foundation/google-speech")}>
+            Install @deep-foundation/google-speech
+          </Button>
+        }
+        {!installedPackages["@deep-foundation/chatgpt"] && !isChatGPTInstallStarted &&
+          <Button onClick={() => installPackage("@deep-foundation/chatgpt")}>
+            Install @deep-foundation/chatgpt
+          </Button>
+        }
+      </div>
             );
           }}
           renderIfLoading={() => (
@@ -232,8 +217,21 @@ export function Setup(arg: {
           )}
           shouldIgnoreResultWhenLoading={true}
         >
-           <Text>Package installation check complete!</Text>
-        </WithPackagesInstalled>
+             {!arePermissionsGranted ? (
+                <>
+    <Button
+        style={{ position: 'relative', zIndex: 1000 }}
+        onClick={async () => {
+            const { value: arePermissionsGranted } = await VoiceRecorder.requestAudioRecordingPermission();
+            setArePermissionsGranted(arePermissionsGranted);
+            setIsGetPermissionPressed(true);
+        }}
+    >
+        GET RECORDING PERMISSION
+        </Button>
+                </> 
+              ) : <></>}
+            </WithPackagesInstalled>
         )}
       </CardBody>
     </Card>
