@@ -2,11 +2,10 @@ import { useDeep } from "@deep-foundation/deeplinks/imports/client";
 import { useState, useEffect } from "react";
 import { Setup } from "./login";
 
-export function LoginOrContent({ gqlPath, setGqlPath, children, apiKey, googleAuth, setApiKey, setGoogleAuth, systemMsg, setSystemMsg }: { gqlPath: string | undefined, setGqlPath: (gqlPath: string | undefined) => void, children: JSX.Element, apiKey: string | undefined, setApiKey: (apiKey: string | undefined) => void, googleAuth: string | undefined, setGoogleAuth: (googleAuth: string | undefined) => void, systemMsg: string | undefined, setSystemMsg: (systemMsg: string | undefined) => void}) {
+export function LoginOrContent({ gqlPath, setGqlPath, children, apiKey, googleAuth, setApiKey, setGoogleAuth, systemMsg, setSystemMsg }: { gqlPath: string | undefined, setGqlPath: (gqlPath: string | undefined) => void, children: JSX.Element, apiKey: string | undefined, setApiKey: (apiKey: string | undefined) => void, googleAuth: string | undefined, setGoogleAuth: (googleAuth: string | undefined) => void, systemMsg: string | undefined, setSystemMsg: (systemMsg: string | undefined) => void }) {
   const deep = useDeep();
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isGetPermissionPressed, setIsGetPermissionPressed] = useState(false);
 
   useEffect(() => {
     self["deep"] = deep
@@ -27,7 +26,6 @@ export function LoginOrContent({ gqlPath, setGqlPath, children, apiKey, googleAu
   console.log({ isAuthorized, gqlPath })
   return isAuthorized && gqlPath && googleAuth && apiKey && systemMsg && isSubmitted ? children : (
     <Setup
-
       onAuthorize={(arg) => {
         console.log({ arg })
         setGqlPath(arg.gqlPath);
@@ -35,7 +33,6 @@ export function LoginOrContent({ gqlPath, setGqlPath, children, apiKey, googleAu
           token: arg.token
         })
       }}
-
       onSubmit={(arg) => {
         setApiKey(arg.apiKey);
         setGoogleAuth(arg.googleAuth);
