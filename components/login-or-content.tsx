@@ -4,7 +4,7 @@ import { Setup } from "./login";
 
 export function LoginOrContent({ gqlPath, setGqlPath, children, apiKey, googleAuth, setApiKey, setGoogleAuth, systemMsg, setSystemMsg }: { gqlPath: string | undefined, setGqlPath: (gqlPath: string | undefined) => void, children: JSX.Element, apiKey: string | undefined, setApiKey: (apiKey: string | undefined) => void, googleAuth: string | undefined, setGoogleAuth: (googleAuth: string | undefined) => void, systemMsg: string | undefined, setSystemMsg: (systemMsg: string | undefined) => void}) {
   const deep = useDeep();
-  const [isAuthorized, setIsAuthorized] = useState(undefined);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isGetPermissionPressed, setIsGetPermissionPressed] = useState(false);
 
