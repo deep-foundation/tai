@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, CSSProperties, useRef } from 'react';
-import { LocalStoreProvider, useLocalStore } from '@deep-foundation/store/local';
+import React, { useEffect, useState, CSSProperties, useRef } from 'react';
+import { useLocalStore } from '@deep-foundation/store/local';
 import {
   Text,
   Stack,
@@ -7,9 +7,6 @@ import {
   CardBody,
   Heading,
   CardHeader,
-  FormControl,
-  FormLabel,
-  Input,
   Button,
   Box,
 } from '@chakra-ui/react';
@@ -22,7 +19,6 @@ import startRecording from '../imports/capacitor-voice-recorder/strart-recording
 import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
-import loadRecords from '../imports/capacitor-voice-recorder/load-records';
 import ChatBubble from '../components/ChatBubble';
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
