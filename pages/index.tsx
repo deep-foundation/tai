@@ -187,7 +187,6 @@ function Content() {
             },
           });
           console.log("flakeed7");
-          console.log("conversationLinkId",conversationLinkId)
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
@@ -212,7 +211,6 @@ function Content() {
               },
             },
           });
-          console.log("conversationLinkId",conversationLinkId)
 
   
           const { data: [{ id: messageLinkId }] } = await deep.insert({
@@ -240,8 +238,8 @@ function Content() {
         }else{ 
         const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
         console.log("sortedData",sortedData)
-        setNewConversationLinkId (sortedData[0].id)}
-        console.log("conversationLinkId select",newConversationLinkId)
+        setNewConversationLinkId (sortedData[0].id)
+      }
 console.log("isChatClosed",isChatClosed)
 if (newConversationLinkId) {
         if ( isTimeEnded || isChatClosed) {
@@ -260,7 +258,6 @@ console.log("isChatClosed",isChatClosed)
             },
           });
           console.log("systemMsg", systemMsg)
-          console.log("conversationLinkId",newConversationLinkId)
 
           const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
             type_id: systemTypeLinkId,
@@ -385,7 +382,6 @@ console.log("isChatClosed",isChatClosed)
           console.log("replyMessageLinkId",replyMessageLinkId)
         }
       }
-        console.log("conversationLinkId",newConversationLinkId)
 
         console.log("flakeed8");
         setSounds([]);
