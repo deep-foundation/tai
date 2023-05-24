@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, CSSProperties, useRef } from 'react';
-import { LocalStoreProvider, useLocalStore } from '@deep-foundation/store/local';
+import React, { useEffect, useState,  CSSProperties, useRef } from 'react';
+import { useLocalStore } from '@deep-foundation/store/local';
 import {
   Text,
   Stack,
@@ -7,12 +7,8 @@ import {
   CardBody,
   Heading,
   CardHeader,
-  FormControl,
-  FormLabel,
-  Input,
   Button,
   Box,
-  TagLeftIcon,
 } from '@chakra-ui/react';
 import { useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
@@ -22,7 +18,6 @@ import startRecording from '../imports/capacitor-voice-recorder/strart-recording
 import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
-import loadRecords from '../imports/capacitor-voice-recorder/load-records';
 import ChatBubble from '../components/ChatBubble';
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
@@ -42,7 +37,6 @@ function Content() {
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
-  // let newConversationLinkId;
   const [containerLinkId, setContainerLinkId] = useLocalStore(
     'containerLinkId',
     undefined
@@ -95,7 +89,6 @@ function Content() {
 
   const handleClick = async () => {
     if (!isRecording) {
-      // Start recording
       try {
         startTime.current = await startRecording();
         setIsRecording(true);
@@ -103,7 +96,6 @@ function Content() {
         console.log('Error starting recording:', error);
       }
     } else {
-      // Stop recording and process
       try {
         setLastPress(Date.now());   
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
