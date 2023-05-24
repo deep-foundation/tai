@@ -242,14 +242,11 @@ function Content() {
         console.log("sortedData",sortedData)
         setNewConversationLinkId (sortedData[0].id)}
         console.log("conversationLinkId select",newConversationLinkId)
-console.log("lastPress",lastPress)
 console.log("isChatClosed",isChatClosed)
 if (newConversationLinkId) {
         if ( isTimeEnded || isChatClosed) {
-          console.log("timeDifferenceInSeconds",lastPress)
 console.log("isChatClosed",isChatClosed)
           setIsChatClosed(false)
-console.log("timeDifferenceInSeconds >= 15 || isChatClose")
           console.log("flakeed7");
   
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
@@ -403,8 +400,6 @@ console.log("timeDifferenceInSeconds >= 15 || isChatClose")
     const timeoutId = setTimeout(() => {
       const doAsyncStuff = async () => {
       if (Date.now() - lastPress >= 15000 && !isRecording) {
-        console.log("Date.now()-lastPress",Date.now()-lastPress)
-        console.log("lastPress",lastPress)
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
 
