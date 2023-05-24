@@ -1,5 +1,5 @@
-import React, { useEffect, useState, CSSProperties, useRef } from 'react';
-import { useLocalStore } from '@deep-foundation/store/local';
+import React, { useEffect, useState, useCallback, CSSProperties, useRef } from 'react';
+import { LocalStoreProvider, useLocalStore } from '@deep-foundation/store/local';
 import {
   Text,
   Stack,
@@ -7,18 +7,22 @@ import {
   CardBody,
   Heading,
   CardHeader,
+  FormControl,
+  FormLabel,
+  Input,
   Button,
   Box,
+  TagLeftIcon,
 } from '@chakra-ui/react';
 import { useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
-import { WithInitDeviceIfNotInitedAndSaveData } from '../components/device/withInitDeviceIfNotInitedAndSaveData';
 import { NavBar } from '../components/navbar';
 import { Page } from '../components/page';
 import startRecording from '../imports/capacitor-voice-recorder/strart-recording';
 import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
+import loadRecords from '../imports/capacitor-voice-recorder/load-records';
 import ChatBubble from '../components/ChatBubble';
 const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
@@ -28,11 +32,17 @@ function Content() {
   }, []);
 
   const deep = useDeep();
-
+  const [lastPress, setLastPress] = useState<number>(0);
+  const [linkToReplyId, setLinkToReplyId] = useState<number>(0);
+  const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
+//let conversationLinkId;
   const [sounds, setSounds] = useLocalStore("Sounds", []);
   const [isRecording, setIsRecording] = useState(false);
+  const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
+  const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
+  // let newConversationLinkId;
   const [containerLinkId, setContainerLinkId] = useLocalStore(
     'containerLinkId',
     undefined
@@ -81,7 +91,7 @@ function Content() {
     </Card>
   );
 
-
+  let linkToReply;
 
   const handleClick = async () => {
     if (!isRecording) {
@@ -95,6 +105,7 @@ function Content() {
     } else {
       // Stop recording and process
       try {
+        setLastPress(Date.now());   
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
@@ -104,6 +115,7 @@ function Content() {
         const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
         const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
         const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
+        const tokensTypeLinkId = await deep.id("@deep-foundation/tokens", "Tokens")
         console.log("1")
         const record = await stopRecording(deep, containerLinkId, startTime.current);
         console.log("2")
@@ -153,96 +165,17 @@ function Content() {
         console.log("transcribedTextLinkId", transcribedTextLinkId)
   
         console.log("flakeed6");
-        const { data: [conversationLinkId] } = await deep.select({
+        const { data: checkConversationLink } = await deep.select({
           type_id: conversationTypeLinkId,
           in: {
             type_id: containTypeLinkId,
             from_id: deep.linkId,
           },
         });
-        if (conversationLinkId) {
-          const { data: replyLinks } = await deep.select({
-            type_id: replyTypeLinkId,
-          });
-  
-          const replyLink = replyLinks.sort((a, b) => {
-            if (b.from_id !== undefined && a.from_id !== undefined) {
-                return b.from_id - a.from_id;
-            } else {
-                return 0;
-            }
-        });
-        
-          console.log("replyLinks", replyLinks)
-  
-          const { data: conversationLink } = await deep.select({
-            tree_id: { _eq: messagingTreeId },
-            parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
-            link: { id: { _eq: replyLink[0].from_id } },
-          }, {
-            table: 'tree',
-            variables: { order_by: { depth: "asc" } },
-            returning: `
-            id
-            depth
-            root_id
-            parent_id
-            link_id
-            parent {
-              id
-              from_id
-              type_id
-              to_id
-              value
-              author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
-                id
-                from_id
-                type_id
-                to_id
-              }
-            }`
-          })
-  
-          const messageLinks = conversationLink
-            .map(item => item.parent)
-            .filter(link => link && link.type_id === messageTypeLinkId);
-  
-          const authorLinks = messageLinks
-            .filter(messageLink => messageLink.author && messageLink.author[0])
-            .map(messageLink => messageLink.author[0].from_id);
-  
-  
-          console.log("messageLinks", messageLinks);
-          console.log("authorLinks", authorLinks);
-  
-          console.log("trascribedTextLinkId", transcribedTextLinkId.value?.value)
-  
-          const { data: [{ id: messageLinkId }] } = await deep.insert({
-            type_id: messageTypeLinkId,
-            string: { data: { value: transcribedTextLinkId.value?.value } },
-            in: {
-              data: {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-              }
-            },
-          });
-  
-          const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
-            type_id: replyTypeLinkId,
-            from_id: messageLinkId,
-            to_id: authorLinks[authorLinks.length - 1],
-            in: {
-              data: {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-              },
-            },
-          });
-          replyMessageLinkId = replyToMessageLinkId;
-        }
-  
-        if (!conversationLinkId) {
+        console.log("checkConversationLink",checkConversationLink)
+
+        if (!checkConversationLink || checkConversationLink.length === 0) {
+          console.log("newConversationLinkId")
           const { data: [{ id: conversationLinkId }] } = await deep.insert({
             type_id: conversationTypeLinkId,
             string: { data: { value: "New chat" } },
@@ -254,7 +187,8 @@ function Content() {
             },
           });
           console.log("flakeed7");
-  
+          console.log("conversationLinkId",conversationLinkId)
+
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
             string: { data: { value: systemMsg } },
@@ -278,10 +212,12 @@ function Content() {
               },
             },
           });
+          console.log("conversationLinkId",conversationLinkId)
+
   
           const { data: [{ id: messageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
-            string: { data: { value: transcribedTextLinkId.value?.value } },
+            string: { data: { value: "who are you" } },
             in: {
               data: {
                 type_id: containTypeLinkId,
@@ -301,7 +237,159 @@ function Content() {
               },
             },
           });
-        };
+        }else{ 
+        const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
+        console.log("sortedData",sortedData)
+        setNewConversationLinkId (sortedData[0].id)}
+        console.log("conversationLinkId select",newConversationLinkId)
+console.log("lastPress",lastPress)
+console.log("isChatClosed",isChatClosed)
+if (newConversationLinkId) {
+        if ( isTimeEnded || isChatClosed) {
+          console.log("timeDifferenceInSeconds",lastPress)
+console.log("isChatClosed",isChatClosed)
+          setIsChatClosed(false)
+console.log("timeDifferenceInSeconds >= 15 || isChatClose")
+          console.log("flakeed7");
+  
+          const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
+            type_id: messageTypeLinkId,
+            string: { data: { value: systemMsg } },
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              }
+            },
+          });
+          console.log("systemMsg", systemMsg)
+          console.log("conversationLinkId",newConversationLinkId)
+
+          const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
+            type_id: systemTypeLinkId,
+            from_id: systemMessageLinkId,
+            to_id: newConversationLinkId,
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              },
+            },
+          });
+  
+          const { data: [{ id: messageLinkId }] } = await deep.insert({
+            type_id: messageTypeLinkId,
+            string: { data: { value: "who are you" } },
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              }
+            },
+          });
+  
+          const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
+            type_id: replyTypeLinkId,
+            from_id: messageLinkId,
+            to_id: newConversationLinkId,
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              },
+            },
+          });
+          replyMessageLinkId = replyToMessageLinkId;
+          setIsTimeEnded(false)
+        }else  {
+            console.log("timeDifferenceInSeconds <= 15 || !isChatClose")
+          const { data: replyLinks } = await deep.select({
+            type_id: replyTypeLinkId,
+          });
+
+          const replyLink = replyLinks.sort((a, b) => {
+            if (b.id !== undefined && a.id !== undefined) {
+                return b.id - a.id;
+            } else {
+                return 0;
+            }
+        });
+
+        linkToReply=replyLink[0].from_id;
+        console.log("linkToReply",linkToReply)
+        if (linkToReply && linkToReply !== undefined) {
+          setLinkToReplyId(linkToReply);
+          console.log("work")
+        }
+        console.log("linkToReplyId",linkToReplyId)
+          console.log("replyLinks", replyLink)
+  
+          const { data: conversationLink } = await deep.select({
+            tree_id: { _eq: messagingTreeId },
+            parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
+            link: { id: { _eq: replyLink[0].from_id } },
+          }, {
+            table: 'tree',
+            variables: { order_by: { depth: "asc" } },
+            returning: `
+              id
+              depth
+              root_id
+              parent_id
+              link_id
+              parent {
+                id
+                from_id
+                type_id
+                to_id
+                value
+                author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
+                  id
+                  from_id
+                  type_id
+                  to_id
+                }
+                tokens: out (where: { type_id: { _eq: ${tokensTypeLinkId}} }) { 
+                  id
+                  from_id
+                  type_id
+                  to_id
+                  value
+                }
+              }`
+          })
+          console.log("conversationLink",conversationLink)
+  
+          console.log("trascribedTextLinkId", "who are you")
+  
+          const { data: [{ id: messageLinkId }] } = await deep.insert({
+            type_id: messageTypeLinkId,
+            string: { data: { value: "who are you" } },
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              }
+            },
+          });
+  
+          const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
+            type_id: replyTypeLinkId,
+            from_id: messageLinkId,
+            to_id: linkToReply,
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              },
+            },
+          });
+          replyMessageLinkId = replyToMessageLinkId;
+          console.log("replyMessageLinkId",replyMessageLinkId)
+        }
+      }
+        console.log("conversationLinkId",newConversationLinkId)
+
         console.log("flakeed8");
         setSounds([]);
         setIsRecording(false);
@@ -311,25 +399,57 @@ function Content() {
     }
   };
 
-  const ScreenChat = ({ replyToMessageLinkId }) => {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const doAsyncStuff = async () => {
+      if (Date.now() - lastPress >= 15000 && !isRecording) {
+        console.log("Date.now()-lastPress",Date.now()-lastPress)
+        console.log("lastPress",lastPress)
+        const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+
+        const { data: [{ id: conversationLinkId }] } =await deep.insert({
+          type_id: conversationTypeLinkId,
+          string: { data: { value: "New chat" } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+        setNewConversationLinkId (conversationLinkId)
+        console.log("flakeed7");
+        setIsTimeEnded(true)
+      }
+    };
+      doAsyncStuff();
+    }, 15000);
+
+    return () => clearTimeout(timeoutId);
+  }, [lastPress, isRecording]);
+
+  const ScreenChat = ({ linkToReply }) => {
     const [messages, setMessages] = useState<Array<any>>([]);
     const [messagesCount, setMessagesCount] = useState(0);
     let chatGptLinkId;
     async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
 
     useEffect(() => {
-      (async () => {
+      const fetchMessages = async () => {
+        console.log(" chat newConversationLinkId",newConversationLinkId)
         const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
         const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
         const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
-
-        const result = await deep.select({
+        const tokensTypeLinkId = await deep.id("@deep-foundation/tokens", "Tokens")
+        console.log("linkToReply",linkToReply)
+        const result = await deep.select({ 
           tree_id: { _eq: messagingTreeId },
-          link: { type_id: { _eq: messageTypeLinkId } },
-          root_id: { _eq: replyMessageLinkId },
+          link: { type_id: { _eq: messageTypeLinkId} },
+          root_id: { _eq: newConversationLinkId },
           // @ts-ignore
-          self: { _eq: true },
-        }, {
+          self: {_eq: true}
+        }, { 
           table: 'tree',
           variables: { order_by: { depth: "asc" } },
           returning: `
@@ -344,7 +464,7 @@ function Content() {
               type_id
               to_id
               value
-              author: out (where: { type_id: { _eq: ${authorTypeLinkId} } }) { 
+              author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
                 id
                 from_id
                 type_id
@@ -355,8 +475,14 @@ function Content() {
 
         setMessages(result?.data);
         setMessagesCount(result?.data.length);
-      })();
-    }, [replyToMessageLinkId]);
+      };
+
+      fetchMessages();
+
+      const intervalId = setInterval(fetchMessages, 5000);
+
+      return () => clearInterval(intervalId);
+    }, []);
 
     return (
       <Box
@@ -371,6 +497,9 @@ function Content() {
         p={3}
         borderRadius="20px"
       >
+        <Box position="absolute" right={3} top={3}>
+      <Button onClick={handleCloseChat}>X</Button>
+        </Box>
         {messagesCount ?
           [
             <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
@@ -425,25 +554,30 @@ function Content() {
     return bubbles;
   };
 
+  const handleCloseChat = async () => {
+    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+    const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+
+    const { data: [{ id: conversationLinkId }] } =await deep.insert({
+      type_id: conversationTypeLinkId,
+      string: { data: { value: "New chat" } },
+      in: {
+        data: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
+        },
+      },
+    });
+    setNewConversationLinkId (conversationLinkId)
+    console.log("flakeed7");
+    setIsChatClosed(true);
+  };
+
   return (
     <Stack alignItems={'center'}>
       <NavBar />
       <Heading as={'h1'}>Tai</Heading>
-      {generalInfoCard}
-      {
-        <>
-          <WithInitDeviceIfNotInitedAndSaveData deep={deep} deviceLinkId={deviceLinkId} setDeviceLinkId={setDeviceLinkId} />
-          {
-            Boolean(deviceLinkId) ? (
-              <>
-                <Pages />
-              </>
-            ) : (
-              <Text>Initializing the device...</Text>
-            )
-          }
-        </>
-      }
+
       <Button
         style={{
           position: 'absolute',
@@ -461,7 +595,7 @@ function Content() {
       >
         {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
       </Button>
-      <ScreenChat replyToMessageLinkId={replyMessageLinkId} />
+      <ScreenChat linkToReply={linkToReply} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
     </Stack>
   );
