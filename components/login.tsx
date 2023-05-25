@@ -21,12 +21,6 @@ export function Setup(arg: {
   const [isChatGPTInstallStarted, setIsChatGPTInstallStarted] = useState(false);
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
   
-  const [installedPackages, setInstalledPackages] = useState({
-    "@deep-foundation/capacitor-voice-recorder": false,
-    "@deep-foundation/google-speech": false,
-    "@deep-foundation/chatgpt": false,
-  });
-  
   const installPackage = async (packageName) => {
     console.log(`Installing ${packageName}`, installedPackages[packageName]);
 
