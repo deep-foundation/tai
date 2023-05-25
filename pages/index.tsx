@@ -31,11 +31,9 @@ function Content() {
   const [linkToReplyId, setLinkToReplyId] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
 //let conversationLinkId;
-  const [sounds, setSounds] = useLocalStore("Sounds", []);
   const [isRecording, setIsRecording] = useState(false);
   const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
-  const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
   const [containerLinkId, setContainerLinkId] = useLocalStore(
     'containerLinkId',
@@ -345,7 +343,6 @@ console.log("isChatClosed",isChatClosed)
       }
 
         console.log("flakeed8");
-        setSounds([]);
         setIsRecording(false);
       } catch (error) {
         console.log('Error stopping recording:', error);
