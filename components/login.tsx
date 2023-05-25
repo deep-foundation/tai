@@ -20,6 +20,7 @@ export function Setup(arg: {
   const [isGoogleSpeechInstallStarted, setIsGoogleSpeechInstallStarted] = useState(false);
   const [isChatGPTInstallStarted, setIsChatGPTInstallStarted] = useState(false);
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
+  
   const [installedPackages, setInstalledPackages] = useState({
     "@deep-foundation/capacitor-voice-recorder": false,
     "@deep-foundation/google-speech": false,
