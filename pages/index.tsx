@@ -16,7 +16,6 @@ import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
 import ChatBubble from '../components/ChatBubble';
-const delay = (time) => new Promise(res => setTimeout(() => res(null), time));
 
 function Content() {
   useEffect(() => {
