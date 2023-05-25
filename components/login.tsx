@@ -16,14 +16,9 @@ export function Setup(arg: {
   const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
   const [isSendDataPressed, setIsSendDataPressed] = useState(false);
   const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(false)
-  const [isVoiceRecorderInstallStarted, setIsVoiceRecorderInstallStarted] = useState(false);
-  const [isGoogleSpeechInstallStarted, setIsGoogleSpeechInstallStarted] = useState(false);
-  const [isChatGPTInstallStarted, setIsChatGPTInstallStarted] = useState(false);
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
   
   const installPackage = async (packageName) => {
-    console.log(`Installing ${packageName}`, installedPackages[packageName]);
-
     if (!installedPackages[packageName]) {
       await deep.insert([
         {
