@@ -17,9 +17,10 @@ export function Setup(arg: {
   const [isSendDataPressed, setIsSendDataPressed] = useState(false);
   const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(false)
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
+  const [packagesInstalled, setPackagesInstalled] = useState<Array<string>>([]);
   
   const installPackage = async (packageName) => {
-    if (!packagesBeingInstalled) {
+    if (!packagesBeingInstalled[packageName]) {
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
@@ -32,7 +33,6 @@ export function Setup(arg: {
           },
         }
       ]);
-
       let packageLinkId;
       while (!packageLinkId) {
         try {
@@ -56,7 +56,7 @@ export function Setup(arg: {
         },
       ]);
     }
-  }
+  };
 
   const submitForm = async () => {
     arg.onSubmit({
@@ -152,15 +152,24 @@ export function Setup(arg: {
               renderIfNotInstalled={(packageNames) => {
                 return (
                   <div>
-                     {
-                        packageNames
-                          .filter(packageName => !packagesBeingInstalled.includes(packageName))
-                          .map((packageName) => (
-                            <Button onClick={() => installPackage(packageName)}>
-                              Install {packageName}
-                            </Button>
-                          ))
-                      }
+                    {`Install these deep packages to proceed: ${packageNames.join(', ')}`},
+                    {
+                      packageNames
+                      .filter((packageName) => !packagesBeingInstalled.includes(packageName))
+                      .map((packageName) => {
+                        if (packagesInstalled.includes(packageName)) {
+                          return null;
+                        }
+                        return (
+                          <Button onClick={() => {
+                            installPackage(packageName);
+                            setPackagesInstalled([...packagesInstalled, packageName]);
+                          }}>
+                            Install {packageName}
+                          </Button>
+                        );
+                    })
+                  }
                   </div>
                 );
               }}
