@@ -25,20 +25,6 @@ export function Setup(arg: {
     console.log(`Installing ${packageName}`, installedPackages[packageName]);
 
     if (!installedPackages[packageName]) {
-      switch (packageName) {
-        case "@deep-foundation/capacitor-voice-recorder":
-          setIsVoiceRecorderInstallStarted(true);
-          break;
-        case "@deep-foundation/google-speech":
-          setIsGoogleSpeechInstallStarted(true);
-          break;
-        case "@deep-foundation/chatgpt":
-          setIsChatGPTInstallStarted(true);
-          break;
-        default:
-          break;
-      }
-
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
