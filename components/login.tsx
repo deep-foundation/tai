@@ -19,6 +19,7 @@ export function Setup(arg: {
   const [isVoiceRecorderInstallStarted, setIsVoiceRecorderInstallStarted] = useState(false);
   const [isGoogleSpeechInstallStarted, setIsGoogleSpeechInstallStarted] = useState(false);
   const [isChatGPTInstallStarted, setIsChatGPTInstallStarted] = useState(false);
+  const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
   const [installedPackages, setInstalledPackages] = useState({
     "@deep-foundation/capacitor-voice-recorder": false,
     "@deep-foundation/google-speech": false,
@@ -181,14 +182,14 @@ export function Setup(arg: {
                 return (
                   <div>
                      {
-                      packageNames
-                        .filter(packageName => !packagesBeingInstalled.find(packageName))
-                        .map((packageName) => (
-                          <Button onClick={() => installPackage(packageName)}>
-                            Install {packageName}
-                          </Button>
-                        ))
-                    }
+                        packageNames
+                          .filter(packageName => !packagesBeingInstalled.includes(packageName))
+                          .map((packageName) => (
+                            <Button onClick={() => installPackage(packageName)}>
+                              Install {packageName}
+                            </Button>
+                          ))
+                      }
                   </div>
                 );
               }}
