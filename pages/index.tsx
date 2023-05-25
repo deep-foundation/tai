@@ -94,26 +94,11 @@ function Content() {
         const tokensTypeLinkId = await deep.id("@deep-foundation/tokens", "Tokens")
         console.log("1")
         const record = await stopRecording(deep, containerLinkId, startTime.current);
-        console.log("2")
         const endTime = new Date().toLocaleDateString();
-        console.log("3")
-        //console.log("await uploadRecords(deep, containerLinkId, [{record, startTime, endTime}])",await uploadRecords(deep, containerLinkId, [{record, startTime, endTime}]))
-        console.log("deep, containerLinkId, [{record, startTime, endTime}]",deep, containerLinkId, [{record, startTime, endTime}])
-        console.log("[{record, startTime, endTime}]", [{record, startTime, endTime}])
         console.log("record, startTime, endTime", record, startTime, endTime)
         console.log("record", record)
-        console.log("startTime", startTime)
-        console.log("endTime" , endTime)
         const soundLinkId = await uploadRecords(deep, containerLinkId, [{record, startTime, endTime}])
-        console.log("4")
-        console.log("before insert sound link", sounds);
-        console.log("flakeed2");
-        console.log("flakeed1");
         console.log("soundLinkId", soundLinkId)
-  
-        console.log("googleauth", googleAuth);
-  
-        console.log("flakeed3");
   
         const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
           type_id: transcribeTypeLinkId,
