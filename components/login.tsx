@@ -19,7 +19,7 @@ export function Setup(arg: {
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
   
   const installPackage = async (packageName) => {
-    if (!installedPackages[packageName]) {
+    if (!packagesBeingInstalled) {
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
