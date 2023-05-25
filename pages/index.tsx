@@ -3,10 +3,7 @@ import { useLocalStore } from '@deep-foundation/store/local';
 import {
   Text,
   Stack,
-  Card,
-  CardBody,
   Heading,
-  CardHeader,
   Button,
   Box,
 } from '@chakra-ui/react';
@@ -38,11 +35,6 @@ function Content() {
   const [containerLinkId, setContainerLinkId] = useLocalStore(
     'containerLinkId',
     undefined
-  );
-
-  const [deviceLinkId, setDeviceLinkId] = useLocalStore<number>(
-    'deviceLinkId',
-    0
   );
 
   const startTime = useRef('');
