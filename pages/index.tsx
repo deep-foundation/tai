@@ -393,7 +393,6 @@ console.log("isChatClosed",isChatClosed)
         const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
         const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
         const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
-        const tokensTypeLinkId = await deep.id("@deep-foundation/tokens", "Tokens")
         console.log("linkToReply",linkToReply)
         const result = await deep.select({ 
           tree_id: { _eq: messagingTreeId },
@@ -458,7 +457,7 @@ console.log("isChatClosed",isChatClosed)
             ...messages.map((message, index) => (
               <Box key={index} mb={3} p={2} borderRadius="5px" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
                 <Text borderBottom="1px solid" pb={2}>
-                  {index === 0 ? "System" : message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
+                  {message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
                 </Text>
                 <Text>{message?.link?.value?.value}</Text>
               </Box>
