@@ -7,6 +7,7 @@ import {
   Button,
   Box,
 } from '@chakra-ui/react';
+const assert = require('assert');
 import { useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { NavBar } from '../components/navbar';
@@ -16,13 +17,12 @@ import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
 import ChatBubble from '../components/ChatBubble';
-
+const deep = useDeep();
 function Content() {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
 
-  const deep = useDeep();
   const [lastPress, setLastPress] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
   const [isRecording, setIsRecording] = useState(false);
@@ -96,25 +96,18 @@ function Content() {
         });
         console.log("transcribeTextLinkId", transcribeTextLinkId)
 
-        let transcribedTextLinkId;
-        while (!transcribedTextLinkId) {
-          try {
-            const { data: [transcribedTextLinkId] } = await deep.select({
-              type_id: transcriptionTypeLinkId,
-              in: {
-                type_id: containTypeLinkId,
-                from_id: soundLinkId
-              },
-            });
-            if (!transcribedTextLinkId) {
-              console.log(`Transcription not ready yet, retrying in 1 second...`);
-              await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-          } catch (error) {
-            console.log(`Error fetching transcription, retrying in 1 second...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        }
+        const { link: transcribedTextLinkId } = await tryGetLink({
+          delayMs: 1000,
+          attemptsCount: 10,
+          selectData: {
+            type_id: transcriptionTypeLinkId,
+            in: {
+              type_id: containTypeLinkId,
+              from_id: soundLinkId
+            },
+          },
+        });
+        assert.notEqual(transcribedTextLinkId, undefined);
 
         console.log("transcribedTextLinkId", transcribedTextLinkId)
 
@@ -553,4 +546,26 @@ function Pages() {
     </Link> */}
 
   </Stack>
+}
+
+async function tryGetLink({ selectData, delayMs, attemptsCount }) {
+  let resultLink;
+  for (let i = 0; i < attemptsCount; i++) {
+    const {
+      data: [link],
+    } = await deep.select(selectData);
+
+    if (link) {
+      resultLink = link;
+    }
+
+    if(attemptsCount !== 0) {
+      await sleep(delayMs);
+    }
+  }
+  return { link: resultLink };
+}
+
+async function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
