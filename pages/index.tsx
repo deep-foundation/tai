@@ -69,22 +69,6 @@ function Content() {
     }
   }, [])
 
-  const generalInfoCard = (
-    <Card>
-      <CardHeader>
-        <Heading as={'h2'}>General Info</Heading>
-      </CardHeader>
-      <CardBody>
-        <Text suppressHydrationWarning>
-          Authentication Link Id: {deep.linkId ?? ' '}
-        </Text>
-        <Text suppressHydrationWarning>
-          Device Link Id: {deviceLinkId ?? ' '}
-        </Text>
-      </CardBody>
-    </Card>
-  );
-
   let linkToReply;
 
   const handleClick = async () => {
