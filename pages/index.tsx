@@ -56,7 +56,6 @@ function Content() {
     }
   }, [])
 
-
   const handleClick = async () => {
     if (!isRecording) {
       try {
@@ -78,7 +77,6 @@ function Content() {
         const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
         const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
         const tokensTypeLinkId = await deep.id("@deep-foundation/tokens", "Tokens")
-        console.log("1")
         const record = await stopRecording(deep, containerLinkId, startTime.current);
         const endTime = new Date().toLocaleDateString();
         console.log("record, startTime, endTime", record, startTime, endTime)
@@ -111,7 +109,6 @@ function Content() {
 
         console.log("transcribedTextLinkId", transcribedTextLinkId)
 
-        console.log("flakeed6");
         const { data: checkConversationLink } = await deep.select({
           type_id: conversationTypeLinkId,
           in: {
@@ -119,6 +116,7 @@ function Content() {
             from_id: deep.linkId,
           },
         });
+
         console.log("checkConversationLink", checkConversationLink)
 
         if (!checkConversationLink || checkConversationLink.length === 0) {
@@ -133,6 +131,7 @@ function Content() {
               },
             },
           });
+
           console.log("flakeed7");
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
@@ -145,6 +144,7 @@ function Content() {
               }
             },
           });
+
           console.log("systemMsg", systemMsg)
 
           const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
@@ -158,7 +158,6 @@ function Content() {
               },
             },
           });
-
 
           const { data: [{ id: messageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
@@ -187,7 +186,9 @@ function Content() {
           console.log("sortedData", sortedData)
           setNewConversationLinkId(sortedData[0].id)
         }
+
         console.log("isChatClosed", isChatClosed)
+
         if (newConversationLinkId) {
           if (isTimeEnded || isChatClosed) {
             console.log("isChatClosed", isChatClosed)
@@ -204,6 +205,7 @@ function Content() {
                 }
               },
             });
+
             console.log("systemMsg", systemMsg)
 
             const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
@@ -240,6 +242,7 @@ function Content() {
                 },
               },
             });
+
             replyMessageLinkId = replyToMessageLinkId;
             setIsTimeEnded(false)
           } else {
@@ -292,9 +295,8 @@ function Content() {
                 }
               }`
             })
+            
             console.log("conversationLink", conversationLink)
-
-            console.log("trascribedTextLinkId", "who are you")
 
             const { data: [{ id: messageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
