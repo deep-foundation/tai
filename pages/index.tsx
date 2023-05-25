@@ -381,7 +381,7 @@ console.log("isChatClosed",isChatClosed)
     return () => clearTimeout(timeoutId);
   }, [lastPress, isRecording]);
 
-  const ScreenChat = ({ linkToReply }) => {
+  const ScreenChat = ({ newConversationLinkId }) => {
     const [messages, setMessages] = useState<Array<any>>([]);
     const [messagesCount, setMessagesCount] = useState(0);
     let chatGptLinkId;
@@ -393,7 +393,6 @@ console.log("isChatClosed",isChatClosed)
         const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
         const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
         const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
-        console.log("linkToReply",linkToReply)
         const result = await deep.select({ 
           tree_id: { _eq: messagingTreeId },
           link: { type_id: { _eq: messageTypeLinkId} },
@@ -546,7 +545,7 @@ console.log("isChatClosed",isChatClosed)
       >
         {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
       </Button>
-      <ScreenChat linkToReply={linkToReply} />
+      <ScreenChat newConversationLinkId={newConversationLinkId} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
     </Stack>
   );
