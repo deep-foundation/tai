@@ -180,21 +180,14 @@ export function Setup(arg: {
               renderIfNotInstalled={(packageNames) => {
                 return (
                   <div>
-                    {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
-                    {!installedPackages["@deep-foundation/capacitor-voice-recorder"] && !isVoiceRecorderInstallStarted &&
-                      <Button onClick={() => installPackage("@deep-foundation/capacitor-voice-recorder")}>
-                        Install @deep-foundation/capacitor-voice-recorder
-                      </Button>
-                    }
-                    {!installedPackages["@deep-foundation/google-speech"] && !isGoogleSpeechInstallStarted &&
-                      <Button onClick={() => installPackage("@deep-foundation/google-speech")}>
-                        Install @deep-foundation/google-speech
-                      </Button>
-                    }
-                    {!installedPackages["@deep-foundation/chatgpt"] && !isChatGPTInstallStarted &&
-                      <Button onClick={() => installPackage("@deep-foundation/chatgpt")}>
-                        Install @deep-foundation/chatgpt
-                      </Button>
+                     {
+                      packageNames
+                        .filter(packageName => !packagesBeingInstalled.find(packageName))
+                        .map((packageName) => (
+                          <Button onClick={() => installPackage(packageName)}>
+                            Install {packageName}
+                          </Button>
+                        ))
                     }
                   </div>
                 );
