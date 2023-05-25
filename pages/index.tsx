@@ -17,7 +17,7 @@ import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
 import ChatBubble from '../components/ChatBubble';
-const deep = useDeep();
+
 function Content() {
   useEffect(() => {
     defineCustomElements(window);
@@ -31,7 +31,7 @@ function Content() {
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
   const startTime = useRef('');
   let replyMessageLinkId;
-
+  const deep = useDeep();
   const [containerLinkId, setContainerLinkId] = useLocalStore(
     'containerLinkId',
     undefined
@@ -549,6 +549,7 @@ function Pages() {
 }
 
 async function tryGetLink({ selectData, delayMs, attemptsCount }) {
+  const deep = useDeep();
   let resultLink;
   for (let i = 0; i < attemptsCount; i++) {
     const {
