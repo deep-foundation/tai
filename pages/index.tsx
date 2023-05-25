@@ -25,21 +25,18 @@ function Content() {
 
   const deep = useDeep();
   const [lastPress, setLastPress] = useState<number>(0);
-  const [linkToReplyId, setLinkToReplyId] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
-  //let conversationLinkId;
   const [isRecording, setIsRecording] = useState(false);
   const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
+  const startTime = useRef('');
+  let replyMessageLinkId;
+
   const [containerLinkId, setContainerLinkId] = useLocalStore(
     'containerLinkId',
     undefined
   );
-
-  const startTime = useRef('');
-
-  let replyMessageLinkId;
 
   useEffect(() => {
     new Promise(async () => {
@@ -59,7 +56,6 @@ function Content() {
     }
   }, [])
 
-  let linkToReply;
 
   const handleClick = async () => {
     if (!isRecording) {
@@ -260,13 +256,6 @@ function Content() {
               }
             });
 
-            linkToReply = replyLink[0].from_id;
-            console.log("linkToReply", linkToReply)
-            if (linkToReply && linkToReply !== undefined) {
-              setLinkToReplyId(linkToReply);
-              console.log("work")
-            }
-            console.log("linkToReplyId", linkToReplyId)
             console.log("replyLinks", replyLink)
 
             const { data: conversationLink } = await deep.select({
@@ -321,7 +310,7 @@ function Content() {
             const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
               type_id: replyTypeLinkId,
               from_id: messageLinkId,
-              to_id: linkToReply,
+              to_id: replyLink[0].from_id,
               in: {
                 data: {
                   type_id: containTypeLinkId,
