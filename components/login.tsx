@@ -79,11 +79,6 @@ export function Setup(arg: {
           to_id: await deep.id('deep', 'admin'),
         },
       ]);
-
-      setInstalledPackages(prevPackages => ({
-        ...prevPackages,
-        [packageName]: true
-      }));
     }
   }
 
