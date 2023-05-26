@@ -14,10 +14,6 @@ export function Setup(arg: {
   const [apiKey, setApiKey] = useLocalStore<string>("apikey", "");
   const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", "");
   const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
-  const [isSendDataPressed, setIsSendDataPressed] = useState(false);
-  const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(false)
-  const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
-  const [packagesInstalled, setPackagesInstalled] = useState<Array<string>>([]);
 
   const submitForm = async () => {
     arg.onSubmit({
@@ -95,9 +91,6 @@ export function Setup(arg: {
               gqlPath,
               token,
             })
-            setTimeout(() => {
-              setIsSendDataPressed(true)
-            }, 3000);
           }}>
             Send Data
           </Button>
