@@ -11,23 +11,23 @@ export function ProvidersAndLoginOrContent({ children }: { children: JSX.Element
   const [apiKey, setApiKey] = useLocalStore<string>("apikey", "");
   const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", "");
   const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
-    
+
   return (
     <>
       <ChakraProvider>
         <TokenProvider>
-        <ApolloClientTokenizedProvider
-  options={{
-    client: 'deeplinks-app',
-    path: gqlPath !== undefined ? gqlPath : '',
-    ssl: true,
-    ws: !!process?.browser,
-  }}
->
+          <ApolloClientTokenizedProvider
+            options={{
+              client: 'deeplinks-app',
+              path: gqlPath !== undefined ? gqlPath : '',
+              ssl: true,
+              ws: !!process?.browser,
+            }}
+          >
             <DeepProvider>
-              <LoginOrContent 
-                 gqlPath={gqlPath} 
-                 setGqlPath={(newGqlPath) => {
+              <LoginOrContent
+                gqlPath={gqlPath}
+                setGqlPath={(newGqlPath) => {
                   console.log({ newGqlPath })
                   if (newGqlPath !== undefined) {
                     setGqlPath(newGqlPath)
