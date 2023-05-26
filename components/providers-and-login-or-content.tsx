@@ -7,43 +7,52 @@ import { LoginOrContent } from "./login-or-content";
 import { ApolloClientTokenizedProvider } from '@deep-foundation/react-hasura/apollo-client-tokenized-provider';
 
 export function ProvidersAndLoginOrContent({ children }: { children: JSX.Element }) {
-  const [gqlPath, setGqlPath] = useLocalStore(CapacitorStoreKeys[CapacitorStoreKeys.GraphQlPath], undefined)
-  const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
-  const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
-  const [systemMgs, setSystemMsg] = useLocalStore("systemMsg", undefined);
-
+  const [gqlPath, setGqlPath] = useLocalStore<string>(CapacitorStoreKeys[CapacitorStoreKeys.GraphQlPath], '')
+  const [apiKey, setApiKey] = useLocalStore<string>("apikey", "");
+  const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", "");
+  const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
+    
   return (
     <>
       <ChakraProvider>
         <TokenProvider>
-          <ApolloClientTokenizedProvider
-            options={{
-              client: 'deeplinks-app',
-              path: gqlPath,
-              ssl: true,
-              ws: !!process?.browser,
-            }}
-          >
+        <ApolloClientTokenizedProvider
+  options={{
+    client: 'deeplinks-app',
+    path: gqlPath !== undefined ? gqlPath : '',
+    ssl: true,
+    ws: !!process?.browser,
+  }}
+>
             <DeepProvider>
               <LoginOrContent 
-                gqlPath={gqlPath} setGqlPath={(newGqlPath) => {
+                 gqlPath={gqlPath} 
+                 setGqlPath={(newGqlPath) => {
                   console.log({ newGqlPath })
-                  setGqlPath(newGqlPath)
+                  if (newGqlPath !== undefined) {
+                    setGqlPath(newGqlPath)
+                  }
                 }}
                 apiKey={apiKey}
                 setApiKey={(newApiKey) => {
                   console.log({ newApiKey })
-                  setApiKey(newApiKey)
+                  if (newApiKey !== undefined) {
+                    setApiKey(newApiKey)
+                  }
                 }}
                 googleAuth={googleAuth}
                 setGoogleAuth={(newGoogleAuth) => {
                   console.log({ newGoogleAuth })
-                  setGoogleAuth(newGoogleAuth)
+                  if (newGoogleAuth !== undefined) {
+                    setGoogleAuth(newGoogleAuth)
+                  }
                 }}
-                systemMsg={systemMgs}
+                systemMsg={systemMsg}
                 setSystemMsg={(newSystemMsg) => {
                   console.log({ newSystemMsg })
-                  setSystemMsg(newSystemMsg)
+                  if (newSystemMsg !== undefined) {
+                    setSystemMsg(newSystemMsg)
+                  }
                 }}
               >
                 {children}
