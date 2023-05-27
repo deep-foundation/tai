@@ -21,12 +21,14 @@ export interface PageParam {
 }
 
 export function Page({ renderChildren }: PageParam) {
+  const deep = useDeep();
+  console.log(deep);
   const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(false)
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
   const [packagesInstalled, setPackagesInstalled] = useState<Array<string>>([]);
-  const deep = useDeep();
   const installPackage = async (packageName) => {
     if (!packagesBeingInstalled[packageName]) {
+      console.log("if condition")
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
@@ -79,20 +81,17 @@ export function Page({ renderChildren }: PageParam) {
                       {`Install these deep packages to proceed: ${packageNames.join(', ')}`},
                       {
                         packageNames
-                          .filter((packageName) => !packagesBeingInstalled.includes(packageName))
-                          .map((packageName) => {
-                            if (packagesInstalled.includes(packageName)) {
-                              return null;
-                            }
-                            return (
-                              <Button onClick={() => {
-                                installPackage(packageName);
-                                setPackagesInstalled([...packagesInstalled, packageName]);
-                              }}>
-                                Install {packageName}
-                              </Button>
-                            );
-                          })
+                        .filter((packageName) => !packagesBeingInstalled.includes(packageName) && !packagesInstalled.includes(packageName))
+                        .map((packageName) => {
+                          return (
+                            <Button onClick={() => {
+                              installPackage(packageName);
+                              setPackagesInstalled([...packagesInstalled, packageName]);
+                            }}>
+                              Install {packageName}
+                            </Button>
+                          );
+                        })
                       }
                     </div>
                   );
@@ -128,6 +127,7 @@ export function Page({ renderChildren }: PageParam) {
     </StoreProvider>
   );
 }
+
 interface WithDeepProps {
   renderChildren: (param: { deep: DeepClient }) => JSX.Element;
 }
@@ -150,9 +150,9 @@ function WithDeviceLinkId({ deep, renderChildren }: WithDeviceLinkIdProps) {
 
   return (
     <WithDeviceInsertionIfDoesNotExistAndSavingdata
-      containerLinkId={deep.linkId}
+      containerLinkId={deep.linkId || 0}
       deep={deep}
-      deviceLinkId={deviceLinkId as number} // use a type assertion to cast deviceLinkId to number
+      deviceLinkId={deviceLinkId}
       setDeviceLinkId={setDeviceLinkId}
       renderIfLoading={() => <Text>Initializing device...</Text>}
       renderIfNotInserted={() => <Text>Initializing device...</Text>}
