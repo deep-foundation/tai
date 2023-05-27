@@ -1,9 +1,6 @@
-import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button, Text} from "@chakra-ui/react";
-import { useState } from "react";
+import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button} from "@chakra-ui/react";
 import { useDeep } from "@deep-foundation/deeplinks/imports/client";
 import { useLocalStore } from "@deep-foundation/store/local";
-import { VoiceRecorder } from 'capacitor-voice-recorder';
-import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
 export function Setup(arg: {
   onAuthorize: (arg: { gqlPath: string, token: string }) => void,
   onSubmit: (arg: { apiKey: string, googleAuth: string, systemMsg: string }) => void
@@ -46,7 +43,6 @@ export function Setup(arg: {
       }
     });
   }
-
   return (
     <>
       <Card>
