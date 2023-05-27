@@ -7,6 +7,9 @@ import {
   Button,
   Box,
 } from '@chakra-ui/react';
+import {
+  DeepClient,
+} from '@deep-foundation/deeplinks/imports/client';
 const assert = require('assert');
 import { useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
@@ -18,7 +21,12 @@ import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
 import ChatBubble from '../components/ChatBubble';
 
-function Content() {
+interface ContentParam {
+  deep: DeepClient;
+  deviceLinkId: number;
+}
+
+function Content({ deep, deviceLinkId }: ContentParam) {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
@@ -31,10 +39,9 @@ function Content() {
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
   const startTime = useRef('');
   let replyMessageLinkId;
-  const deep = useDeep();
-  const [containerLinkId, setContainerLinkId] = useLocalStore(
+  const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
     'containerLinkId',
-    undefined
+    0
   );
 
   useEffect(() => {
@@ -534,9 +541,13 @@ function Content() {
 }
 
 export default function IndexPage() {
-  return <Page>
-    <Content />
-  </Page>
+  return (
+    <Page
+      renderChildren={({ deep, deviceLinkId }) => (
+        <Content deep={deep} deviceLinkId={deviceLinkId} />
+      )}
+    />
+  );
 }
 
 function Pages() {
@@ -548,7 +559,7 @@ function Pages() {
   </Stack>
 }
 
-async function tryGetLink({ selectData, delayMs, attemptsCount }) {
+export async function tryGetLink({ selectData, delayMs, attemptsCount }) {
   const deep = useDeep();
   let resultLink;
   for (let i = 0; i < attemptsCount; i++) {
@@ -567,6 +578,6 @@ async function tryGetLink({ selectData, delayMs, attemptsCount }) {
   return { link: resultLink };
 }
 
-async function sleep(ms) {
+export async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
