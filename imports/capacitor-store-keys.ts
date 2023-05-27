@@ -18,4 +18,6 @@ export enum CapacitorStoreKeys {
    Gallery,
    Images,
    Sounds,
+   GraphQlPath,
+   NetworkConnectionStatuses
 }
