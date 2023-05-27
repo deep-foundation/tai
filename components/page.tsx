@@ -21,12 +21,10 @@ export interface PageParam {
 }
 
 export function Page({ renderChildren }: PageParam) {
-  const deep = useDeep();
-  console.log(deep);
   const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(false)
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
   const [packagesInstalled, setPackagesInstalled] = useState<Array<string>>([]);
-  const installPackage = async (packageName) => {
+  const installPackage = async (packageName,deep) => {
     if (!packagesBeingInstalled[packageName]) {
       console.log("if condition")
       await deep.insert([
@@ -85,7 +83,7 @@ export function Page({ renderChildren }: PageParam) {
                         .map((packageName) => {
                           return (
                             <Button onClick={() => {
-                              installPackage(packageName);
+                              installPackage(packageName,deep);
                               setPackagesInstalled([...packagesInstalled, packageName]);
                             }}>
                               Install {packageName}
