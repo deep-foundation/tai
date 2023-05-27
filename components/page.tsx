@@ -69,34 +69,37 @@ export function Page({ renderChildren }: PageParam) {
           renderChildren={({ deep }) => {
             return (
               <WithPackagesInstalled
-                packageNames={["@deep-foundation/capacitor-voice-recorder", "@deep-foundation/google-speech", "@deep-foundation/chatgpt"]}
-                renderIfError={(error) => <div>{error.message}</div>}
-                renderIfNotInstalled={(packageNames) => {
-                  return (
-                    <div>
-                      {`Install these deep packages to proceed: ${packageNames.join(', ')}`},
-                      {
-                        packageNames
-                          .filter((packageName) => !packagesBeingInstalled.includes(packageName) && !packagesInstalled.includes(packageName))
-                          .map((packageName) => {
-                            return (
-                              <Button onClick={() => {
-                                installPackage(packageName, deep);
-                                setPackagesInstalled([...packagesInstalled, packageName]);
-                              }}>
-                                Install {packageName}
-                              </Button>
-                            );
-                          })
-                      }
-                    </div>
-                  );
-                }}
-                renderIfLoading={() => (
-                  <Text>Checking if deep packages are installed...</Text>
-                )}
-                shouldIgnoreResultWhenLoading={true}
-              >
+              packageNames={["@deep-foundation/capacitor-voice-recorder", "@deep-foundation/google-speech", "@deep-foundation/chatgpt"]}
+              renderIfError={(error) => <div>{error.message}</div>}
+              renderIfNotInstalled={(packageNames) => {
+                return (
+                  <div>
+                    {`Install these deep packages to proceed: ${packageNames.join(', ')}`},
+                    {
+                      packageNames
+                      .filter((packageName) => !packagesBeingInstalled.includes(packageName))
+                      .map((packageName) => {
+                        if (packagesInstalled.includes(packageName)) {
+                          return null;
+                        }
+                        return (
+                          <Button onClick={() => {
+                            installPackage(packageName,deep);
+                            setPackagesInstalled([...packagesInstalled, packageName]);
+                          }}>
+                            Install {packageName}
+                          </Button>
+                        );
+                    })
+                  }
+                  </div>
+                );
+              }}
+              renderIfLoading={() => (
+                <Text>Checking if deep packages are installed...</Text>
+              )}
+              shouldIgnoreResultWhenLoading={true}
+            >
                 {arePermissionsGranted ? (
                   <WithDeviceLinkId
                     deep={deep}
