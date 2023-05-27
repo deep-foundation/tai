@@ -1,6 +1,6 @@
-import { ProvidersAndLoginOrContent } from "./providers-and-login-or-content";  
+import { ProvidersAndLoginOrContent } from "./providers-and-login-or-content";
 import { StoreProvider } from "./store-provider";
-import { Button, Text } from '@chakra-ui/react'; 
+import { Button, Text } from '@chakra-ui/react';
 import { useLocalStore } from '@deep-foundation/store/local';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
 import {
@@ -48,7 +48,7 @@ export function Page({ renderChildren }: PageParam) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
-  
+
       await deep.insert([
         {
           type_id: await deep.id("@deep-foundation/core", "Join"),
@@ -63,45 +63,45 @@ export function Page({ renderChildren }: PageParam) {
       ]);
     }
   };
-  
-    return (  
-      <StoreProvider>  
-        <ProvidersAndLoginOrContent>
-          <WithDeep
-            renderChildren={({ deep }) => {
-              return (
-                <WithPackagesInstalled
-                  packageNames={["@deep-foundation/capacitor-voice-recorder", "@deep-foundation/google-speech", "@deep-foundation/chatgpt"]}
-                  renderIfError={(error) => <div>{error.message}</div>}
-                  renderIfNotInstalled={(packageNames) => {
-                    return (
-                      <div>
-                       {`Install these deep packages to proceed: ${packageNames.join(', ')}`},
-                          {
-                            packageNames
-                              .filter((packageName) => !packagesBeingInstalled.includes(packageName))
-                              .map((packageName) => {
-                                if (packagesInstalled.includes(packageName)) {
-                                  return null;
-                                }
-                                return (
-                                  <Button onClick={() => {
-                                    installPackage(packageName);
-                                    setPackagesInstalled([...packagesInstalled, packageName]);
-                                  }}>
-                                    Install {packageName}
-                                  </Button>
-                                );
-                              })
-                          }
-                      </div>
-                    );
-                  }}
-                  renderIfLoading={() => (
-                    <Text>Checking if deep packages are installed...</Text>
-                  )}
-                  shouldIgnoreResultWhenLoading={true}
-                > 
+
+  return (
+    <StoreProvider>
+      <ProvidersAndLoginOrContent>
+        <WithDeep
+          renderChildren={({ deep }) => {
+            return (
+              <WithPackagesInstalled
+                packageNames={["@deep-foundation/capacitor-voice-recorder", "@deep-foundation/google-speech", "@deep-foundation/chatgpt"]}
+                renderIfError={(error) => <div>{error.message}</div>}
+                renderIfNotInstalled={(packageNames) => {
+                  return (
+                    <div>
+                      {`Install these deep packages to proceed: ${packageNames.join(', ')}`},
+                      {
+                        packageNames
+                          .filter((packageName) => !packagesBeingInstalled.includes(packageName))
+                          .map((packageName) => {
+                            if (packagesInstalled.includes(packageName)) {
+                              return null;
+                            }
+                            return (
+                              <Button onClick={() => {
+                                installPackage(packageName);
+                                setPackagesInstalled([...packagesInstalled, packageName]);
+                              }}>
+                                Install {packageName}
+                              </Button>
+                            );
+                          })
+                      }
+                    </div>
+                  );
+                }}
+                renderIfLoading={() => (
+                  <Text>Checking if deep packages are installed...</Text>
+                )}
+                shouldIgnoreResultWhenLoading={true}
+              >
                 {arePermissionsGranted ? (
                   <WithDeviceLinkId
                     deep={deep}
@@ -120,44 +120,44 @@ export function Page({ renderChildren }: PageParam) {
                     GET RECORDING PERMISSION
                   </Button>
                 )}
-                </WithPackagesInstalled>
-              );
-            }}
-          />
-        </ProvidersAndLoginOrContent>  
-      </StoreProvider>  
-    );
-  }
-  interface WithDeepProps {
-    renderChildren: (param: { deep: DeepClient }) => JSX.Element;
-  }
-  
-  function WithDeep({ renderChildren }: WithDeepProps) {
-    const deep = useDeep();
-    return renderChildren({ deep });
-  }
-  
-  interface WithDeviceLinkIdProps {
-    deep: DeepClient;
-    renderChildren: (param: { deviceLinkId: number }) => JSX.Element;
-  }
+              </WithPackagesInstalled>
+            );
+          }}
+        />
+      </ProvidersAndLoginOrContent>
+    </StoreProvider>
+  );
+}
+interface WithDeepProps {
+  renderChildren: (param: { deep: DeepClient }) => JSX.Element;
+}
 
-  function WithDeviceLinkId({ deep, renderChildren }: WithDeviceLinkIdProps) {
-    const [deviceLinkId, setDeviceLinkId] = useLocalStore<number>(
-      CapacitorStoreKeys[CapacitorStoreKeys.DeviceLinkId],
-      0
-    );
-  
-    return (
-      <WithDeviceInsertionIfDoesNotExistAndSavingdata
-        containerLinkId={deep.linkId}
-        deep={deep}
-        deviceLinkId={deviceLinkId as number} // use a type assertion to cast deviceLinkId to number
-        setDeviceLinkId={setDeviceLinkId}
-        renderIfLoading={() => <Text>Initializing device...</Text>}
-        renderIfNotInserted={() => <Text>Initializing device...</Text>}
-      >
-        {renderChildren({ deviceLinkId })}
-      </WithDeviceInsertionIfDoesNotExistAndSavingdata>
-    );
-  }
+function WithDeep({ renderChildren }: WithDeepProps) {
+  const deep = useDeep();
+  return renderChildren({ deep });
+}
+
+interface WithDeviceLinkIdProps {
+  deep: DeepClient;
+  renderChildren: (param: { deviceLinkId: number }) => JSX.Element;
+}
+
+function WithDeviceLinkId({ deep, renderChildren }: WithDeviceLinkIdProps) {
+  const [deviceLinkId, setDeviceLinkId] = useLocalStore<number>(
+    CapacitorStoreKeys[CapacitorStoreKeys.DeviceLinkId],
+    0
+  );
+
+  return (
+    <WithDeviceInsertionIfDoesNotExistAndSavingdata
+      containerLinkId={deep.linkId}
+      deep={deep}
+      deviceLinkId={deviceLinkId as number} // use a type assertion to cast deviceLinkId to number
+      setDeviceLinkId={setDeviceLinkId}
+      renderIfLoading={() => <Text>Initializing device...</Text>}
+      renderIfNotInserted={() => <Text>Initializing device...</Text>}
+    >
+      {renderChildren({ deviceLinkId })}
+    </WithDeviceInsertionIfDoesNotExistAndSavingdata>
+  );
+}
