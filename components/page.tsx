@@ -5,7 +5,6 @@ import { useLocalStore } from '@deep-foundation/store/local';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
 import {
   DeepClient,
-  DeepProvider,
   useDeep,
 } from '@deep-foundation/deeplinks/imports/client';
 import { useState } from "react";
@@ -24,7 +23,7 @@ export function Page({ renderChildren }: PageParam) {
   const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(false)
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
   const [packagesInstalled, setPackagesInstalled] = useState<Array<string>>([]);
-  const installPackage = async (packageName,deep) => {
+  const installPackage = async (packageName, deep) => {
     if (!packagesBeingInstalled[packageName]) {
       console.log("if condition")
       await deep.insert([
@@ -48,7 +47,6 @@ export function Page({ renderChildren }: PageParam) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
-
       await deep.insert([
         {
           type_id: await deep.id("@deep-foundation/core", "Join"),
@@ -79,17 +77,17 @@ export function Page({ renderChildren }: PageParam) {
                       {`Install these deep packages to proceed: ${packageNames.join(', ')}`},
                       {
                         packageNames
-                        .filter((packageName) => !packagesBeingInstalled.includes(packageName) && !packagesInstalled.includes(packageName))
-                        .map((packageName) => {
-                          return (
-                            <Button onClick={() => {
-                              installPackage(packageName,deep);
-                              setPackagesInstalled([...packagesInstalled, packageName]);
-                            }}>
-                              Install {packageName}
-                            </Button>
-                          );
-                        })
+                          .filter((packageName) => !packagesBeingInstalled.includes(packageName) && !packagesInstalled.includes(packageName))
+                          .map((packageName) => {
+                            return (
+                              <Button onClick={() => {
+                                installPackage(packageName, deep);
+                                setPackagesInstalled([...packagesInstalled, packageName]);
+                              }}>
+                                Install {packageName}
+                              </Button>
+                            );
+                          })
                       }
                     </div>
                   );
