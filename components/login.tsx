@@ -1,8 +1,7 @@
 import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
 import { useLocalStore } from "@deep-foundation/store/local";
 export function Setup(arg: {
-  onAuthorize: (arg: { gqlPath: string, token: string }) => void,
-  onSubmit: (arg: { apiKey: string, googleAuth: string, systemMsg: string }) => void
+  onSubmit: (arg: { gqlPath: string, token: string ,apiKey: string, googleAuth: string, systemMsg: string }) => void
 }) {
   const [gqlPath, setGqlPath] = useLocalStore<string>("gqlPath", "");
   const [token, setToken] = useLocalStore<string>("token", "");
@@ -56,16 +55,9 @@ export function Setup(arg: {
           </FormControl>
 
           <Button onClick={() => {
-            arg.onAuthorize({
+            arg.onSubmit({
               gqlPath,
               token,
-            })
-          }}>
-            Send Data
-          </Button>
-
-          <Button onClick={() => {
-            arg.onSubmit({
               apiKey,
               googleAuth,
               systemMsg
