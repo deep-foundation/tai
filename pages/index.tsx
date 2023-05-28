@@ -170,7 +170,7 @@ function Content({ deep, deviceLinkId }: ContentParam) {
 
           const { data: [{ id: messageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
-            string: { data: { value: "who are you" } },
+            string: { data: { value: transcribedTextLinkId.value.value } },
             in: {
               data: {
                 type_id: containTypeLinkId,
@@ -231,7 +231,7 @@ function Content({ deep, deviceLinkId }: ContentParam) {
 
             const { data: [{ id: messageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
-              string: { data: { value: "who are you" } },
+              string: { data: { value: transcribedTextLinkId.value.value } },
               in: {
                 data: {
                   type_id: containTypeLinkId,
@@ -309,7 +309,7 @@ function Content({ deep, deviceLinkId }: ContentParam) {
 
             const { data: [{ id: messageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
-              string: { data: { value: "who are you" } },
+              string: { data: { value: transcribedTextLinkId.value.value} },
               in: {
                 data: {
                   type_id: containTypeLinkId,
