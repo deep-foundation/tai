@@ -1,8 +1,6 @@
 import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
 import { useLocalStore } from "@deep-foundation/store/local";
-export function Setup(arg: {
-  onSubmit: (arg: { gqlPath: string, token: string ,apiKey: string, googleAuth: string, systemMsg: string }) => void
-}) {
+export function Setup(arg: { onSubmit: (arg: { gqlPath: string, token: string, apiKey: string, googleAuth: string, systemMsg: string }) => void }) {
   const [gqlPath, setGqlPath] = useLocalStore<string>("gqlPath", "");
   const [token, setToken] = useLocalStore<string>("token", "");
   const [apiKey, setApiKey] = useLocalStore<string>("apikey", "");
