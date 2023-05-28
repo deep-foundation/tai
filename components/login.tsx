@@ -13,14 +13,6 @@ export function Setup(arg: {
   const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", "");
   const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
 
-  const submitForm = async () => {
-    arg.onSubmit({
-      apiKey,
-      googleAuth,
-      systemMsg
-    });
-  }
-
   return (
     <>
       <Card>
@@ -76,7 +68,11 @@ export function Setup(arg: {
           </Button>
 
           <Button onClick={() => {
-            submitForm();
+             arg.onSubmit({
+              apiKey,
+              googleAuth,
+              systemMsg
+            });
           }}>
             Submit
           </Button>
