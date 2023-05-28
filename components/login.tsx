@@ -19,20 +19,6 @@ export function Setup(arg: {
       googleAuth,
       systemMsg
     });
-    
-    const parsedGoogleAuth = JSON.parse(googleAuth);
-    await deep.insert({
-      type_id: await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile"),
-      object: { data: { value: parsedGoogleAuth } },
-      in: {
-        data: [
-          {
-            type_id: await deep.id("@deep-foundation/core", "Contain"),
-            from_id: deep.linkId,
-          }
-        ]
-      }
-    });
 
     await deep.insert({
       type_id: await deep.id("@deep-foundation/openai", "ApiKey"),
