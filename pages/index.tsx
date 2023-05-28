@@ -26,7 +26,7 @@ interface ContentParam {
   deviceLinkId: number;
 }
 
-function Content({ deep, deviceLinkId }: ContentParam) {
+function Content({ deep }: ContentParam) {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
