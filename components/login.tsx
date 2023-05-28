@@ -33,21 +33,21 @@ export function Setup(arg: {
             }} />
           </FormControl>
 
-          <FormControl id="OpenAI API key">
-            <FormLabel>Api key</FormLabel>
+          <FormControl id="openai-api-key">
+            <FormLabel>OpenAI API key</FormLabel>
             <Input type="text" onChange={(newApiKey) => {
               setApiKey(newApiKey.target.value)
             }} />
           </FormControl>
 
-          <FormControl id="Google Auth">
-            <FormLabel>Google Auth</FormLabel>
+          <FormControl id="google-service-account">
+            <FormLabel>Google service account</FormLabel>
             <Input type="text" onChange={(newGoogleAuth) => {
               setGoogleAuth(newGoogleAuth.target.value)
             }} />
           </FormControl>
 
-          <FormControl id="System Message">
+          <FormControl id="system-message">
             <FormLabel>System Message</FormLabel>
             <Input type="text" onChange={(newSystemMsg) => {
               setSystemMsg(newSystemMsg.target.value)
