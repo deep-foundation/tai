@@ -19,18 +19,6 @@ export function Setup(arg: {
       googleAuth,
       systemMsg
     });
-
-    await deep.insert({
-      type_id: await deep.id("@deep-foundation/openai", "ApiKey"),
-      string: { data: { value: apiKey } },
-      in: {
-        data: [
-          {
-            type_id: await deep.id('@deep-foundation/core', "Contain"),
-            from_id: deep.linkId,
-          }]
-      }
-    });
   }
 
   return (
