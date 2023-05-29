@@ -103,18 +103,25 @@ function Content({ deep }: ContentParam) {
         });
         console.log("transcribeTextLinkId", transcribeTextLinkId)
 
-        const { link: transcribedTextLinkId } = await tryGetLink({
-          delayMs: 1000,
-          attemptsCount: 10,
-          selectData: {
-            type_id: transcriptionTypeLinkId,
-            in: {
-              type_id: containTypeLinkId,
-              from_id: soundLinkId
-            },
-          },
-        });
-        assert.notEqual(transcribedTextLinkId, undefined);
+        let transcribedTextLinkId;
+        while (!transcribedTextLinkId) {
+          try {
+            const { data: [transcribedTextLinkId] } = await deep.select({
+              type_id: transcriptionTypeLinkId,
+              in: {
+                type_id: containTypeLinkId,
+                from_id: soundLinkId
+              },
+            });
+            if (!transcribedTextLinkId) {
+              console.log(`Transcription not ready yet, retrying in 1 second...`);
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          } catch (error) {
+            console.log(`Error fetching transcription, retrying in 1 second...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
 
         console.log("transcribedTextLinkId", transcribedTextLinkId)
 
