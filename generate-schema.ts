@@ -1,7 +1,7 @@
 import * as TJS from 'typescript-json-schema';
 import * as path from 'path'
 import * as fs from 'fs'
-import _ from 'lodash';
+import * as _ from 'lodash';
 import {deepMapObject} from '@freephoenix888/deep-map-object';
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
