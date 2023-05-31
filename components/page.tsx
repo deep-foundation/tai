@@ -84,6 +84,20 @@ export function Page({ renderChildren }: PageParam) {
           },
         ]);
       }
+      if(packageName=="@deep-foundation/chatgpt"){
+        await deep.insert([
+          {
+            type_id: await deep.id("@deep-foundation/core", "Join"),
+            from_id: await deep.id("@freephoenix888/object-to-links-async-converter"),
+            to_id: await deep.id('deep', 'users', 'packages'),
+          },
+          {
+            type_id: await deep.id("@deep-foundation/core", "Join"),
+            from_id: await deep.id("@freephoenix888/object-to-links-async-converter"),
+            to_id: await deep.id('deep', 'admin'),
+          },
+        ]);
+      }
     }
   };
 
