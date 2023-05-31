@@ -7,11 +7,13 @@ import {
   DeepClient,
   useDeep,
 } from '@deep-foundation/deeplinks/imports/client';
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { WithDeviceInsertionIfDoesNotExistAndSavingdata } from '@deep-foundation/capacitor-device';
+import { LocalStorage } from 'node-localstorage';
 
+const localStorage = global.localStorage;
 export interface PageParam {
   renderChildren: (param: {
     deep: DeepClient;
@@ -20,7 +22,16 @@ export interface PageParam {
 }
 
 export function Page({ renderChildren }: PageParam) {
-  const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(false)
+  const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(() => {
+    const storedValue = typeof window !== 'undefined' ? window.localStorage.getItem('arePermissionsGranted') : null;
+    return storedValue ? JSON.parse(storedValue) : false;
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('arePermissionsGranted', JSON.stringify(arePermissionsGranted));
+    }
+  }, [arePermissionsGranted]);
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
   const [packagesInstalled, setPackagesInstalled] = useState<Array<string>>([]);
   const installPackage = async (packageName, deep) => {
