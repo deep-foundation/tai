@@ -70,6 +70,20 @@ export function Page({ renderChildren }: PageParam) {
           to_id: await deep.id('deep', 'admin'),
         },
       ]);
+      if(packageName=="@deep-foundation/chatgpt"){
+        await deep.insert([
+          {
+            type_id: await deep.id("@deep-foundation/core", "Join"),
+            from_id: await deep.id("@deep-foundation/chatgpt-tokens-gpt-3-encoder"),
+            to_id: await deep.id('deep', 'users', 'packages'),
+          },
+          {
+            type_id: await deep.id("@deep-foundation/core", "Join"),
+            from_id: await deep.id("@deep-foundation/chatgpt-tokens-gpt-3-encoder"),
+            to_id: await deep.id('deep', 'admin'),
+          },
+        ]);
+      }
     }
   };
 
