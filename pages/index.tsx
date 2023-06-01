@@ -116,26 +116,6 @@ function Content({ deep }: ContentParam) {
         });
         assert.notEqual(transcribedTextLinkId, undefined);
 
-        // let transcribedTextLinkId;
-        // while (!transcribedTextLinkId) {
-        //   try {
-        //     const { data: [transcribedTextLinkId] } = await deep.select({
-        //       type_id: transcriptionTypeLinkId,
-        //       in: {
-        //         type_id: containTypeLinkId,
-        //         from_id: soundLinkId
-        //       },
-        //     });
-        //     if (!transcribedTextLinkId) {
-        //       console.log(`Transcription not ready yet, retrying in 1 second...`);
-        //       await new Promise(resolve => setTimeout(resolve, 1000));
-        //     }
-        //   } catch (error) {
-        //     console.log(`Error fetching transcription, retrying in 1 second...`);
-        //     await new Promise(resolve => setTimeout(resolve, 1000));
-        //   }
-        // }
-
         console.log("transcribedTextLinkId", transcribedTextLinkId)
 
         const { data: checkConversationLink } = await deep.select({
@@ -398,7 +378,6 @@ function Content({ deep }: ContentParam) {
 
     useEffect(() => {
       const fetchMessages = async () => {
-        console.log(" chat newConversationLinkId", newConversationLinkId)
         const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
         const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
         const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
