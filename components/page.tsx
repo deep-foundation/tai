@@ -108,6 +108,7 @@ export function Page({ renderChildren }: PageParam) {
           renderChildren={({ deep }) => {
             return (
               <WithPackagesInstalled
+              deep={deep}
               packageNames={["@deep-foundation/capacitor-voice-recorder", "@deep-foundation/google-speech", "@deep-foundation/chatgpt","@deep-foundation/capacitor-device"]}
               renderIfError={(error) => <div>{error.message}</div>}
               renderIfNotInstalled={(packageNames) => {
