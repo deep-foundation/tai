@@ -58,7 +58,7 @@
     "@capawesome/capacitor-file-picker": "^0.6.3",
     "@chakra-ui/react": "^2.7.0",
     "@deep-foundation/capacitor-device": "^1.0.21",
-    "@deep-foundation/deeplinks": "^0.0.189",
+    "@deep-foundation/deeplinks": "^0.0.193",
     "@deep-foundation/react-hasura": "^0.0.15",
     "@deep-foundation/react-use-are-packages-installed": "^1.0.2",
     "@deep-foundation/react-with-packages-installed": "^0.5.1",
