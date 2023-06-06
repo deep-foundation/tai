@@ -33,12 +33,13 @@ function Content({ deep }: ContentParam) {
 
   const [lastPress, setLastPress] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
-  const [isRecording, setIsRecording] = useState(false);
+  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
   const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
   const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", '');
+  const [isProcessing, setIsProcessing] = useState(false);
   const startTime = useRef('');
   let replyMessageLinkId;
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
@@ -132,6 +133,7 @@ function Content({ deep }: ContentParam) {
       }
     } else {
       try {
+        setIsProcessing(true);
         setLastPress(Date.now());
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
@@ -396,6 +398,7 @@ function Content({ deep }: ContentParam) {
 
         console.log("flakeed8");
         setIsRecording(false);
+        setIsProcessing(false);
       } catch (error) {
         console.log('Error stopping recording:', error);
       }
@@ -576,23 +579,25 @@ function Content({ deep }: ContentParam) {
       <NavBar />
       <Heading as={'h1'}>Tai</Heading>
 
-      <Button
-        style={{
-          position: 'absolute',
-          zIndex: 1000,
-          width: '350px',
-          height: '350px',
-          borderRadius: '50%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          fontSize: '24px',
-          top: window.innerHeight / 2,
-        }}
-        onClick={handleClick}
-      >
-        {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
-      </Button>
+      {!isProcessing && (
+        <Button
+          style={{
+            position: 'absolute',
+            zIndex: 1000,
+            width: '350px',
+            height: '350px',
+            borderRadius: '50%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontSize: '24px',
+            top: window.innerHeight / 2,
+          }}
+          onClick={handleClick}
+        >
+    {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
+    </Button>
+  )}
       <ScreenChat newConversationLinkId={newConversationLinkId} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
     </Stack>
