@@ -1,19 +1,14 @@
-import { ProvidersAndLoginOrContent } from "./providers-and-login-or-content";
-import { StoreProvider } from "./store-provider";
+import { WithProvidersAndSetup } from './withProvidersAndSetup';
+import { StoreProvider } from './store-provider';
 import { Button, Text } from '@chakra-ui/react';
 import { useLocalStore } from '@deep-foundation/store/local';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
-import {
-  DeepClient,
-  useDeep,
-} from '@deep-foundation/deeplinks/imports/client';
-import { useState,useEffect } from "react";
+import { DeepClient} from '@deep-foundation/deeplinks/imports/client';
+import { useState, useEffect, useRef } from 'react';
 import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { WithDeviceInsertionIfDoesNotExistAndSavingdata } from '@deep-foundation/capacitor-device';
-import { LocalStorage } from 'node-localstorage';
 
-const localStorage = global.localStorage;
 export interface PageParam {
   renderChildren: (param: {
     deep: DeepClient;
@@ -22,21 +17,11 @@ export interface PageParam {
 }
 
 export function Page({ renderChildren }: PageParam) {
-  const [arePermissionsGranted, setArePermissionsGranted] = useState<boolean>(() => {
-    const storedValue = typeof window !== 'undefined' ? window.localStorage.getItem('arePermissionsGranted') : null;
-    return storedValue ? JSON.parse(storedValue) : false;
-  });
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('arePermissionsGranted', JSON.stringify(arePermissionsGranted));
-    }
-  }, [arePermissionsGranted]);
-  const [packagesBeingInstalled, setPackagesBeingInstalled] = useState<Array<string>>([]);
-  const [packagesInstalled, setPackagesInstalled] = useState<Array<string>>([]);
+  const packagesBeingInstalled = useRef<Array<string>>([]);
   const installPackage = async (packageName, deep) => {
-    if (!packagesBeingInstalled[packageName]) {
-      console.log("if condition")
+    if (!packagesBeingInstalled.current[packageName]) {
+      console.log('if condition');
+
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
@@ -44,56 +29,70 @@ export function Page({ renderChildren }: PageParam) {
           to: {
             data: {
               type_id: await deep.id('@deep-foundation/core', 'PackageQuery'),
-              string: { data: { value: packageName } }
-            }
+              string: { data: { value: packageName } },
+            },
           },
-        }
+        },
       ]);
-      let packageLinkId
+
+      let packageLinkId;
       while (!packageLinkId) {
         try {
           packageLinkId = await deep.id(packageName);
         } catch (error) {
-          console.log(`Package ${packageName} not installed yet, retrying in 1 second...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log(
+            `Package ${packageName} not installed yet, retrying in 1 second...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
+
       await deep.insert([
         {
-          type_id: await deep.id("@deep-foundation/core", "Join"),
+          type_id: await deep.id('@deep-foundation/core', 'Join'),
           from_id: packageLinkId,
           to_id: await deep.id('deep', 'users', 'packages'),
         },
         {
-          type_id: await deep.id("@deep-foundation/core", "Join"),
+          type_id: await deep.id('@deep-foundation/core', 'Join'),
           from_id: packageLinkId,
           to_id: await deep.id('deep', 'admin'),
         },
       ]);
-      if(packageName=="@deep-foundation/chatgpt"){
+
+      if (packageName == '@deep-foundation/chatgpt') {
         await deep.insert([
           {
-            type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: await deep.id("@deep-foundation/chatgpt-tokens-gpt-3-encoder"),
+            type_id: await deep.id('@deep-foundation/core', 'Join'),
+            from_id: await deep.id(
+              '@deep-foundation/chatgpt-tokens-gpt-3-encoder'
+            ),
             to_id: await deep.id('deep', 'users', 'packages'),
           },
           {
-            type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: await deep.id("@deep-foundation/chatgpt-tokens-gpt-3-encoder"),
+            type_id: await deep.id('@deep-foundation/core', 'Join'),
+            from_id: await deep.id(
+              '@deep-foundation/chatgpt-tokens-gpt-3-encoder'
+            ),
             to_id: await deep.id('deep', 'admin'),
           },
         ]);
       }
-      if(packageName=="@deep-foundation/chatgpt"){
+      
+      if (packageName == '@deep-foundation/capacitor-device') {
         await deep.insert([
           {
-            type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: await deep.id("@freephoenix888/object-to-links-async-converter"),
+            type_id: await deep.id('@deep-foundation/core', 'Join'),
+            from_id: await deep.id(
+              '@freephoenix888/object-to-links-async-converter'
+            ),
             to_id: await deep.id('deep', 'users', 'packages'),
           },
           {
-            type_id: await deep.id("@deep-foundation/core", "Join"),
-            from_id: await deep.id("@freephoenix888/object-to-links-async-converter"),
+            type_id: await deep.id('@deep-foundation/core', 'Join'),
+            from_id: await deep.id(
+              '@freephoenix888/object-to-links-async-converter'
+            ),
             to_id: await deep.id('deep', 'admin'),
           },
         ]);
@@ -103,35 +102,44 @@ export function Page({ renderChildren }: PageParam) {
 
   return (
     <StoreProvider>
-      <ProvidersAndLoginOrContent>
-        <WithDeep
-          renderChildren={({ deep }) => {
-            return (
-              <WithPackagesInstalled
+      <WithProvidersAndSetup
+        renderChildren={({ deep }) => {
+          console.log(deep.linkId);
+
+          return (
+            <WithPackagesInstalled
               deep={deep}
-              packageNames={["@deep-foundation/capacitor-voice-recorder", "@deep-foundation/google-speech", "@deep-foundation/chatgpt","@deep-foundation/capacitor-device"]}
+              packageNames={[
+                '@deep-foundation/capacitor-voice-recorder',
+                '@deep-foundation/google-speech',
+                '@deep-foundation/chatgpt',
+                '@deep-foundation/capacitor-device',
+              ]}
               renderIfError={(error) => <div>{error.message}</div>}
               renderIfNotInstalled={(packageNames) => {
                 return (
                   <div>
-                    {`Install these deep packages to proceed: ${packageNames.join(', ')}`},
-                    {
-                      packageNames
-                      .filter((packageName) => !packagesBeingInstalled.includes(packageName))
+                    {`Install these deep packages to proceed: ${packageNames.join(
+                      ', '
+                    )}`}
+                    ,
+                    {packageNames
+                      .filter(
+                        (packageName) =>
+                          !packagesBeingInstalled.current.includes(packageName)
+                      )
                       .map((packageName) => {
-                        if (packagesInstalled.includes(packageName)) {
-                          return null;
-                        }
                         return (
-                          <Button onClick={() => {
-                            installPackage(packageName,deep);
-                            setPackagesInstalled([...packagesInstalled, packageName]);
-                          }}>
+                          <Button
+                            key={packageName}
+                            onClick={() => {
+                              installPackage(packageName, deep);
+                            }}
+                          >
                             Install {packageName}
                           </Button>
                         );
-                    })
-                  }
+                      })}
                   </div>
                 );
               }}
@@ -139,40 +147,53 @@ export function Page({ renderChildren }: PageParam) {
                 <Text>Checking if deep packages are installed...</Text>
               )}
             >
-                {arePermissionsGranted ? (
-                  <WithDeviceLinkId
-                    deep={deep}
-                    renderChildren={({ deviceLinkId }) =>
-                      renderChildren({ deep, deviceLinkId })
-                    }
-                  />
-                ) : (
-                  <Button
-                    style={{ position: 'relative', zIndex: 1000 }}
-                    onClick={async () => {
-                      const { value: arePermissionsGranted } = await VoiceRecorder.requestAudioRecordingPermission();
-                      setArePermissionsGranted(arePermissionsGranted);
-                    }}
-                  >
-                    GET RECORDING PERMISSION
-                  </Button>
-                )}
-              </WithPackagesInstalled>
-            );
-          }}
-        />
-      </ProvidersAndLoginOrContent>
+              <WithPermissionsGranted>
+                <WithDeviceLinkId
+                  deep={deep}
+                  renderChildren={({ deviceLinkId }) =>
+                    renderChildren({ deep, deviceLinkId })
+                  }
+                />
+              </WithPermissionsGranted>
+            </WithPackagesInstalled>
+          );
+        }}
+      />
     </StoreProvider>
   );
 }
 
-interface WithDeepProps {
-  renderChildren: (param: { deep: DeepClient }) => JSX.Element;
-}
+function WithPermissionsGranted({ children }: { children: JSX.Element }) {
+  const [arePermissionsGranted, setArePermissionsGranted] = useState<
+    boolean | undefined
+  >(undefined);
 
-function WithDeep({ renderChildren }: WithDeepProps) {
-  const deep = useDeep();
-  return renderChildren({ deep });
+  useEffect(() => {
+    VoiceRecorder.requestAudioRecordingPermission().then(
+      ({ value: isPermissionGranted }) => {
+        setArePermissionsGranted(isPermissionGranted);
+      }
+    );
+  }, []);
+
+  if (arePermissionsGranted === undefined) {
+    return null;
+  } else if (arePermissionsGranted === false) {
+    return (
+      <Button
+        style={{ position: 'relative', zIndex: 1000 }}
+        onClick={async () => {
+          const { value: arePermissionsGranted } =
+            await VoiceRecorder.requestAudioRecordingPermission();
+          setArePermissionsGranted(arePermissionsGranted);
+        }}
+      >
+        Provide Recodring Permissions
+      </Button>
+    );
+  } else {
+    return children;
+  }
 }
 
 interface WithDeviceLinkIdProps {
