@@ -104,7 +104,8 @@ export function Page({ renderChildren }: PageParam) {
         const newPackages = new Set(prevPackages);
         newPackages.delete(packageName);
         return newPackages;
-      });        }
+      });
+    }
   };
 
   return (
@@ -126,26 +127,26 @@ export function Page({ renderChildren }: PageParam) {
               renderIfNotInstalled={(packageNames) => {
                 return (
                   <div>
-                  {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
-                  ,
-                  {packageNames
-  .filter(
-    (packageName) =>
-      !packagesBeingInstalled.has(packageName)
-  )
-  .map((packageName) => {
-    return (
-      <Button
-        key={packageName}
-        onClick={() => {
-          installPackage(packageName, deep);
-        }}
-      >
-        Install {packageName}
-      </Button>
-    );
-  })}
-                </div>          
+                    {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
+                    ,
+                    {packageNames
+                      .filter(
+                        (packageName) =>
+                          !packagesBeingInstalled.has(packageName)
+                      )
+                      .map((packageName) => {
+                        return (
+                          <Button
+                            key={packageName}
+                            onClick={() => {
+                              installPackage(packageName, deep);
+                            }}
+                          >
+                            Install {packageName}
+                          </Button>
+                        );
+                      })}
+                  </div>
                 );
               }}
               renderIfLoading={() => (
