@@ -134,7 +134,6 @@ function Content({ deep }: ContentParam) {
     } else {
       try {
         setIsProcessing(true);
-        setLastPress(Date.now());
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
@@ -202,7 +201,9 @@ function Content({ deep }: ContentParam) {
               },
             },
           });
-
+          
+          setNewConversationLinkId(conversationLinkId)
+            
           console.log("flakeed7");
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
@@ -252,6 +253,7 @@ function Content({ deep }: ContentParam) {
               },
             },
           });
+          replyMessageLinkId = replyToMessageLinkId;
         } else {
           const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
           console.log("sortedData", sortedData)
@@ -397,6 +399,7 @@ function Content({ deep }: ContentParam) {
         }
 
         console.log("flakeed8");
+               setLastPress(Date.now());
         setIsRecording(false);
         setIsProcessing(false);
       } catch (error) {
@@ -598,7 +601,7 @@ function Content({ deep }: ContentParam) {
           {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
         </Button>
       )}
-      
+
       <ScreenChat newConversationLinkId={newConversationLinkId} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
     </Stack>
