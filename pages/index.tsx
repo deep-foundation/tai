@@ -64,62 +64,62 @@ function Content({ deep }: ContentParam) {
     }
   }, [])
 
-useEffect(() => {
-  (async () => {
-    const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
-    const googleCloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
-    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-    const { data: checkApiKeyLink } = await deep.select({
-      type_id: apiKeyTypeLinkId,
-      in: {
-        type_id: containTypeLinkId,
-        from_id: deep.linkId,
-      },
-    });
-
-    console.log("checkApiKeyLink", checkApiKeyLink);
-
-    if (!checkApiKeyLink || checkApiKeyLink.length === 0) {
-      const { data: [{ id: apiKeyLinkId }] } = await deep.insert({
+  useEffect(() => {
+    (async () => {
+      const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
+      const googleCloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
+      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+      const { data: checkApiKeyLink } = await deep.select({
         type_id: apiKeyTypeLinkId,
-        string: { data: { value: apiKey } },
         in: {
-          data: {
-            type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          },
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
         },
       });
 
-      console.log("apiKeyLinkId", apiKeyLinkId);
-    }
+      console.log("checkApiKeyLink", checkApiKeyLink);
 
-    const { data: checkGoogleAuthLink } = await deep.select({
-      type_id: googleCloudAuthKeyTypeLink,
-      in: {
-        type_id: containTypeLinkId,
-        from_id: deep.linkId,
-      },
-    });
+      if (!checkApiKeyLink || checkApiKeyLink.length === 0) {
+        const { data: [{ id: apiKeyLinkId }] } = await deep.insert({
+          type_id: apiKeyTypeLinkId,
+          string: { data: { value: apiKey } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
 
-    console.log("checkGoogleAuthLink", checkGoogleAuthLink);
+        console.log("apiKeyLinkId", apiKeyLinkId);
+      }
 
-    if (!checkGoogleAuthLink || checkGoogleAuthLink.length === 0) {
-      const { data: [{ id: googleAuthLinkId }] } = await deep.insert({
+      const { data: checkGoogleAuthLink } = await deep.select({
         type_id: googleCloudAuthKeyTypeLink,
-        string: { data: { value: googleAuth } },
         in: {
-          data: {
-            type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          },
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
         },
       });
 
-      console.log("googleAuthLinkId", googleAuthLinkId);
-    }
-  })();
-}, []);
+      console.log("checkGoogleAuthLink", checkGoogleAuthLink);
+
+      if (!checkGoogleAuthLink || checkGoogleAuthLink.length === 0) {
+        const { data: [{ id: googleAuthLinkId }] } = await deep.insert({
+          type_id: googleCloudAuthKeyTypeLink,
+          string: { data: { value: googleAuth } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+
+        console.log("googleAuthLinkId", googleAuthLinkId);
+      }
+    })();
+  }, []);
 
   const handleClick = async () => {
     if (!isRecording) {
@@ -162,7 +162,7 @@ useEffect(() => {
         });
         console.log("transcribeTextLinkId", transcribeTextLinkId)
 
-        const { link: transcribedTextLinkId } = await tryGetLink(deep,{
+        const { link: transcribedTextLinkId } = await tryGetLink(deep, {
           delayMs: 1000,
           attemptsCount: 10,
           selectData: {
@@ -363,12 +363,12 @@ useEffect(() => {
                 }
               }`
             })
-            
+
             console.log("conversationLink", conversationLink)
 
             const { data: [{ id: messageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
-              string: { data: { value: transcribedTextLinkId.value.value} },
+              string: { data: { value: transcribedTextLinkId.value.value } },
               in: {
                 data: {
                   type_id: containTypeLinkId,
@@ -617,7 +617,7 @@ function Pages() {
   </Stack>
 }
 
-export async function tryGetLink(deep,{ selectData, delayMs, attemptsCount }) {
+export async function tryGetLink(deep, { selectData, delayMs, attemptsCount }) {
   let resultLink;
   for (let i = 0; i < attemptsCount; i++) {
     const {
@@ -628,7 +628,7 @@ export async function tryGetLink(deep,{ selectData, delayMs, attemptsCount }) {
       resultLink = link;
     }
 
-    if(attemptsCount !== 0) {
+    if (attemptsCount !== 0) {
       await sleep(delayMs);
     }
   }
