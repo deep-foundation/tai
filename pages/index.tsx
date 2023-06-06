@@ -595,9 +595,10 @@ function Content({ deep }: ContentParam) {
           }}
           onClick={handleClick}
         >
-    {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
-    </Button>
-  )}
+          {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
+        </Button>
+      )}
+      
       <ScreenChat newConversationLinkId={newConversationLinkId} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
     </Stack>
