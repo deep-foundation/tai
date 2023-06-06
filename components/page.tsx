@@ -75,7 +75,7 @@ export function Page({ renderChildren }: PageParam) {
           },
         ]);
       }
-      if (packageName == '@deep-foundation/chatgpt') {
+      if (packageName == '@deep-foundation/capacitor-device') {
         await deep.insert([
           {
             type_id: await deep.id('@deep-foundation/core', 'Join'),
