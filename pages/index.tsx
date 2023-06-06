@@ -37,6 +37,8 @@ function Content({ deep }: ContentParam) {
   const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
+  const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
+  const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
   const startTime = useRef('');
   let replyMessageLinkId;
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
@@ -61,6 +63,23 @@ function Content({ deep }: ContentParam) {
       initializeContainerLink();
     }
   }, [])
+
+useEffect(() => {
+  (async () => {
+    const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
+    const googleCloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
+    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+    const { data: checkApiKeyLink } = await deep.select({
+      type_id: apiKeyTypeLinkId,
+      in: {
+        type_id: containTypeLinkId,
+        from_id: deep.linkId,
+      },
+    });
+
+    console.log("checkApiKeyLink", checkApiKeyLink);
+  })();
+}, []);
 
   const handleClick = async () => {
     if (!isRecording) {
