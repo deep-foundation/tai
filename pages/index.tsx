@@ -103,6 +103,21 @@ useEffect(() => {
     });
 
     console.log("checkGoogleAuthLink", checkGoogleAuthLink);
+
+    if (!checkGoogleAuthLink || checkGoogleAuthLink.length === 0) {
+      const { data: [{ id: googleAuthLinkId }] } = await deep.insert({
+        type_id: googleCloudAuthKeyTypeLink,
+        string: { data: { value: googleAuth } },
+        in: {
+          data: {
+            type_id: containTypeLinkId,
+            from_id: deep.linkId,
+          },
+        },
+      });
+
+      console.log("googleAuthLinkId", googleAuthLinkId);
+    }
   })();
 }, []);
 
