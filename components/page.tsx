@@ -3,13 +3,12 @@ import { StoreProvider } from './store-provider';
 import { Button, Text } from '@chakra-ui/react';
 import { useLocalStore } from '@deep-foundation/store/local';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
-import { DeepClient, useDeep } from '@deep-foundation/deeplinks/imports/client';
+import { DeepClient} from '@deep-foundation/deeplinks/imports/client';
 import { useState, useEffect, useRef } from 'react';
 import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { WithDeviceInsertionIfDoesNotExistAndSavingdata } from '@deep-foundation/capacitor-device';
-import { LocalStorage } from 'node-localstorage';
-import { PackageInstallationStatuses } from '@deep-foundation/react-use-are-packages-installed';
+
 export interface PageParam {
   renderChildren: (param: {
     deep: DeepClient;
@@ -22,6 +21,7 @@ export function Page({ renderChildren }: PageParam) {
   const installPackage = async (packageName, deep) => {
     if (!packagesBeingInstalled.current[packageName]) {
       console.log('if condition');
+
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
@@ -34,6 +34,7 @@ export function Page({ renderChildren }: PageParam) {
           },
         },
       ]);
+
       let packageLinkId;
       while (!packageLinkId) {
         try {
@@ -45,6 +46,7 @@ export function Page({ renderChildren }: PageParam) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
+
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/core', 'Join'),
@@ -57,6 +59,7 @@ export function Page({ renderChildren }: PageParam) {
           to_id: await deep.id('deep', 'admin'),
         },
       ]);
+
       if (packageName == '@deep-foundation/chatgpt') {
         await deep.insert([
           {
@@ -75,6 +78,7 @@ export function Page({ renderChildren }: PageParam) {
           },
         ]);
       }
+      
       if (packageName == '@deep-foundation/capacitor-device') {
         await deep.insert([
           {
