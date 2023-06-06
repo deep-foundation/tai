@@ -3,7 +3,7 @@ import { StoreProvider } from './store-provider';
 import { Button, Text } from '@chakra-ui/react';
 import { useLocalStore } from '@deep-foundation/store/local';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
-import { DeepClient} from '@deep-foundation/deeplinks/imports/client';
+import { DeepClient } from '@deep-foundation/deeplinks/imports/client';
 import { useState, useEffect, useRef } from 'react';
 import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
@@ -17,9 +17,12 @@ export interface PageParam {
 }
 
 export function Page({ renderChildren }: PageParam) {
-  const packagesBeingInstalled = useRef<Array<string>>([]);
+  const [processingPackage, setProcessingPackage] = useState(null);
+  const [packagesBeingInstalled, setPackagesBeingInstalled] = useState(new Set());
+
   const installPackage = async (packageName, deep) => {
-    if (!packagesBeingInstalled.current[packageName]) {
+    if (!packagesBeingInstalled.has(packageName)) {
+      setPackagesBeingInstalled(prevPackages => new Set([...prevPackages, packageName]));
       console.log('if condition');
 
       await deep.insert([
@@ -78,7 +81,7 @@ export function Page({ renderChildren }: PageParam) {
           },
         ]);
       }
-      
+
       if (packageName == '@deep-foundation/capacitor-device') {
         await deep.insert([
           {
@@ -97,7 +100,11 @@ export function Page({ renderChildren }: PageParam) {
           },
         ]);
       }
-    }
+      setPackagesBeingInstalled(prevPackages => {
+        const newPackages = new Set(prevPackages);
+        newPackages.delete(packageName);
+        return newPackages;
+      });        }
   };
 
   return (
@@ -119,28 +126,26 @@ export function Page({ renderChildren }: PageParam) {
               renderIfNotInstalled={(packageNames) => {
                 return (
                   <div>
-                    {`Install these deep packages to proceed: ${packageNames.join(
-                      ', '
-                    )}`}
-                    ,
-                    {packageNames
-                      .filter(
-                        (packageName) =>
-                          !packagesBeingInstalled.current.includes(packageName)
-                      )
-                      .map((packageName) => {
-                        return (
-                          <Button
-                            key={packageName}
-                            onClick={() => {
-                              installPackage(packageName, deep);
-                            }}
-                          >
-                            Install {packageName}
-                          </Button>
-                        );
-                      })}
-                  </div>
+                  {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
+                  ,
+                  {packageNames
+  .filter(
+    (packageName) =>
+      !packagesBeingInstalled.has(packageName)
+  )
+  .map((packageName) => {
+    return (
+      <Button
+        key={packageName}
+        onClick={() => {
+          installPackage(packageName, deep);
+        }}
+      >
+        Install {packageName}
+      </Button>
+    );
+  })}
+                </div>          
                 );
               }}
               renderIfLoading={() => (
