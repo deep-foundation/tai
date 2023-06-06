@@ -38,7 +38,7 @@ function Content({ deep }: ContentParam) {
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
   const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
-  const [googleAuth, setGoogleAuth] = useLocalStore("googleAuth", undefined);
+  const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", '');
   const startTime = useRef('');
   let replyMessageLinkId;
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
@@ -105,9 +105,10 @@ function Content({ deep }: ContentParam) {
       console.log("checkGoogleAuthLink", checkGoogleAuthLink);
 
       if (!checkGoogleAuthLink || checkGoogleAuthLink.length === 0) {
+        const parsedGoogleAuth = JSON.parse(googleAuth);
         const { data: [{ id: googleAuthLinkId }] } = await deep.insert({
           type_id: googleCloudAuthKeyTypeLink,
-          string: { data: { value: googleAuth } },
+          object: { data: { value: parsedGoogleAuth } },
           in: {
             data: {
               type_id: containTypeLinkId,
