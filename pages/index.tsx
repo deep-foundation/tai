@@ -93,6 +93,16 @@ useEffect(() => {
 
       console.log("apiKeyLinkId", apiKeyLinkId);
     }
+
+    const { data: checkGoogleAuthLink } = await deep.select({
+      type_id: googleCloudAuthKeyTypeLink,
+      in: {
+        type_id: containTypeLinkId,
+        from_id: deep.linkId,
+      },
+    });
+
+    console.log("checkGoogleAuthLink", checkGoogleAuthLink);
   })();
 }, []);
 
