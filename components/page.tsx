@@ -135,7 +135,7 @@ export function Page({ renderChildren }: PageParam) {
                             onClick={() => {
                               installPackage(packageName, deep);
                             }}
-                            disabled={packagesBeingInstalled.current.has(packageName)}
+                            isDisabled={packagesBeingInstalled.current.has(packageName)}
                           >
                             Install {packageName}
                           </Button>
