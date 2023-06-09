@@ -19,14 +19,13 @@ export interface PageParam {
 
 export function Page({ renderChildren }: PageParam) {
   const [processingPackage, setProcessingPackage] = useState(null);
-  const packagesBeingInstalled = useRef(new Set());
+  const [packagesBeingInstalled, setPackagesBeingInstalled] = useState(new Set());
 
   const installPackage = async (param: {
     packageName: string, deep: DeepClient
   }) => {
     const { packageName, deep } = param;
-    if (!packagesBeingInstalled.current.has(packageName)) {
-      packagesBeingInstalled.current = new Set([...packagesBeingInstalled.current, packageName]);
+    setPackagesBeingInstalled(prevPackages => new Set([...prevPackages, packageName]));
       console.log('if condition');
 
       const {data: [installLink]} = await deep.insert({
@@ -100,8 +99,11 @@ export function Page({ renderChildren }: PageParam) {
           },
         ]);
       }
-      packagesBeingInstalled.current.delete(packageName)
-    }
+      setPackagesBeingInstalled(prevPackages => {
+        const newPackages = new Set(prevPackages);
+        newPackages.delete(packageName);
+        return newPackages;
+      });
   };
 
   return (
@@ -131,11 +133,11 @@ export function Page({ renderChildren }: PageParam) {
                           <Button
                             key={packageName}
                             onClick={async () => {
-                              if(!packagesBeingInstalled.current.has(packageName)) {
+                              if(!packagesBeingInstalled.has(packageName)) {
                                 await installPackage({packageName, deep});
                               }
                             }}
-                            isLoading={packagesBeingInstalled.current.has(packageName)}
+                            isLoading={packagesBeingInstalled.has(packageName)}
                           >
                             Install {packageName}
                           </Button>
