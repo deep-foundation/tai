@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from 'react';
 import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { WithDeviceInsertionIfDoesNotExistAndSavingdata } from '@deep-foundation/capacitor-device';
+import delay from 'delay';
 
 export interface PageParam {
   renderChildren: (param: {
@@ -20,46 +21,45 @@ export function Page({ renderChildren }: PageParam) {
   const [processingPackage, setProcessingPackage] = useState(null);
   const packagesBeingInstalled = useRef(new Set());
 
-  const installPackage = async (packageName, deep) => {
+  const installPackage = async (param: {
+    packageName: string, deep: DeepClient
+  }) => {
+    const { packageName, deep } = param;
     if (!packagesBeingInstalled.current.has(packageName)) {
       packagesBeingInstalled.current = new Set([...packagesBeingInstalled.current, packageName]);
       console.log('if condition');
 
-      await deep.insert([
-        {
-          type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
-          from_id: deep.linkId,
-          to: {
-            data: {
-              type_id: await deep.id('@deep-foundation/core', 'PackageQuery'),
-              string: { data: { value: packageName } },
-            },
+      const {data: [installLink]} = await deep.insert({
+        type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
+        from_id: deep.linkId,
+        to: {
+          data: {
+            type_id: await deep.id('@deep-foundation/core', 'PackageQuery'),
+            string: { data: { value: packageName } },
           },
         },
-      ]);
+      });
 
-      let packageLinkId;
-      while (!packageLinkId) {
-        try {
-          packageLinkId = await deep.id(packageName);
-        } catch (error) {
-          console.log(
-            `Package ${packageName} not installed yet, retrying in 1 second...`
-          );
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
+      await deep.await(installLink.id);
 
+      // let packageLinkId: number|undefined = undefined;
+      // while (!packageLinkId) {
+      //   try {
+      //     packageLinkId = await deep.id(packageName);
+      //   } catch (error) {
+      //     console.log(
+      //       `Package ${packageName} not installed yet, retrying in 1 second...`
+      //     );
+      //     await delay(1000);
+      //   }
+      // }
+
+      const packageLinkId = await deep.id(packageName)
       await deep.insert([
         {
           type_id: await deep.id('@deep-foundation/core', 'Join'),
           from_id: packageLinkId,
-          to_id: await deep.id('deep', 'users', 'packages'),
-        },
-        {
-          type_id: await deep.id('@deep-foundation/core', 'Join'),
-          from_id: packageLinkId,
-          to_id: await deep.id('deep', 'admin'),
+          to_id: deep.linkId,
         },
       ]);
 
@@ -108,8 +108,6 @@ export function Page({ renderChildren }: PageParam) {
     <StoreProvider>
       <WithProvidersAndSetup
         renderChildren={({ deep }) => {
-          console.log(deep.linkId);
-
           return (
             <WithPackagesInstalled
               deep={deep}
@@ -132,10 +130,12 @@ export function Page({ renderChildren }: PageParam) {
                         return (
                           <Button
                             key={packageName}
-                            onClick={() => {
-                              installPackage(packageName, deep);
+                            onClick={async () => {
+                              if(!packagesBeingInstalled.current.has(packageName)) {
+                                await installPackage({packageName, deep});
+                              }
                             }}
-                            isDisabled={packagesBeingInstalled.current.has(packageName)}
+                            isLoading={packagesBeingInstalled.current.has(packageName)}
                           >
                             Install {packageName}
                           </Button>
