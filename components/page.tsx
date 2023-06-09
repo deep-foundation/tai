@@ -1,6 +1,6 @@
 import { WithProvidersAndSetup } from './withProvidersAndSetup';
 import { StoreProvider } from './store-provider';
-import { Button, Text } from '@chakra-ui/react';
+import { Button, Stack, Text } from '@chakra-ui/react';
 import { useLocalStore } from '@deep-foundation/store/local';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
 import { DeepClient } from '@deep-foundation/deeplinks/imports/client';
@@ -126,14 +126,12 @@ export function Page({ renderChildren }: PageParam) {
               renderIfError={(error) => <div>{error.message}</div>}
               renderIfNotInstalled={(packageNames) => {
                 return (
-                  <div>
+                  <Stack>
+                    <Text>
                     {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
-                    ,
+                    </Text>
+                    
                     {packageNames
-                      .filter(
-                        (packageName) =>
-                          !packagesBeingInstalled.has(packageName)
-                      )
                       .map((packageName) => {
                         return (
                           <Button
@@ -141,12 +139,13 @@ export function Page({ renderChildren }: PageParam) {
                             onClick={() => {
                               installPackage(packageName, deep);
                             }}
+                            disabled={packagesBeingInstalled.has(packageName)}
                           >
                             Install {packageName}
                           </Button>
                         );
                       })}
-                  </div>
+                  </Stack>
                 );
               }}
               renderIfLoading={() => (
