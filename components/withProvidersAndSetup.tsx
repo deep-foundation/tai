@@ -1,5 +1,5 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { DeepProvider } from '@deep-foundation/deeplinks/imports/client';
+import { DeepClient, DeepProvider } from '@deep-foundation/deeplinks/imports/client';
 import { TokenProvider } from '@deep-foundation/deeplinks/imports/react-token';
 import { useLocalStore } from '@deep-foundation/store/local';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
@@ -70,5 +70,5 @@ export function WithProvidersAndSetup({
 }
 
 export interface WithProvidersAndSetupParam {
-  renderChildren: (param: { deep: any }) => JSX.Element;
+  renderChildren: (param: { deep: DeepClient }) => JSX.Element;
 }
