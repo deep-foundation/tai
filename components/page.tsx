@@ -18,11 +18,11 @@ export interface PageParam {
 
 export function Page({ renderChildren }: PageParam) {
   const [processingPackage, setProcessingPackage] = useState(null);
-  const [packagesBeingInstalled, setPackagesBeingInstalled] = useState(new Set());
+  const packagesBeingInstalled = useRef(new Set());
 
   const installPackage = async (packageName, deep) => {
-    if (!packagesBeingInstalled.has(packageName)) {
-      setPackagesBeingInstalled(prevPackages => new Set([...prevPackages, packageName]));
+    if (!packagesBeingInstalled.current.has(packageName)) {
+      packagesBeingInstalled.current = new Set([...packagesBeingInstalled.current, packageName]);
       console.log('if condition');
 
       await deep.insert([
@@ -100,11 +100,7 @@ export function Page({ renderChildren }: PageParam) {
           },
         ]);
       }
-      setPackagesBeingInstalled(prevPackages => {
-        const newPackages = new Set(prevPackages);
-        newPackages.delete(packageName);
-        return newPackages;
-      });
+      packagesBeingInstalled.current.delete(packageName)
     }
   };
 
@@ -139,7 +135,7 @@ export function Page({ renderChildren }: PageParam) {
                             onClick={() => {
                               installPackage(packageName, deep);
                             }}
-                            disabled={packagesBeingInstalled.has(packageName)}
+                            disabled={packagesBeingInstalled.current.has(packageName)}
                           >
                             Install {packageName}
                           </Button>
