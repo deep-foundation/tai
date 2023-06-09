@@ -58,9 +58,9 @@
     "@capawesome/capacitor-file-picker": "^0.6.3",
     "@chakra-ui/react": "^2.7.0",
     "@deep-foundation/capacitor-device": "^1.0.21",
-    "@deep-foundation/react-use-are-packages-installed": "^1.0.2",
     "@deep-foundation/deeplinks": "^0.0.193",
     "@deep-foundation/react-hasura": "^0.0.15",
+    "@deep-foundation/react-use-are-packages-installed": "^1.0.2",
     "@deep-foundation/react-with-packages-installed": "^0.5.3",
     "@deep-foundation/store": "^0.0.19",
     "@emotion/react": "^11.10.6",
@@ -100,6 +100,7 @@
   "devDependencies": {
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
+    "delay": "^6.0.0",
     "detective": "^5.2.1",
     "process": "^0.11.10"
   }
