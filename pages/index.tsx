@@ -166,7 +166,7 @@ function Content({ deep }: ContentParam) {
 
         const { link: transcribedTextLinkId } = await tryGetLink(deep, {
           delayMs: 1000,
-          attemptsCount: 10,
+          attemptsCount: 20,
           selectData: {
             type_id: transcriptionTypeLinkId,
             in: {
@@ -411,7 +411,7 @@ function Content({ deep }: ContentParam) {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       const doAsyncStuff = async () => {
-        if (Date.now() - lastPress >= 15000 && !isRecording) {
+        if (Date.now() - lastPress >= 60000 && !isRecording) {
           const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
           const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
 
@@ -431,7 +431,7 @@ function Content({ deep }: ContentParam) {
         }
       };
       doAsyncStuff();
-    }, 15000);
+    }, 60000);
 
     return () => clearTimeout(timeoutId);
   }, [lastPress, isRecording]);
