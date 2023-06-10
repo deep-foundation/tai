@@ -5,9 +5,7 @@ import { Setup } from './login';
 export function WithSetup({
   renderChildren,
   gqlPath,
-  setGqlPath,
-  systemMsg,
-  setSystemMsg,
+  setGqlPath
 }: LoginOrContentParam) {
   const deep = useDeep();
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
