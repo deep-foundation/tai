@@ -22,7 +22,7 @@ export function WithSetup({
   }, [deep]);
 
   console.log({ isAuthorized, gqlPath });
-  return isAuthorized && gqlPath && googleAuth && apiKey && systemMsg ? (
+  return isAuthorized && gqlPath && systemMsg ? (
     renderChildren({deep})
   ) : (
     <Setup
