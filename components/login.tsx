@@ -31,6 +31,21 @@ export function Setup(arg: {
       });
 
       console.log("checkApiKeyLink", checkApiKeyLink);
+
+      if (!checkApiKeyLink || checkApiKeyLink.length === 0) {
+        const { data: [{ id: apiKeyLinkId }] } = await deep.insert({
+          type_id: apiKeyTypeLinkId,
+          string: { data: { value: apiKey } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+
+        console.log("apiKeyLinkId", apiKeyLinkId);
+      }
   }
   return (
     <>
