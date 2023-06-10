@@ -20,7 +20,7 @@ export function WithSetup({
   }, [deep]);
 
   console.log({ isAuthorized, gqlPath });
-  return isAuthorized ? (
+  return isAuthorized && gqlPath ? (
     renderChildren({deep})
   ) : (
     <Setup
