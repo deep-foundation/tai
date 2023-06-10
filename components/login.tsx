@@ -1,10 +1,15 @@
 import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
 import { useLocalStore } from "@deep-foundation/store/local";
-export function Setup(arg: { onSubmit: (arg: { gqlPath: string, token: string, apiKey: string, googleAuth: string, systemMsg: string }) => void }) {
+import { useState } from "react";
+import { useDeep } from "@deep-foundation/deeplinks/imports/client";
+export function Setup(arg: {
+  onAuthorize: (arg: { gqlPath: string, token: string }) => void,
+  onSubmit: (arg: { systemMsg: string  }) => void
+}) {
   const [gqlPath, setGqlPath] = useLocalStore<string>("gqlPath", "");
   const [token, setToken] = useLocalStore<string>("token", "");
-  const [apiKey, setApiKey] = useLocalStore<string>("apikey", "");
-  const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", "");
+  const [apiKey, setApiKey] = useState<string>("");
+  const [googleAuth, setGoogleAuth] = useState<string>("");
   const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
 
   return (
@@ -53,13 +58,16 @@ export function Setup(arg: { onSubmit: (arg: { gqlPath: string, token: string, a
           </FormControl>
 
           <Button onClick={() => {
-            arg.onSubmit({
+            arg.onAuthorize({
               gqlPath,
-              token,
-              apiKey,
-              googleAuth,
-              systemMsg
+              token
             });
+          }}>
+            Autorize
+          </Button>
+
+          <Button onClick={() => {
+            submitForm();
           }}>
             Submit
           </Button>
