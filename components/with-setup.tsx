@@ -38,7 +38,5 @@ export function WithSetup({
 export interface LoginOrContentParam {
   gqlPath: string | undefined;
   setGqlPath: (gqlPath: string | undefined) => void;
-  systemMsg: string | undefined;
-  setSystemMsg: (systemMsg: string | undefined) => void;
   renderChildren: (param: { deep: DeepClient }) => JSX.Element;
 }
