@@ -7,9 +7,7 @@ export function WithSetup({
   gqlPath,
   setGqlPath,
   apiKey,
-  googleAuth,
   setApiKey,
-  setGoogleAuth,
   systemMsg,
   setSystemMsg,
 }: LoginOrContentParam) {
