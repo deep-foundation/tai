@@ -9,11 +9,7 @@ import { ApolloClientTokenizedProvider } from '@deep-foundation/react-hasura/apo
 export function WithProvidersAndSetup({
   renderChildren,
 }: WithProvidersAndSetupParam) {
-  const [gqlPath, setGqlPath] = useLocalStore<string>(
-    CapacitorStoreKeys[CapacitorStoreKeys.GraphQlPath],
-    ''
-  );
-  const [systemMsg, setSystemMsg] = useLocalStore<string>('systemMsg', '');
+  const [gqlPath, setGqlPath] = useLocalStore<string>(CapacitorStoreKeys[CapacitorStoreKeys.GraphQlPath],'');
 
   return (
     <>
