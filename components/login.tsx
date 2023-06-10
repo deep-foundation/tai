@@ -13,11 +13,24 @@ export function Setup(arg: {
   const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
 
   const deep = useDeep();
-
+  
   const submitForm = async () => {
       arg.onSubmit({
         systemMsg
       });
+      const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
+      const googleCloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
+      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+
+      const { data: checkApiKeyLink } = await deep.select({
+        type_id: apiKeyTypeLinkId,
+        in: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
+        },
+      });
+
+      console.log("checkApiKeyLink", checkApiKeyLink);
   }
   return (
     <>
