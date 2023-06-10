@@ -36,13 +36,6 @@ export function WithProvidersAndSetup({
                     setGqlPath(newGqlPath);
                   }
                 }}
-                systemMsg={systemMsg}
-                setSystemMsg={(newSystemMsg) => {
-                  console.log({ newSystemMsg });
-                  if (newSystemMsg !== undefined) {
-                    setSystemMsg(newSystemMsg);
-                  }
-                }}
                 renderChildren={renderChildren}
               />
             </DeepProvider>
