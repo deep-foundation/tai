@@ -31,9 +31,6 @@ export function WithSetup({
         token: arg.token,
       });
     }}
-      onSubmit={(arg) => {
-        setSystemMsg(arg.systemMsg);
-      }}
     />
   );
 }
