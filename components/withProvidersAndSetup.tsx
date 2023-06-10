@@ -13,7 +13,6 @@ export function WithProvidersAndSetup({
     CapacitorStoreKeys[CapacitorStoreKeys.GraphQlPath],
     ''
   );
-  const [googleAuth, setGoogleAuth] = useLocalStore<string>('googleAuth', '');
   const [systemMsg, setSystemMsg] = useLocalStore<string>('systemMsg', '');
 
   return (
@@ -35,13 +34,6 @@ export function WithProvidersAndSetup({
                   console.log({ newGqlPath });
                   if (newGqlPath !== undefined) {
                     setGqlPath(newGqlPath);
-                  }
-                }}
-                googleAuth={googleAuth}
-                setGoogleAuth={(newGoogleAuth) => {
-                  console.log({ newGoogleAuth });
-                  if (newGoogleAuth !== undefined) {
-                    setGoogleAuth(newGoogleAuth);
                   }
                 }}
                 systemMsg={systemMsg}
