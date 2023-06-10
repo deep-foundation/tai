@@ -37,8 +37,6 @@ function Content({ deep }: ContentParam) {
   const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
-  const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
-  const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", '');
   const [isProcessing, setIsProcessing] = useState(false);
   const startTime = useRef('');
   let replyMessageLinkId;
