@@ -12,6 +12,13 @@ export function Setup(arg: {
   const [googleAuth, setGoogleAuth] = useState<string>("");
   const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
 
+  const deep = useDeep();
+
+  const submitForm = async () => {
+      arg.onSubmit({
+        systemMsg
+      });
+  }
   return (
     <>
       <Card>
