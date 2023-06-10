@@ -56,6 +56,22 @@ export function Setup(arg: {
       });
 
       console.log("checkGoogleAuthLink", checkGoogleAuthLink);
+
+      if (!checkGoogleAuthLink || checkGoogleAuthLink.length === 0) {
+        const parsedGoogleAuth = JSON.parse(googleAuth);
+        const { data: [{ id: googleAuthLinkId }] } = await deep.insert({
+          type_id: googleCloudAuthKeyTypeLink,
+          object: { data: { value: parsedGoogleAuth } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+
+        console.log("googleAuthLinkId", googleAuthLinkId);
+      }
   }
   return (
     <>
