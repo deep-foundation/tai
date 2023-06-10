@@ -49,8 +49,6 @@ export interface LoginOrContentParam {
   setGqlPath: (gqlPath: string | undefined) => void;
   apiKey: string | undefined;
   setApiKey: (apiKey: string | undefined) => void;
-  googleAuth: string | undefined;
-  setGoogleAuth: (googleAuth: string | undefined) => void;
   systemMsg: string | undefined;
   setSystemMsg: (systemMsg: string | undefined) => void;
   renderChildren: (param: { deep: DeepClient }) => JSX.Element;
