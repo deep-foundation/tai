@@ -30,14 +30,14 @@ export function WithSetup({
     renderChildren({deep})
   ) : (
     <Setup
+    onAuthorize={(arg)=>{
+      console.log({ arg });
+      setGqlPath(arg.gqlPath);
+      deep.login({
+        token: arg.token,
+      });
+    }}
       onSubmit={(arg) => {
-        console.log({ arg });
-        setGqlPath(arg.gqlPath);
-        deep.login({
-          token: arg.token,
-        });
-        setApiKey(arg.apiKey);
-        setGoogleAuth(arg.googleAuth);
         setSystemMsg(arg.systemMsg);
       }}
     />
