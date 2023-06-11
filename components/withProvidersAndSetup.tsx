@@ -9,7 +9,13 @@ import { ApolloClientTokenizedProvider } from '@deep-foundation/react-hasura/apo
 export function WithProvidersAndSetup({
   renderChildren,
 }: WithProvidersAndSetupParam) {
-  const [gqlPath, setGqlPath] = useLocalStore<string>(CapacitorStoreKeys[CapacitorStoreKeys.GraphQlPath],'');
+  const [gqlPath, setGqlPath] = useLocalStore<string>(
+    CapacitorStoreKeys[CapacitorStoreKeys.GraphQlPath],
+    ''
+  );
+  const [apiKey, setApiKey] = useLocalStore<string>('apikey', '');
+  const [googleAuth, setGoogleAuth] = useLocalStore<string>('googleAuth', '');
+  const [systemMsg, setSystemMsg] = useLocalStore<string>('systemMsg', '');
 
   return (
     <>
@@ -30,6 +36,27 @@ export function WithProvidersAndSetup({
                   console.log({ newGqlPath });
                   if (newGqlPath !== undefined) {
                     setGqlPath(newGqlPath);
+                  }
+                }}
+                apiKey={apiKey}
+                setApiKey={(newApiKey) => {
+                  console.log({ newApiKey });
+                  if (newApiKey !== undefined) {
+                    setApiKey(newApiKey);
+                  }
+                }}
+                googleAuth={googleAuth}
+                setGoogleAuth={(newGoogleAuth) => {
+                  console.log({ newGoogleAuth });
+                  if (newGoogleAuth !== undefined) {
+                    setGoogleAuth(newGoogleAuth);
+                  }
+                }}
+                systemMsg={systemMsg}
+                setSystemMsg={(newSystemMsg) => {
+                  console.log({ newSystemMsg });
+                  if (newSystemMsg !== undefined) {
+                    setSystemMsg(newSystemMsg);
                   }
                 }}
                 renderChildren={renderChildren}
