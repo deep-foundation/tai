@@ -1,16 +1,10 @@
 import { Card, CardHeader, Heading, CardBody, FormControl, FormLabel, Input, Button } from "@chakra-ui/react";
 import { useLocalStore } from "@deep-foundation/store/local";
-import { useState } from "react";
-import { useDeep } from "@deep-foundation/deeplinks/imports/client";
 export function Setup(arg: {
   onAuthorize: (arg: { gqlPath: string, token: string }) => void,
 }) {
   const [gqlPath, setGqlPath] = useLocalStore<string>("gqlPath", "");
   const [token, setToken] = useLocalStore<string>("token", "");
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
-
-  const deep = useDeep();
-  
 
   return (
     <>
