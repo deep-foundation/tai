@@ -37,6 +37,8 @@ function Content({ deep }: ContentParam) {
   const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
+  const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
+  const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", '');
   const [isProcessing, setIsProcessing] = useState(false);
   const startTime = useRef('');
   let replyMessageLinkId;
@@ -62,6 +64,64 @@ function Content({ deep }: ContentParam) {
       initializeContainerLink();
     }
   }, [])
+
+  useEffect(() => {
+    (async () => {
+      const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
+      const googleCloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
+      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+      const { data: checkApiKeyLink } = await deep.select({
+        type_id: apiKeyTypeLinkId,
+        in: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
+        },
+      });
+
+      console.log("checkApiKeyLink", checkApiKeyLink);
+
+      if (!checkApiKeyLink || checkApiKeyLink.length === 0) {
+        const { data: [{ id: apiKeyLinkId }] } = await deep.insert({
+          type_id: apiKeyTypeLinkId,
+          string: { data: { value: apiKey } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+
+        console.log("apiKeyLinkId", apiKeyLinkId);
+      }
+
+      const { data: checkGoogleAuthLink } = await deep.select({
+        type_id: googleCloudAuthKeyTypeLink,
+        in: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
+        },
+      });
+
+      console.log("checkGoogleAuthLink", checkGoogleAuthLink);
+
+      if (!checkGoogleAuthLink || checkGoogleAuthLink.length === 0) {
+        const parsedGoogleAuth = JSON.parse(googleAuth);
+        const { data: [{ id: googleAuthLinkId }] } = await deep.insert({
+          type_id: googleCloudAuthKeyTypeLink,
+          object: { data: { value: parsedGoogleAuth } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+
+        console.log("googleAuthLinkId", googleAuthLinkId);
+      }
+    })();
+  }, []);
 
   const handleClick = async () => {
     if (!isRecording) {
@@ -126,7 +186,7 @@ function Content({ deep }: ContentParam) {
             from_id: deep.linkId,
           },
         });
-        
+
         console.log("checkConversationLink", checkConversationLink)
 
         if (!checkConversationLink || checkConversationLink.length === 0) {
