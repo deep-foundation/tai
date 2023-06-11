@@ -5,7 +5,13 @@ import { Setup } from './login';
 export function WithSetup({
   renderChildren,
   gqlPath,
-  setGqlPath
+  setGqlPath,
+  apiKey,
+  googleAuth,
+  setApiKey,
+  setGoogleAuth,
+  systemMsg,
+  setSystemMsg,
 }: LoginOrContentParam) {
   const deep = useDeep();
   const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
@@ -20,17 +26,20 @@ export function WithSetup({
   }, [deep]);
 
   console.log({ isAuthorized, gqlPath });
-  return isAuthorized && gqlPath ? (
+  return isAuthorized && gqlPath && googleAuth && apiKey && systemMsg ? (
     renderChildren({deep})
   ) : (
     <Setup
-    onAuthorize={(arg)=>{
-      console.log({ arg });
-      setGqlPath(arg.gqlPath);
-      deep.login({
-        token: arg.token,
-      });
-    }}
+      onSubmit={(arg) => {
+        console.log({ arg });
+        setGqlPath(arg.gqlPath);
+        deep.login({
+          token: arg.token,
+        });
+        setApiKey(arg.apiKey);
+        setGoogleAuth(arg.googleAuth);
+        setSystemMsg(arg.systemMsg);
+      }}
     />
   );
 }
@@ -38,5 +47,11 @@ export function WithSetup({
 export interface LoginOrContentParam {
   gqlPath: string | undefined;
   setGqlPath: (gqlPath: string | undefined) => void;
+  apiKey: string | undefined;
+  setApiKey: (apiKey: string | undefined) => void;
+  googleAuth: string | undefined;
+  setGoogleAuth: (googleAuth: string | undefined) => void;
+  systemMsg: string | undefined;
+  setSystemMsg: (systemMsg: string | undefined) => void;
   renderChildren: (param: { deep: DeepClient }) => JSX.Element;
 }
