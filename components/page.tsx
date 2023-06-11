@@ -1,10 +1,10 @@
 import { WithProvidersAndSetup } from './withProvidersAndSetup';
 import { StoreProvider } from './store-provider';
-import { Button, Stack, Text,FormControl, FormLabel,Input } from '@chakra-ui/react';
+import { Button, Stack, Text } from '@chakra-ui/react';
 import { useLocalStore } from '@deep-foundation/store/local';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
 import { DeepClient } from '@deep-foundation/deeplinks/imports/client';
-import { useState, useEffect, useRef, Children } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { WithDeviceInsertionIfDoesNotExistAndSavingdata } from '@deep-foundation/capacitor-device';
@@ -20,11 +20,6 @@ export interface PageParam {
 export function Page({ renderChildren }: PageParam) {
   const [processingPackage, setProcessingPackage] = useState(null);
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState(new Set());
-  const [apiKey, setApiKey] = useState<string>("");
-  const [googleAuth, setGoogleAuth] = useState<string>("");
-  const [systemMsg, setSystemMsg] = useLocalStore<string>("systemMsg", "");
-  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-  const [canRenderChildren, setCanRenderChildren] = useState(false);
 
   const installPackage = async (param: {
     packageName: string, deep: DeepClient
@@ -56,6 +51,7 @@ export function Page({ renderChildren }: PageParam) {
         }
       }
       // await deep.await(installLink.id);
+
       // const packageLinkId = await deep.id(packageName)
       await deep.insert([
         {
@@ -153,14 +149,14 @@ export function Page({ renderChildren }: PageParam) {
                 <Text>Checking if deep packages are installed...</Text>
               )}
             >
-                <WithPermissionsGranted deep={deep}>
-                  <WithDeviceLinkId
-                    deep={deep}
-                    renderChildren={({ deviceLinkId }) =>
-                      renderChildren({ deep, deviceLinkId })
-                    }
-                  />
-                </WithPermissionsGranted>
+              <WithPermissionsGranted>
+                <WithDeviceLinkId
+                  deep={deep}
+                  renderChildren={({ deviceLinkId }) =>
+                    renderChildren({ deep, deviceLinkId })
+                  }
+                />
+              </WithPermissionsGranted>
             </WithPackagesInstalled>
           );
         }}
@@ -169,124 +165,37 @@ export function Page({ renderChildren }: PageParam) {
   );
 }
 
-function WithPermissionsGranted({ children,deep }: { children: JSX.Element,deep:DeepClient }) {
+function WithPermissionsGranted({ children }: { children: JSX.Element }) {
   const [arePermissionsGranted, setArePermissionsGranted] = useState<
     boolean | undefined
   >(undefined);
-  const [formDataSubmitted, setFormDataSubmitted] = useLocalStore<boolean>("formDataSubmitted",false);
-  const [apiKey, setApiKey] = useState<string>("");
-  const [googleAuth, setGoogleAuth] = useState<string>("");
-  const [systemMsg, setSystemMsg] = useState<string>("");
 
-  const onSubmit = async (arg: { systemMsg: string }, deep: DeepClient ) => {
-    const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
-    const googleCloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
-    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-
-    const { data: checkApiKeyLink } = await deep.select({
-      type_id: apiKeyTypeLinkId,
-      in: {
-        type_id: containTypeLinkId,
-        from_id: deep.linkId,
-      },
-    });
-
-    console.log("checkApiKeyLink", checkApiKeyLink);
-
-    if (!checkApiKeyLink || checkApiKeyLink.length === 0) {
-      const { data: [{ id: apiKeyLinkId }] } = await deep.insert({
-        type_id: apiKeyTypeLinkId,
-        string: { data: { value: apiKey } },
-        in: {
-          data: {
-            type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          },
-        },
-      });
-
-      console.log("apiKeyLinkId", apiKeyLinkId);
-    }
-
-    const { data: checkGoogleAuthLink } = await deep.select({
-      type_id: googleCloudAuthKeyTypeLink,
-      in: {
-        type_id: containTypeLinkId,
-        from_id: deep.linkId,
-      },
-    });
-
-    console.log("checkGoogleAuthLink", checkGoogleAuthLink);
-
-    if (!checkGoogleAuthLink || checkGoogleAuthLink.length === 0) {
-      const parsedGoogleAuth = JSON.parse(googleAuth);
-      const { data: [{ id: googleAuthLinkId }] } = await deep.insert({
-        type_id: googleCloudAuthKeyTypeLink,
-        object: { data: { value: parsedGoogleAuth } },
-        in: {
-          data: {
-            type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          },
-        },
-      });
-
-      console.log("googleAuthLinkId", googleAuthLinkId);
-    }
-    if (apiKey && googleAuth && systemMsg) {
-     setFormDataSubmitted(true);
-    }
-}
-useEffect(() => {
-  if (formDataSubmitted) {
+  useEffect(() => {
     VoiceRecorder.requestAudioRecordingPermission().then(
       ({ value: isPermissionGranted }) => {
         setArePermissionsGranted(isPermissionGranted);
       }
     );
-  }
-}, [formDataSubmitted]);
+  }, []);
 
-if (arePermissionsGranted === undefined) {
-  return (
-    <div>
-      <FormControl id="openai-api-key">
-        <FormLabel>OpenAI API key</FormLabel>
-        <Input type="text" onChange={(newApiKey) => {
-          setApiKey(newApiKey.target.value)
-        }} />
-      </FormControl>
-      <FormControl id="google-service-account">
-        <FormLabel>Google service account</FormLabel>
-        <Input type="text" onChange={(newGoogleAuth) => {
-          setGoogleAuth(newGoogleAuth.target.value)
-        }} />
-      </FormControl>
-      <FormControl id="system-message">
-        <FormLabel>System Message</FormLabel>
-        <Input type="text" onChange={(newSystemMsg) => {
-          setSystemMsg(newSystemMsg.target.value)
-        }} />
-      </FormControl>
-      <Button onClick={() => onSubmit({ systemMsg }, deep)}>Submit</Button>
-    </div>
-  );
-} else if (arePermissionsGranted === false) {
-  return (
-    <Button
-      style={{ position: 'relative', zIndex: 1000 }}
-      onClick={async () => {
-        const { value: arePermissionsGranted } =
-          await VoiceRecorder.requestAudioRecordingPermission();
-        setArePermissionsGranted(arePermissionsGranted);
-      }}
-    >
-      Provide Recodring Permissions
-    </Button>
-  );
-} else {
-  return children;
-}
+  if (arePermissionsGranted === undefined) {
+    return null;
+  } else if (arePermissionsGranted === false) {
+    return (
+      <Button
+        style={{ position: 'relative', zIndex: 1000 }}
+        onClick={async () => {
+          const { value: arePermissionsGranted } =
+            await VoiceRecorder.requestAudioRecordingPermission();
+          setArePermissionsGranted(arePermissionsGranted);
+        }}
+      >
+        Provide Recodring Permissions
+      </Button>
+    );
+  } else {
+    return children;
+  }
 }
 
 interface WithDeviceLinkIdProps {
