@@ -41,6 +41,11 @@ function Content() {
   const startTime = useRef('');
   let replyMessageLinkId;
 
+  const graphQlPath = GRAPHQL_PATH;
+
+const token = TOKEN;
+
+
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
     'containerLinkId',
     0
