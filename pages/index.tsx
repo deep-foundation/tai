@@ -45,6 +45,13 @@ function Content() {
 
 const token = TOKEN;
 
+  const apolloClient = generateApolloClient({
+    path: graphQlPath,
+    ssl: true,
+    ws: true,
+    token,
+  });
+
 
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
     'containerLinkId',
