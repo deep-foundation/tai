@@ -10,6 +10,7 @@ import {
 import {
   DeepClient,
 } from '@deep-foundation/deeplinks/imports/client';
+import { generateApolloClient } from '@deep-foundation/hasura/client.js';
 const assert = require('assert');
 import { useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
@@ -26,22 +27,20 @@ interface ContentParam {
   deviceLinkId: number;
 }
 
-function Content({ deep }: ContentParam) {
+function Content() {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
-
+  let deep=useDeep();
   const [lastPress, setLastPress] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
-  const [systemMsg, setSystemMsg] = useLocalStore("systemMsg", undefined);
-  const [apiKey, setApiKey] = useLocalStore("apikey", undefined);
-  const [googleAuth, setGoogleAuth] = useLocalStore<string>("googleAuth", '');
   const [isProcessing, setIsProcessing] = useState(false);
   const startTime = useRef('');
   let replyMessageLinkId;
+
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
     'containerLinkId',
     0
@@ -52,7 +51,6 @@ function Content({ deep }: ContentParam) {
       if (deep.linkId !== 0) {
         return;
       }
-      await deep.guest();
     })
   }, [deep])
 
@@ -119,12 +117,14 @@ function Content({ deep }: ContentParam) {
         });
 
         console.log("googleAuthLinkId", googleAuthLinkId);
+        console.log("deep.linkId",deep.linkId)
       }
     })();
   }, []);
 
   const handleClick = async () => {
     if (!isRecording) {
+      console.log("deep.linkId",deep.linkId)
       try {
         startTime.current = await startRecording();
         setIsRecording(true);
@@ -134,6 +134,7 @@ function Content({ deep }: ContentParam) {
     } else {
       try {
         setIsProcessing(true);
+        console.log("deep.linkId",deep.linkId)
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
@@ -612,7 +613,7 @@ export default function IndexPage() {
   return (
     <Page
       renderChildren={({ deep, deviceLinkId }) => (
-        <Content deep={deep} deviceLinkId={deviceLinkId} />
+        <Content />
       )}
     />
   );
