@@ -52,6 +52,8 @@ const token = TOKEN;
     token,
   });
 
+  let deepClient = new DeepClient({ apolloClient });
+
 
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
     'containerLinkId',
