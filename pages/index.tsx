@@ -20,6 +20,7 @@ import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
 import ChatBubble from '../components/ChatBubble';
+import { generateApolloClient } from "@deep-foundation/hasura/client";
 
 interface ContentParam {
   deep: DeepClient;
@@ -46,6 +47,21 @@ function Content({ deep }: ContentParam) {
     'containerLinkId',
     0
   );
+
+  const graphQlPath =  process.env.NEXT_PUBLIC_GQL_PATH || 'default_path';
+  const ssl = process.env.NEXT_PUBLIC_GQL_PATH && !!~process.env.NEXT_PUBLIC_GQL_PATH.indexOf('localhost')  ? false  : true;
+  const apolloClient = generateApolloClient({
+    path: graphQlPath,
+    ssl: ssl,
+  });
+  const unloginedDeep = new DeepClient({ apolloClient });
+async()=>{  const guest = await unloginedDeep.guest();
+  const guestDeep = new DeepClient({ deep: unloginedDeep, ...guest });
+  const admin = await guestDeep.login({
+    linkId: await guestDeep.id('deep', 'admin'),
+  })
+  deep = new DeepClient({ deep: guestDeep, ...admin });
+};
 
   useEffect(() => {
     new Promise(async () => {
