@@ -54,6 +54,15 @@ const token = TOKEN;
 
   let deepClient = new DeepClient({ apolloClient });
 
+  console.log("apolloClient",{
+    path: graphQlPath,
+    ssl: true,
+    ws: true,
+    token,
+  } )
+
+      console.log("deep",deep)
+      console.log("deep.linkId",deep.linkId)
 
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
     'containerLinkId',
