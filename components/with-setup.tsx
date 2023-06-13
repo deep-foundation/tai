@@ -1,6 +1,6 @@
 import { DeepClient, useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { useState, useEffect } from 'react';
-import { Setup } from './login';
+import { Setup } from '../pages/login';
 
 export function WithSetup({
   renderChildren,
@@ -26,13 +26,13 @@ export function WithSetup({
   }, [deep]);
 
   console.log({ isAuthorized, gqlPath });
-  return isAuthorized && gqlPath && googleAuth && apiKey && systemMsg ? (
+  return isAuthorized ? (
     renderChildren({deep})
   ) : (
     <Setup
       onSubmit={(arg) => {
         console.log({ arg });
-        setGqlPath(arg.gqlPath);
+        setGqlPath("gqlPath");
         deep.login({
           token: arg.token,
         });
