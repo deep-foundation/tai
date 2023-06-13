@@ -34,7 +34,7 @@ export function WithSetup({
         console.log({ arg });
         setGqlPath("gqlPath");
         deep.login({
-          token: arg.token,
+          token: "token",
         });
         setApiKey(arg.apiKey);
         setGoogleAuth(arg.googleAuth);
