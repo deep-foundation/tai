@@ -31,7 +31,7 @@ function Content() {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
-  let deep=useDeep();
+  let deep = useDeep();
   const [lastPress, setLastPress] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -43,7 +43,7 @@ function Content() {
 
   const graphQlPath = GRAPHQL_PATH;
 
-const token = TOKEN;
+  const token = TOKEN;
 
   const apolloClient = generateApolloClient({
     path: graphQlPath,
@@ -54,15 +54,15 @@ const token = TOKEN;
 
   let deepClient = new DeepClient({ apolloClient });
 
-  console.log("apolloClient",{
+  console.log("apolloClient", {
     path: graphQlPath,
     ssl: true,
     ws: true,
     token,
-  } )
+  })
 
-      console.log("deep",deep)
-      console.log("deep.linkId",deep.linkId)
+  console.log("deep", deep)
+  console.log("deep.linkId", deep.linkId)
 
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
     'containerLinkId',
@@ -79,8 +79,8 @@ const token = TOKEN;
       const adminId = await deepClient.id('deep', 'admin');
       const admin = await deepClient.login({ linkId: adminId });
       deep = new DeepClient({ deep: deepClient, ...admin });
-      console.log("deep",deep)
-      console.log("deep.linkId",deep.linkId)
+      console.log("deep", deep)
+      console.log("deep.linkId", deep.linkId)
     })
   }, [deep])
 
@@ -147,14 +147,14 @@ const token = TOKEN;
         });
 
         console.log("googleAuthLinkId", googleAuthLinkId);
-        console.log("deep.linkId",deep.linkId)
+        console.log("deep.linkId", deep.linkId)
       }
     })();
   }, []);
 
   const handleClick = async () => {
     if (!isRecording) {
-      console.log("deep.linkId",deep.linkId)
+      console.log("deep.linkId", deep.linkId)
       try {
         startTime.current = await startRecording();
         setIsRecording(true);
@@ -164,7 +164,7 @@ const token = TOKEN;
     } else {
       try {
         setIsProcessing(true);
-        console.log("deep.linkId",deep.linkId)
+        console.log("deep.linkId", deep.linkId)
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
@@ -232,9 +232,9 @@ const token = TOKEN;
               },
             },
           });
-          
+
           setNewConversationLinkId(conversationLinkId)
-            
+
           console.log("flakeed7");
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
@@ -430,7 +430,7 @@ const token = TOKEN;
         }
 
         console.log("flakeed8");
-               setLastPress(Date.now());
+        setLastPress(Date.now());
         setIsRecording(false);
         setIsProcessing(false);
       } catch (error) {
