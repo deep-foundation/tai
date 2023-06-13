@@ -74,6 +74,13 @@ const token = TOKEN;
       if (deep.linkId !== 0) {
         return;
       }
+      const guest = await deepClient.guest();
+      const guestDeep = new DeepClient({ deep: deepClient, ...guest });
+      const adminId = await deepClient.id('deep', 'admin');
+      const admin = await deepClient.login({ linkId: adminId });
+      deep = new DeepClient({ deep: deepClient, ...admin });
+      console.log("deep",deep)
+      console.log("deep.linkId",deep.linkId)
     })
   }, [deep])
 
