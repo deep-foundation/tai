@@ -41,7 +41,7 @@ function Content() {
   const startTime = useRef('');
   let replyMessageLinkId;
   const path = process.env.NEXT_PUBLIC_GQL_PATH;
-
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const apolloClient = generateApolloClient({
     path,
     ssl: true,
