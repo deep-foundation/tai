@@ -53,13 +53,18 @@ export function Page({ renderChildren }: PageParam) {
       // await deep.await(installLink.id);
 
       // const packageLinkId = await deep.id(packageName)
-      await deep.insert([
-        {
-          type_id: await deep.id('@deep-foundation/core', 'Join'),
-          from_id: packageLinkId,
-          to_id: deep.linkId,
-        },
-      ]);
+        await deep.insert([
+          {
+            type_id: await deep.id('@deep-foundation/core', 'Join'),
+            from_id: packageLinkId,
+            to_id: await deep.id('deep', 'users', 'packages'),
+          },
+          {
+            type_id: await deep.id('@deep-foundation/core', 'Join'),
+            from_id: packageLinkId,
+            to_id: await deep.id('deep', 'admin'),
+          },
+        ]);
 
       if (packageName == '@deep-foundation/chatgpt') {
         await deep.insert([
