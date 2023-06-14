@@ -43,6 +43,7 @@ function Content() {
   const path = process.env.NEXT_PUBLIC_GQL_PATH;
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const googleAuth = process.env.NEXT_PUBLIC_GOOGLE_AUTH || '';
+  const systemMsg = process.env.NEXT_PUBLIC_SYSTEM_MSG;
   const apolloClient = generateApolloClient({
     path,
     ssl: true,
