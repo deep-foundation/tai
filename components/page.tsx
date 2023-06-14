@@ -53,33 +53,19 @@ export function Page({ renderChildren }: PageParam) {
       // await deep.await(installLink.id);
 
       // const packageLinkId = await deep.id(packageName)
-        await deep.insert([
-          {
-            type_id: await deep.id('@deep-foundation/core', 'Join'),
-            from_id: packageLinkId,
-            to_id: await deep.id('deep', 'users', 'packages'),
-          },
-          {
-            type_id: await deep.id('@deep-foundation/core', 'Join'),
-            from_id: packageLinkId,
-            to_id: await deep.id('deep', 'admin'),
-          },
-        ]);
+      await deep.insert([
+        {
+          type_id: await deep.id('@deep-foundation/core', 'Join'),
+          from_id: packageLinkId,
+          to_id: await deep.id('deep', 'admin'),
+        },
+      ]);
 
       if (packageName == '@deep-foundation/chatgpt') {
         await deep.insert([
           {
             type_id: await deep.id('@deep-foundation/core', 'Join'),
-            from_id: await deep.id(
-              '@deep-foundation/chatgpt-tokens-gpt-3-encoder'
-            ),
-            to_id: await deep.id('deep', 'users', 'packages'),
-          },
-          {
-            type_id: await deep.id('@deep-foundation/core', 'Join'),
-            from_id: await deep.id(
-              '@deep-foundation/chatgpt-tokens-gpt-3-encoder'
-            ),
+            from_id: await deep.id('@deep-foundation/chatgpt-tokens-gpt-3-encoder'),
             to_id: await deep.id('deep', 'admin'),
           },
         ]);
@@ -89,17 +75,8 @@ export function Page({ renderChildren }: PageParam) {
         await deep.insert([
           {
             type_id: await deep.id('@deep-foundation/core', 'Join'),
-            from_id: await deep.id(
-              '@freephoenix888/object-to-links-async-converter'
-            ),
-            to_id: await deep.id('deep', 'users', 'packages'),
-          },
-          {
-            type_id: await deep.id('@deep-foundation/core', 'Join'),
-            from_id: await deep.id(
-              '@freephoenix888/object-to-links-async-converter'
-            ),
-            to_id: await deep.id('deep', 'admin'),
+            from_id: await deep.id('@freephoenix888/object-to-links-async-converter'),
+            to_id: await deep.id('deep', 'admin'), 
           },
         ]);
       }
@@ -122,6 +99,7 @@ export function Page({ renderChildren }: PageParam) {
                 '@deep-foundation/google-speech',
                 '@deep-foundation/chatgpt',
                 '@deep-foundation/capacitor-device',
+                '@deep-foundation/sound'
               ]}
               renderIfError={(error) => <div>{error.message}</div>}
               renderIfNotInstalled={(packageNames) => {
@@ -133,6 +111,11 @@ export function Page({ renderChildren }: PageParam) {
                     
                     {packageNames
                       .map((packageName) => {
+                        if (packageName === '@deep-foundation/capacitor-voice-recorder' || packageName === '@deep-foundation/google-speech') {
+                          if (packageNames.includes('@deep-foundation/sound')) {
+                            return null;
+                          }
+                        }
                         return (
                           <Button
                             key={packageName}
