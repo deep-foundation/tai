@@ -40,25 +40,22 @@ function Content() {
   const [isProcessing, setIsProcessing] = useState(false);
   const startTime = useRef('');
   let replyMessageLinkId;
-
-  const graphQlPath = GRAPHQL_PATH;
-
-  const token = TOKEN;
+  const path = process.env.NEXT_PUBLIC_GQL_PATH;
 
   const apolloClient = generateApolloClient({
-    path: graphQlPath,
+    path,
     ssl: true,
     ws: true,
-    token,
+    token: process.env.NEXT_PUBLIC_TOKEN,
   });
 
   let deepClient = new DeepClient({ apolloClient });
 
   console.log("apolloClient", {
-    path: graphQlPath,
+    path,
     ssl: true,
     ws: true,
-    token,
+    token: process.env.NEXT_PUBLIC_TOKEN,
   })
 
   console.log("deep", deep)
@@ -134,7 +131,9 @@ function Content() {
       console.log("checkGoogleAuthLink", checkGoogleAuthLink);
 
       if (!checkGoogleAuthLink || checkGoogleAuthLink.length === 0) {
-        const parsedGoogleAuth = JSON.parse(googleAuth);
+        let parsedGoogleAuth;
+        parsedGoogleAuth = JSON.parse(googleAuth);
+        parsedGoogleAuth.private_key = parsedGoogleAuth.private_key.replace(/\\n/g, '\n');
         const { data: [{ id: googleAuthLinkId }] } = await deep.insert({
           type_id: googleCloudAuthKeyTypeLink,
           object: { data: { value: parsedGoogleAuth } },
@@ -175,6 +174,9 @@ function Content() {
         const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
         const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
         const tokensTypeLinkId = await deep.id("@deep-foundation/tokens", "Tokens")
+        const soundTypelinkId = await deep.id("@deep-foundation/sound", "Sound");
+        const formatTypelinkId = await deep.id("@deep-foundation/sound", "Format");
+        const mimetypeTypelinkId = await deep.id("@deep-foundation/sound", "MIME/type");
         const record = await stopRecording(deep, containerLinkId, startTime.current);
         const endTime = new Date().toLocaleDateString();
         console.log("record, startTime, endTime", record, startTime, endTime)
@@ -182,6 +184,30 @@ function Content() {
         const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }])
         console.log("soundLinkId", soundLinkId)
 
+        const { data } = await deep.select({
+          up: {
+            parent: {
+              id: soundLinkId
+            },
+            link: {
+              type_id: {
+                _in:
+                  [
+                    soundTypelinkId,
+                    formatTypelinkId,
+                    mimetypeTypelinkId
+                  ]
+              }
+            }
+          },
+        });
+
+        const soundLink = data.filter((link) => link.type_id === soundTypelinkId);
+        console.log('soundLink:', soundLink);
+        const mimetypeLink = data.filter((link) => link.type_id === mimetypeTypelinkId);
+        const formatLink = data.filter((link) => link.type_id === formatTypelinkId);
+        console.log('Data:', data);
+if(soundLink && mimetypeLink && formatLink){
         const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
           type_id: transcribeTypeLinkId,
           from_id: deep.linkId,
@@ -194,6 +220,7 @@ function Content() {
           }
         });
         console.log("transcribeTextLinkId", transcribeTextLinkId)
+      }
 
         const { link: transcribedTextLinkId } = await tryGetLink(deep, {
           delayMs: 1000,
