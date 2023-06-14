@@ -23,25 +23,19 @@ export function WithSetup({
     } else {
       setIsAuthorized(false);
     }
-  }, [deep]);
+
+    if (!isAuthorized) {
+      setGqlPath(process.env.NEXT_PUBLIC_GQL_PATH);
+      deep.login({
+        token: process.env.NEXT_PUBLIC_TOKEN,
+      });
+    }
+  }, [deep, isAuthorized, gqlPath, apiKey, googleAuth, systemMsg]);
 
   console.log({ isAuthorized, gqlPath });
   return isAuthorized ? (
     renderChildren({deep})
-  ) : (
-    <Setup
-      onSubmit={(arg) => {
-        console.log({ arg });
-        setGqlPath("gqlPath");
-        deep.login({
-          token: "token",
-        });
-        setApiKey(arg.apiKey);
-        setGoogleAuth(arg.googleAuth);
-        setSystemMsg(arg.systemMsg);
-      }}
-    />
-  );
+  ) : null;
 }
 
 export interface LoginOrContentParam {
