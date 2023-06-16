@@ -642,25 +642,26 @@ if(soundLink && mimetypeLink && formatLink){
       <NavBar />
       <Heading as={'h1'}>Tai</Heading>
 
-      {!isProcessing && (
-        <Button
-          style={{
-            position: 'absolute',
-            zIndex: 1000,
-            width: '350px',
-            height: '350px',
-            borderRadius: '50%',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            fontSize: '24px',
-            top: window.innerHeight / 2,
-          }}
-          onClick={handleClick}
-        >
-          {isRecording ? 'STOP RECORDING' : 'START RECORDING'}
-        </Button>
-      )}
+      <Button
+  style={{
+    position: 'absolute',
+    zIndex: 1000,
+    width: '350px',
+    height: '350px',
+    borderRadius: '50%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: '24px',
+    top: window.innerHeight / 2,
+    backgroundColor: isProcessing ? '#505050' : (isRecording ? '#505050' : '#B0B0B0'),
+  }}
+  onClick={handleClick}
+  isLoading={isProcessing}
+>
+  {isProcessing ? 'IN PROCESSING' : (isRecording ? 'STOP RECORDING' : 'START RECORDING')}
+</Button>
+
 
       <ScreenChat newConversationLinkId={newConversationLinkId} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
