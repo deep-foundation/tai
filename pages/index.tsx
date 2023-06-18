@@ -350,43 +350,6 @@ function Content() {
 
             console.log("replyLinks", replyLink)
 
-            const { data: conversationLink } = await deep.select({
-              tree_id: { _eq: messagingTreeId },
-              parent: { type_id: { _in: [conversationTypeLinkId, messageTypeLinkId] } },
-              link: { id: { _eq: replyLink[0].from_id } },
-            }, {
-              table: 'tree',
-              variables: { order_by: { depth: "asc" } },
-              returning: `
-              id
-              depth
-              root_id
-              parent_id
-              link_id
-              parent {
-                id
-                from_id
-                type_id
-                to_id
-                value
-                author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
-                  id
-                  from_id
-                  type_id
-                  to_id
-                }
-                tokens: out (where: { type_id: { _eq: ${tokensTypeLinkId}} }) { 
-                  id
-                  from_id
-                  type_id
-                  to_id
-                  value
-                }
-              }`
-            })
-
-            console.log("conversationLink", conversationLink)
-
             const { data: [{ id: messageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
               string: { data: { value: transcribedTextLinkId.value.value } },
