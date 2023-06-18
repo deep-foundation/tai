@@ -196,8 +196,14 @@ function Content() {
             from_id: deep.linkId,
           },
         });
-
         console.log("checkConversationLink", checkConversationLink)
+
+        if (checkConversationLink && checkConversationLink.length > 0) {
+        const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
+          console.log("before sortedData[0].id",sortedData[0].id)
+          console.log("before newConversationLinkId", newConversationLinkId)
+        setNewConversationLinkId(sortedData[0].id)      
+        }
 
         if (!checkConversationLink || checkConversationLink.length === 0) {
           console.log("newConversationLinkId")
