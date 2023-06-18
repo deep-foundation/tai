@@ -278,7 +278,7 @@ function Content() {
 
         console.log("isChatClosed", isChatClosed)
 
-        if (newConversationLinkId) {
+        if (newConversationLinkId && newConversationLinkId !== 0) {
           if (isTimeEnded || isChatClosed) {
             console.log("isChatClosed", isChatClosed)
             setIsChatClosed(false)
