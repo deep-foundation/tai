@@ -429,29 +429,6 @@ function Content() {
     return <div style={containerStyle}>{children}</div>;
   };
 
-  const generateRandomChatBubbles = (count) => {
-    const messages = [
-      "Hello!",
-      "How are you?",
-      "What are you doing?",
-      "Nice to meet you!",
-      "Have a good day!",
-    ];
-
-    const sides = ["left", "right"];
-
-    const bubbles = Array.from({ length: count }, (_, i) => (
-      <ChatBubble
-        key={i}
-        text={getRandom(messages)}
-        side={getRandom(sides)}
-        top={Math.floor(Math.random() * (window.innerHeight - 150))}
-        left={Math.floor(Math.random() * (window.innerWidth - 150))}
-      />
-    ));
-    return bubbles;
-  };
-
   const handleCloseChat = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
@@ -622,3 +599,26 @@ const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
     </Box>
   );
 }
+
+const generateRandomChatBubbles = (count) => {
+  const messages = [
+    "Hello!",
+    "How are you?",
+    "What are you doing?",
+    "Nice to meet you!",
+    "Have a good day!",
+  ];
+
+  const sides = ["left", "right"];
+
+  const bubbles = Array.from({ length: count }, (_, i) => (
+    <ChatBubble
+      key={i}
+      text={getRandom(messages)}
+      side={getRandom(sides)}
+      top={Math.floor(Math.random() * (window.innerHeight - 150))}
+      left={Math.floor(Math.random() * (window.innerWidth - 150))}
+    />
+  ));
+  return bubbles;
+};
