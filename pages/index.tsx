@@ -161,12 +161,6 @@ function Content() {
         const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }])
         console.log("soundLinkId", soundLinkId)
 
-        const soundLink = data.filter((link) => link.type_id === soundTypelinkId);
-        console.log('soundLink:', soundLink);
-        const mimetypeLink = data.filter((link) => link.type_id === mimetypeTypelinkId);
-        const formatLink = data.filter((link) => link.type_id === formatTypelinkId);
-        console.log('Data:', data);
-if(soundLink && mimetypeLink && formatLink){
         const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
           type_id: transcribeTypeLinkId,
           from_id: deep.linkId,
@@ -179,7 +173,6 @@ if(soundLink && mimetypeLink && formatLink){
           }
         });
         console.log("transcribeTextLinkId", transcribeTextLinkId)
-      }
 
         const { link: transcribedTextLinkId } = await tryGetLink(deep, {
           delayMs: 1000,
