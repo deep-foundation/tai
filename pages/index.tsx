@@ -53,9 +53,6 @@ function Content() {
 
   let deepClient = new DeepClient({ apolloClient });
 
-  console.log("deep", deep)
-  console.log("deep.linkId", deep.linkId)
-
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
     'containerLinkId',
     0
@@ -71,8 +68,6 @@ function Content() {
       const adminId = await deepClient.id('deep', 'admin');
       const admin = await deepClient.login({ linkId: adminId });
       deep = new DeepClient({ deep: deepClient, ...admin });
-      console.log("deep", deep)
-      console.log("deep.linkId", deep.linkId)
     })
   }, [deep])
 
