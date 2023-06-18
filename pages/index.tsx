@@ -415,18 +415,6 @@ function Content() {
     return () => clearTimeout(timeoutId);
   }, [lastPress, isRecording]);
 
-  const ChatBubblesContainer = ({ children }) => {
-    const containerStyle: CSSProperties = {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-    };
-
-    return <div style={containerStyle}>{children}</div>;
-  };
-
   const handleCloseChat = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
@@ -622,3 +610,16 @@ const generateRandomChatBubbles = (count) => {
 };
 
 const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+
+const ChatBubblesContainer = ({ children }) => {
+  const containerStyle: CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+  };
+
+  return <div style={containerStyle}>{children}</div>;
+};
