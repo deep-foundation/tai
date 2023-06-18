@@ -161,24 +161,6 @@ function Content() {
         const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }])
         console.log("soundLinkId", soundLinkId)
 
-        const { data } = await deep.select({
-          up: {
-            parent: {
-              id: soundLinkId
-            },
-            link: {
-              type_id: {
-                _in:
-                  [
-                    soundTypelinkId,
-                    formatTypelinkId,
-                    mimetypeTypelinkId
-                  ]
-              }
-            }
-          },
-        });
-
         const soundLink = data.filter((link) => link.type_id === soundTypelinkId);
         console.log('soundLink:', soundLink);
         const mimetypeLink = data.filter((link) => link.type_id === mimetypeTypelinkId);
