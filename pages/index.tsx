@@ -205,7 +205,7 @@ function Content() {
         setNewConversationLinkId(sortedData[0].id)      
         }
 
-        if (!checkConversationLink || checkConversationLink.length === 0) {
+        if (!checkConversationLink || checkConversationLink.length === 0 || !newConversationLinkId || newConversationLinkId === 0) {
           console.log("newConversationLinkId")
           const { data: [{ id: conversationLinkId }] } = await deep.insert({
             type_id: conversationTypeLinkId,
