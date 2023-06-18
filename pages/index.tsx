@@ -158,8 +158,6 @@ function Content() {
         const mimetypeTypelinkId = await deep.id("@deep-foundation/sound", "MIME/type");
         const record = await stopRecording(deep, containerLinkId, startTime.current);
         const endTime = new Date().toLocaleDateString();
-        console.log("record, startTime, endTime", record, startTime, endTime)
-        console.log("record", record)
         const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }])
         console.log("soundLinkId", soundLinkId)
 
