@@ -128,14 +128,12 @@ function Content() {
             },
           },
         });
-        console.log("deep.linkId", deep.linkId)
       }
     })();
   }, []);
 
   const handleClick = async () => {
     if (!isRecording) {
-      console.log("deep.linkId", deep.linkId)
       try {
         startTime.current = await startRecording();
         setIsRecording(true);
@@ -145,7 +143,6 @@ function Content() {
     } else {
       try {
         setIsProcessing(true);
-        console.log("deep.linkId", deep.linkId)
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
