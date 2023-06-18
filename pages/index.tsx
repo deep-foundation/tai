@@ -460,7 +460,7 @@ function Content() {
 </Button>
 
 
-      <ScreenChat newConversationLinkId={newConversationLinkId} />
+      <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
     </Stack>
   );
