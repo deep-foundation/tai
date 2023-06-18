@@ -53,13 +53,6 @@ function Content() {
 
   let deepClient = new DeepClient({ apolloClient });
 
-  console.log("apolloClient", {
-    path,
-    ssl: true,
-    ws: true,
-    token: process.env.NEXT_PUBLIC_TOKEN,
-  })
-
   console.log("deep", deep)
   console.log("deep.linkId", deep.linkId)
 
