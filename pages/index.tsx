@@ -104,8 +104,6 @@ function Content() {
             },
           },
         });
-
-        console.log("apiKeyLinkId", apiKeyLinkId);
       }
 
       const { data: checkGoogleAuthLink } = await deep.select({
@@ -130,8 +128,6 @@ function Content() {
             },
           },
         });
-
-        console.log("googleAuthLinkId", googleAuthLinkId);
         console.log("deep.linkId", deep.linkId)
       }
     })();
