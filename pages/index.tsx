@@ -415,8 +415,6 @@ function Content() {
     return () => clearTimeout(timeoutId);
   }, [lastPress, isRecording]);
 
-  const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
   const ChatBubblesContainer = ({ children }) => {
     const containerStyle: CSSProperties = {
       position: 'absolute',
@@ -622,3 +620,5 @@ const generateRandomChatBubbles = (count) => {
   ));
   return bubbles;
 };
+
+const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
