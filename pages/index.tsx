@@ -93,8 +93,6 @@ function Content() {
         },
       });
 
-      console.log("checkApiKeyLink", checkApiKeyLink);
-
       if (!checkApiKeyLink || checkApiKeyLink.length === 0) {
         const { data: [{ id: apiKeyLinkId }] } = await deep.insert({
           type_id: apiKeyTypeLinkId,
@@ -117,8 +115,6 @@ function Content() {
           from_id: deep.linkId,
         },
       });
-
-      console.log("checkGoogleAuthLink", checkGoogleAuthLink);
 
       if (!checkGoogleAuthLink || checkGoogleAuthLink.length === 0) {
         let parsedGoogleAuth;
