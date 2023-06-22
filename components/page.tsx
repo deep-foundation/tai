@@ -7,7 +7,7 @@ import { DeepClient } from '@deep-foundation/deeplinks/imports/client';
 import { useState, useEffect, useRef } from 'react';
 import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
-import { WithDeviceInsertionIfDoesNotExistAndSavingdata } from '@deep-foundation/capacitor-device';
+import { WithDeviceInsertionIfDoesNotExistAndSavingData } from '@deep-foundation/capacitor-device';
 import delay from 'delay';
 
 export interface PageParam {
@@ -187,15 +187,18 @@ function WithDeviceLinkId({ deep, renderChildren }: WithDeviceLinkIdProps) {
   );
 
   return (
-    <WithDeviceInsertionIfDoesNotExistAndSavingdata
+    <WithDeviceInsertionIfDoesNotExistAndSavingData
       containerLinkId={deep.linkId || 0}
       deep={deep}
       deviceLinkId={deviceLinkId}
       setDeviceLinkId={setDeviceLinkId}
       renderIfLoading={() => <Text>Initializing device...</Text>}
       renderIfNotInserted={() => <Text>Initializing device...</Text>}
+      saveDeviceInfo={(deviceLinkId) => {
+        deviceLinkId
+      }}
     >
       {renderChildren({ deviceLinkId })}
-    </WithDeviceInsertionIfDoesNotExistAndSavingdata>
+    </WithDeviceInsertionIfDoesNotExistAndSavingData>
   );
 }
