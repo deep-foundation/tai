@@ -1,6 +1,6 @@
 import { DeepClient, useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { useState, useEffect } from 'react';
-import { Setup } from '../pages/login';
+import { Setup } from './login';
 
 export function WithSetup({
   renderChildren,
