@@ -14,7 +14,8 @@ export function ProviderConnected({
 }
 
 export const GRAPHQL_PATH = process.env.NEXT_PUBLIC_GQL_PATH;
-export const GRAPHQL_SSL = !!+process.env.NEXT_PUBLIC_GQL_SSL;
+export const GRAPHQL_SSL = process.env.NEXT_PUBLIC_GQL_SSL ? !!+process.env.NEXT_PUBLIC_GQL_SSL : false;
+
 
 
 
