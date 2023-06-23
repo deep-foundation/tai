@@ -7,7 +7,7 @@ import { DeepClient } from '@deep-foundation/deeplinks/imports/client';
 import { useState, useEffect, useRef } from 'react';
 import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-installed';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
-import { WithDeviceInsertionIfDoesNotExistAndSavingData } from '@deep-foundation/capacitor-device';
+import { WithDeviceInsertionIfDoesNotExistAndSavingData,getAllDeviceInfo,insertDevice } from '@deep-foundation/capacitor-device';
 import delay from 'delay';
 
 export interface PageParam {
@@ -175,28 +175,32 @@ function WithPermissionsGranted({ children }: { children: JSX.Element }) {
   }
 }
 
-interface WithDeviceLinkIdProps {
+interface WithDeviceLinkIdParam {
   deep: DeepClient;
   renderChildren: (param: { deviceLinkId: number }) => JSX.Element;
 }
 
-function WithDeviceLinkId({ deep, renderChildren }: WithDeviceLinkIdProps) {
+function WithDeviceLinkId({ deep, renderChildren }: WithDeviceLinkIdParam) {
   const [deviceLinkId, setDeviceLinkId] = useLocalStore<number>(
     CapacitorStoreKeys[CapacitorStoreKeys.DeviceLinkId],
     0
   );
-
+  const insertDeviceCallback = async () => {
+    const insertionResult = await insertDevice({
+      deep,
+      containerLinkId: deep.linkId || 0,
+      info: await getAllDeviceInfo(),
+    });
+    setDeviceLinkId(insertionResult.deviceLink.id);
+  };
   return (
     <WithDeviceInsertionIfDoesNotExistAndSavingData
       containerLinkId={deep.linkId || 0}
       deep={deep}
       deviceLinkId={deviceLinkId}
-      setDeviceLinkId={setDeviceLinkId}
       renderIfLoading={() => <Text>Initializing device...</Text>}
       renderIfNotInserted={() => <Text>Initializing device...</Text>}
-      saveDeviceInfo={(deviceLinkId) => {
-        deviceLinkId
-      }}
+      insertDeviceCallback={insertDeviceCallback}
     >
       {renderChildren({ deviceLinkId })}
     </WithDeviceInsertionIfDoesNotExistAndSavingData>
