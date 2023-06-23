@@ -21,7 +21,7 @@ import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
 import ChatBubble from '../components/ChatBubble';
-
+import delay from 'delay';
 interface ContentParam {
   deep: DeepClient;
   deviceLinkId: number;
@@ -31,11 +31,11 @@ function Content() {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
+  const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
+const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   let deep = useDeep();
   const [lastPress, setLastPress] = useState<number>(0);
-  const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
   const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const startTime = useRef('');
@@ -142,6 +142,9 @@ function Content() {
       }
     } else {
       try {
+        const endTime = new Date().toLocaleDateString();
+        const record = await stopRecording(deep, containerLinkId, startTime.current);
+        const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }])
         setIsProcessing(true);
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
@@ -156,9 +159,6 @@ function Content() {
         const soundTypelinkId = await deep.id("@deep-foundation/sound", "Sound");
         const formatTypelinkId = await deep.id("@deep-foundation/sound", "Format");
         const mimetypeTypelinkId = await deep.id("@deep-foundation/sound", "MIME/type");
-        const record = await stopRecording(deep, containerLinkId, startTime.current);
-        const endTime = new Date().toLocaleDateString();
-        const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }])
         console.log("soundLinkId", soundLinkId)
 
         const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
@@ -196,15 +196,15 @@ function Content() {
             from_id: deep.linkId,
           },
         });
-        console.log("checkConversationLink", checkConversationLink)
-
         if (checkConversationLink && checkConversationLink.length > 0) {
-        const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
+          const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
           console.log("before sortedData[0].id",sortedData[0].id)
-          console.log("before newConversationLinkId", newConversationLinkId)
+        console.log("before newConversationLinkId", newConversationLinkId)
         setNewConversationLinkId(sortedData[0].id)      
         }
-
+        console.log("newConversationLinkId", newConversationLinkId)
+        
+        console.log("checkConversationLink", checkConversationLink)
         if (!checkConversationLink || checkConversationLink.length === 0 || !newConversationLinkId || newConversationLinkId === 0) {
           console.log("newConversationLinkId")
           const { data: [{ id: conversationLinkId }] } = await deep.insert({
@@ -217,8 +217,8 @@ function Content() {
               },
             },
           });
-
           setNewConversationLinkId(conversationLinkId)
+          console.log("newConversationLinkId", newConversationLinkId)
 
           console.log("flakeed7");
 
@@ -270,15 +270,11 @@ function Content() {
             },
           });
           replyMessageLinkId = replyToMessageLinkId;
-        } else {
-          const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
-          console.log("sortedData", sortedData)
-          setNewConversationLinkId(sortedData[0].id)
         }
 
         console.log("isChatClosed", isChatClosed)
 
-        if (newConversationLinkId && newConversationLinkId !== 0) {
+        if (newConversationLinkId && newConversationLinkId !==0) {
           if (isTimeEnded || isChatClosed) {
             console.log("isChatClosed", isChatClosed)
             setIsChatClosed(false)
@@ -409,6 +405,7 @@ function Content() {
           setIsTimeEnded(true)
         }
       };
+      console.log("newConversationLinkId", newConversationLinkId)
       doAsyncStuff();
     }, 60000);
 
@@ -418,7 +415,7 @@ function Content() {
   const handleCloseChat = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
-
+  
     const { data: [{ id: conversationLinkId }] } = await deep.insert({
       type_id: conversationTypeLinkId,
       string: { data: { value: "New chat" } },
@@ -430,15 +427,16 @@ function Content() {
       },
     });
     setNewConversationLinkId(conversationLinkId)
+  
     console.log("flakeed7");
     setIsChatClosed(true);
+    console.log("newConversationLinkId", newConversationLinkId)
   };
 
   return (
     <Stack alignItems={'center'}>
       <NavBar />
       <Heading as={'h1'}>Tai</Heading>
-
       <Button
   style={{
     position: 'absolute',
@@ -460,7 +458,7 @@ function Content() {
 </Button>
 
 
-      <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat}/>
+      <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat} />
       <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
     </Stack>
   );
@@ -512,6 +510,7 @@ const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
   const [messagesCount, setMessagesCount] = useState(0);
   let chatGptLinkId;
   async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
+
   useEffect(() => {
     const fetchMessages = async () => {
       const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
@@ -538,7 +537,7 @@ const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
             type_id
             to_id
             value
-            author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) {
+            author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) { 
               id
               from_id
               type_id
@@ -549,10 +548,14 @@ const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
       setMessages(result?.data);
       setMessagesCount(result?.data.length);
     };
+
     fetchMessages();
+
     const intervalId = setInterval(fetchMessages, 1000);
+
     return () => clearInterval(intervalId);
   }, [newConversationLinkId]);
+
   return (
     <Box
       position="fixed"
@@ -586,6 +589,20 @@ const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
   );
 }
 
+const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+const ChatBubblesContainer = ({ children }) => {
+  const containerStyle: CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+  };
+
+  return <div style={containerStyle}>{children}</div>;
+};
+
 const generateRandomChatBubbles = (count) => {
   const messages = [
     "Hello!",
@@ -607,19 +624,4 @@ const generateRandomChatBubbles = (count) => {
     />
   ));
   return bubbles;
-};
-
-const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-
-const ChatBubblesContainer = ({ children }) => {
-  const containerStyle: CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-  };
-
-  return <div style={containerStyle}>{children}</div>;
 };
