@@ -37,7 +37,7 @@
     "**/*.ts",
     "**/*.tsx",
     "app/types/**/*.ts"
-  ],
+, "components/ChatBubble.tsx"  ],
   "exclude": [
     "node_modules",
     "electron"
