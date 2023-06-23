@@ -33,28 +33,24 @@ export function WithProvidersAndSetup({
               <WithSetup
                 gqlPath={gqlPath}
                 setGqlPath={(newGqlPath) => {
-                  console.log({ newGqlPath });
                   if (newGqlPath !== undefined) {
                     setGqlPath(newGqlPath);
                   }
                 }}
                 apiKey={apiKey}
                 setApiKey={(newApiKey) => {
-                  console.log({ newApiKey });
                   if (newApiKey !== undefined) {
                     setApiKey(newApiKey);
                   }
                 }}
                 googleAuth={googleAuth}
                 setGoogleAuth={(newGoogleAuth) => {
-                  console.log({ newGoogleAuth });
                   if (newGoogleAuth !== undefined) {
                     setGoogleAuth(newGoogleAuth);
                   }
                 }}
                 systemMsg={systemMsg}
                 setSystemMsg={(newSystemMsg) => {
-                  console.log({ newSystemMsg });
                   if (newSystemMsg !== undefined) {
                     setSystemMsg(newSystemMsg);
                   }

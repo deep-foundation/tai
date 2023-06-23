@@ -3,11 +3,9 @@ import { useLocalStore } from '@deep-foundation/store/local';
 import {
   Text,
   Stack,
-  VStack,
   Heading,
   Button,
   Box,
-  IconButton,
 } from '@chakra-ui/react';
 import {
   DeepClient,
@@ -22,9 +20,7 @@ import startRecording from '../imports/capacitor-voice-recorder/strart-recording
 import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
-import { RecordButton } from '../components/record-button';
-import { BackgroundProbableQuestions } from '../components/background-probable-questions';
-import { TfiClose } from 'react-icons/tfi';
+import { ChatBubble } from '../components/chat/ChatBubble';
 
 interface ContentParam {
   deep: DeepClient;
@@ -54,6 +50,7 @@ function Content() {
     ws: true,
     token: process.env.NEXT_PUBLIC_TOKEN,
   });
+
   let deepClient = new DeepClient({ apolloClient });
 
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
@@ -198,10 +195,13 @@ function Content() {
 
         if (checkConversationLink && checkConversationLink.length > 0) {
         const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
+          // console.log("before sortedData[0].id",sortedData[0].id)
+          // console.log("before newConversationLinkId", newConversationLinkId)
         setNewConversationLinkId(sortedData[0].id)      
         }
 
         if (!checkConversationLink || checkConversationLink.length === 0 || !newConversationLinkId || newConversationLinkId === 0) {
+          // console.log("newConversationLinkId")
           const { data: [{ id: conversationLinkId }] } = await deep.insert({
             type_id: conversationTypeLinkId,
             string: { data: { value: "New chat" } },
@@ -225,7 +225,7 @@ function Content() {
               }
             },
           });
-          
+
           const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
             type_id: systemTypeLinkId,
             from_id: systemMessageLinkId,
@@ -263,14 +263,13 @@ function Content() {
           replyMessageLinkId = replyToMessageLinkId;
         } else {
           const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
+          // console.log("sortedData", sortedData)
           setNewConversationLinkId(sortedData[0].id)
         }
 
         if (newConversationLinkId && newConversationLinkId !== 0) {
           if (isTimeEnded || isChatClosed) {
-
             setIsChatClosed(false)
-
 
             const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
@@ -384,7 +383,7 @@ function Content() {
               },
             },
           });
-          setNewConversationLinkId(conversationLinkId)
+          setNewConversationLinkId(conversationLinkId);
           setIsTimeEnded(true)
         }
       };
@@ -408,19 +407,39 @@ function Content() {
         },
       },
     });
-    setNewConversationLinkId(conversationLinkId)
+    setNewConversationLinkId(conversationLinkId);
     setIsChatClosed(true);
   };
 
-  return (<VStack position='relative' width='100vw' height='100vh'>
-      <BackgroundProbableQuestions />
+  return (
+    <Stack alignItems={'center'}>
       <NavBar />
-      <Box sx={{color: 'antiquewhite', zIndex: 1}}>
-        <Heading as='h1' sx={{color: 'antiquewhite', zIndex: 1}}>Tai</Heading>
-      </Box>
-      <RecordButton isProcessing={isProcessing} isRecording={isRecording} handleClick={handleClick} />
+      <Heading as={'h1'}>Tai</Heading>
+
+      <Button
+        style={{
+          position: 'absolute',
+          zIndex: 1000,
+          width: '350px',
+          height: '350px',
+          borderRadius: '50%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          fontSize: '24px',
+          top: window.innerHeight / 2,
+          backgroundColor: isProcessing ? '#505050' : (isRecording ? '#505050' : '#B0B0B0'),
+        }}
+        onClick={handleClick}
+        isLoading={isProcessing}
+        >
+        {isProcessing ? 'IN PROCESSING' : (isRecording ? 'STOP RECORDING' : 'START RECORDING')}
+      </Button>
+
+
       <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat}/>
-    </VStack>
+      <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
+    </Stack>
   );
 }
 
@@ -518,20 +537,20 @@ const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
       left={0}
       zIndex={1000}
       overflowY="scroll"
-      height='30vh'
-      width='100vw'
-      bg='#ffffff4d'
+      height='500px'
+      width='500px'
+      bg={"grey"}
       p={3}
-      borderRadius="1rem"
+      borderRadius="20px"
     >
       <Box position="absolute" right={3} top={3}>
-        <IconButton aria-label='Close chat' isRound icon={<TfiClose />} onClick={handleCloseChat}>X</IconButton>
+      <Button onClick={handleCloseChat}>X</Button>
       </Box>
       {messagesCount ?
         [
           <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
           ...messages.map((message, index) => (
-            <Box key={index} mb={3} p={2} borderRadius="sm" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
+            <Box key={index} mb={3} p={2} borderRadius="5px" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
               <Text borderBottom="1px solid" pb={2}>
                 {message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
               </Text>
@@ -543,3 +562,42 @@ const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
     </Box>
   );
 }
+
+const generateRandomChatBubbles = (count) => {
+  const messages = [
+    "Hello!",
+    "How are you?",
+    "What are you doing?",
+    "Nice to meet you!",
+    "Have a good day!",
+  ];
+
+  const sides = ["left", "right"];
+
+  const bubbles = Array.from({ length: count }, (_, i) => (
+    <ChatBubble
+      key={i}
+      text={getRandom(messages)}
+      side={getRandom(sides)}
+      top={Math.floor(Math.random() * (window.innerHeight - 150))}
+      left={Math.floor(Math.random() * (window.innerWidth - 150))}
+    />
+    
+  ));
+  return bubbles;
+};
+
+const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+
+const ChatBubblesContainer = ({ children }) => {
+  const containerStyle: CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+  };
+
+  return <div style={containerStyle}>{children}</div>;
+};
