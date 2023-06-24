@@ -492,6 +492,7 @@ export async function tryGetLink(deep, { selectData, delayMs, attemptsCount }) {
 
     if (link) {
       resultLink = link;
+      break;
     }
 
     if (attemptsCount !== 0) {
