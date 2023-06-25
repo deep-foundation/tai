@@ -20,7 +20,7 @@ export function BackgroundProbableQuestions() {
   };
 
   return (<Box sx={{
-        background: 'linear-gradient(0deg, #417100 0%, #0f4801 20%, #092a01 45%, #050126 70%)',
+        background: 'linear-gradient(0deg, #417100 0%, #0f4801 20%, #092a01 45%, #03001d 70%)',
         width: '100%',
         height: '100%',
         position: 'absolute',

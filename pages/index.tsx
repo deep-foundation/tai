@@ -24,14 +24,10 @@ import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
 import { RecordButton } from '../components/record-button';
 import { BackgroundProbableQuestions } from '../components/background-probable-questions';
-import { TfiClose } from 'react-icons/tfi';
+import { ScreenChat } from '../components/chat/screen-chat';
 
-interface ContentParam {
-  deep: DeepClient;
-  deviceLinkId: number;
-}
 
-function Content() {
+export function Content() {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
@@ -434,14 +430,6 @@ export default function IndexPage() {
   );
 }
 
-function Pages() {
-  return <Stack>
-    {/* <Link as={NextLink} href="/audiorecord">
-      Audiorecord
-    </Link> */}
-
-  </Stack>
-}
 
 export async function tryGetLink(deep, { selectData, delayMs, attemptsCount }) {
   let resultLink;
@@ -463,83 +451,4 @@ export async function tryGetLink(deep, { selectData, delayMs, attemptsCount }) {
 
 export async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
-  const [messages, setMessages] = useState<Array<any>>([]);
-  const [messagesCount, setMessagesCount] = useState(0);
-  let chatGptLinkId;
-  async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
-  useEffect(() => {
-    const fetchMessages = async () => {
-      const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
-      const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
-      const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
-      const result = await deep.select({
-        tree_id: { _eq: messagingTreeId },
-        link: { type_id: { _eq: messageTypeLinkId } },
-        root_id: { _eq: newConversationLinkId },
-        // @ts-ignore
-        self: { _eq: true }
-      }, {
-        table: 'tree',
-        variables: { order_by: { depth: "asc" } },
-        returning: `
-          id
-          depth
-          root_id
-          parent_id
-          link_id
-          link {
-            id
-            from_id
-            type_id
-            to_id
-            value
-            author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) {
-              id
-              from_id
-              type_id
-              to_id
-            }
-          }`
-      });
-      setMessages(result?.data);
-      setMessagesCount(result?.data.length);
-    };
-    fetchMessages();
-    const intervalId = setInterval(fetchMessages, 1000);
-    return () => clearInterval(intervalId);
-  }, [newConversationLinkId]);
-  return (
-    <Box
-      position="fixed"
-      bottom={0}
-      left={0}
-      zIndex={1000}
-      overflowY="scroll"
-      height='30vh'
-      width='100vw'
-      bg='#ffffff4d'
-      p={3}
-      borderRadius="1rem"
-    >
-      <Box position="absolute" right={3} top={3}>
-        <IconButton aria-label='Close chat' isRound icon={<TfiClose />} onClick={handleCloseChat}>X</IconButton>
-      </Box>
-      {messagesCount ?
-        [
-          <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
-          ...messages.map((message, index) => (
-            <Box key={index} mb={3} p={2} borderRadius="sm" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
-              <Text borderBottom="1px solid" pb={2}>
-                {message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
-              </Text>
-              <Text>{message?.link?.value?.value}</Text>
-            </Box>
-          ))
-        ] : []
-      }
-    </Box>
-  );
 }

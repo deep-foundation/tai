@@ -20,7 +20,7 @@ import startRecording from '../imports/capacitor-voice-recorder/strart-recording
 import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
-import { ChatBubble } from '../components/chat/ChatBubble';
+import ChatBubble from '../components/ChatBubble';
 
 interface ContentParam {
   deep: DeepClient;
