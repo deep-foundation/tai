@@ -1,12 +1,7 @@
-import React from 'react';
 // @ts-ignore
 import Particles from "react-tsparticles";
-
-import { useCallback } from "react";
-import type { Container, Engine } from "tsparticles-engine";
-//@ts-ignore
-import { loadFull } from "tsparticles";
 import { Box } from '@chakra-ui/react';
+import { loadFull } from "tsparticles";
 
 
 export function BackgroundProbableQuestions() {

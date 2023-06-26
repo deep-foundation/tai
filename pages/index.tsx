@@ -1,30 +1,26 @@
-import React, { useEffect, useState, CSSProperties, useRef } from 'react';
-import { useLocalStore } from '@deep-foundation/store/local';
 import {
-  Text,
-  Stack,
-  VStack,
-  Heading,
-  Button,
   Box,
-  IconButton,
+  Heading,
+  VStack
 } from '@chakra-ui/react';
 import {
   DeepClient,
+  useDeep,
 } from '@deep-foundation/deeplinks/imports/client';
 import { generateApolloClient } from '@deep-foundation/hasura/client.js';
-const assert = require('assert');
-import { useDeep } from '@deep-foundation/deeplinks/imports/client';
+import { useLocalStore } from '@deep-foundation/store/local';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
-import { NavBar } from '../components/navbar';
-import { Page } from '../components/page';
-import startRecording from '../imports/capacitor-voice-recorder/strart-recording';
-import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
-import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
-import createContainer from '../imports/capacitor-voice-recorder/create-container';
-import { RecordButton } from '../components/record-button';
+import React, { useEffect, useRef, useState } from 'react';
 import { BackgroundProbableQuestions } from '../components/background-probable-questions';
 import { ScreenChat } from '../components/chat/screen-chat';
+import { NavBar } from '../components/navbar';
+import { Page } from '../components/page';
+import { RecordButton } from '../components/record-button';
+import createContainer from '../imports/capacitor-voice-recorder/create-container';
+import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
+import startRecording from '../imports/capacitor-voice-recorder/strart-recording';
+import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
+const assert = require('assert');
 
 
 export const Content = React.memo<any>(() => {

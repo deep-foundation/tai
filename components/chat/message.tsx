@@ -1,9 +1,8 @@
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Avatar, Box, HStack, Text } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
-import { Avatar } from '@chakra-ui/react';
-import { BubbleArrowLeft, BubbleArrowRight } from "./bubble-arrow";
+import React from "react";
 import { GiHemp } from 'react-icons/gi';
+import { BubbleArrowLeft, BubbleArrowRight } from "./bubble-arrow";
 
 
 const CreatureAvatar = React.memo<any>(({
