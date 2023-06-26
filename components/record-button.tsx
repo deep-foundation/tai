@@ -29,8 +29,6 @@ export const RecordButton = ({
 }) => {
   const control = useAnimation();
 
-  const top = window.innerHeight / 2;
-
   useEffect(() => {
     if (isRecording && !isProcessing) {
       control.start("recording");
@@ -52,7 +50,7 @@ export const RecordButton = ({
         zIndex: 1000,
         width: '150px',
         height: '150px',
-        top: top,
+        bottom: '35vh',
         boxShadow: isProcessing ? 'rgb(9, 32, 9) 0px 0px 25px 7px inset, rgb(9, 32, 9) 0px 0px 6px 1px' : (isRecording ? 'rgb(9, 32, 9) 0px 0px 25px 7px inset, rgb(9, 32, 9) 0px 0px 5px 0px' : 'inset 0px 0px 25px 7px #03001d, 0px 0px 2px 0px #03001d'),
         backgroundColor: isProcessing ? '#dae1d3' : (isRecording ? '#306604' : '#0080ff'),
         _hover: { 
