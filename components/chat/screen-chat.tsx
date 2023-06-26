@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box, IconButton, Text } from '@chakra-ui/react';
 import { TfiClose } from 'react-icons/tfi';
+import { Message } from './message';
 
 
-export const ScreenChat = ({ newConversationLinkId, deep, handleCloseChat }) => {
+export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handleCloseChat }) => {
   const [messages, setMessages] = useState<Array<any>>([]);
   const [messagesCount, setMessagesCount] = useState(0);
   
@@ -55,6 +56,7 @@ export const ScreenChat = ({ newConversationLinkId, deep, handleCloseChat }) => 
   return (
     <Box
       display="flex"
+      flexDirection="column"
       position="fixed"
       bottom={0}
       left={0}
@@ -67,27 +69,31 @@ export const ScreenChat = ({ newConversationLinkId, deep, handleCloseChat }) => 
       borderRadius="0.5rem"
       _before={{ content: '""', position: 'absolute', top: 0, left: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderRight: '1.5rem solid transparent' }}
       _after={{ content: '""', position: 'absolute', top: 0, right: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderLeft: '1.5rem solid transparent' }}
+      sx={{
+        '& > *:not(:last-child)': {
+          mb: '1rem',
+        },
+      }}
     >
-      <Diamand />
+      {/* <Diamand /> */}
       <Box position="absolute" right={3} top={3}>
-        <IconButton aria-label='Close chat' isRound icon={<TfiClose />} onClick={handleCloseChat}>X</IconButton>
+        <IconButton variant='outline' borderColor='#909294' aria-label='Close chat' isRound icon={<TfiClose color='#909294' />} onClick={handleCloseChat} />
       </Box>
-      {messagesCount ?
-        [
-          <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
-          ...messages.map((message, index) => (
-            <Box key={index} mb={3} p={2} borderRadius="sm" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
-              <Text borderBottom="1px solid" pb={2}>
-                {message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
-              </Text>
-              <Text>{message?.link?.value?.value}</Text>
-            </Box>
+      { messagesCount ? [<Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Conversation with {messagesCount} messages:</Text>] : null }
+      { messagesCount ? [
+          messages.map(message => (
+            <Message key={message.id}
+              text={message?.link?.value?.value}
+              align = {message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'right' : 'left'}
+              arrow = {message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'right' : 'left'}
+              fill = {message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right' ? '#dcdcdc' : '#cce4ff'}
+            />
           ))
         ] : []
       }
     </Box>
   );
-}
+})
 
 const Diamand = () => {
   return (<Box

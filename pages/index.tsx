@@ -27,7 +27,7 @@ import { BackgroundProbableQuestions } from '../components/background-probable-q
 import { ScreenChat } from '../components/chat/screen-chat';
 
 
-export function Content() {
+export const Content = React.memo<any>(() => {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
@@ -418,7 +418,7 @@ export function Content() {
       <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat}/>
     </VStack>
   );
-}
+})
 
 export default function IndexPage() {
   return (
