@@ -1,9 +1,24 @@
 import { Box, IconButton, Text } from "@chakra-ui/react";
-import { motion, useSpring, useTransform } from "framer-motion";
-import React, { useState } from "react";
+import { motion, useAnimation, useSpring, useTransform } from "framer-motion";
+import React, { useEffect, useState } from "react";
 // @ts-ignore
 import { PiMicrophoneSlashThin, PiMicrophoneThin } from "react-icons/pi";
 
+
+const variants = {
+  noRecord: { scale: 1 },
+  recording: { 
+    scale: [1, 0.85, 1.15, 0.85, 1],
+    transition: {
+      repeat: Infinity,
+      // ease: "easeInOut",
+      type: "spring",
+      bounce: 0.5,
+      duration: 3,
+      times: [0, 0.16, 0.33, 0.5, 0.66, 0.83, 0.95, 1, 0.95, 0.83, 0.66, 0.5, 0.33, 0.16, 0]
+    }
+   },
+};
 export const RecordButton = ({
   isProcessing,
   isRecording,
@@ -13,16 +28,26 @@ export const RecordButton = ({
   isRecording?: boolean;
   handleClick?: () => any;
 }) => {
+  const control = useAnimation();
+
   const top = window.innerHeight / 2;
+
+  useEffect(() => {
+    if (isRecording && !isProcessing) {
+      control.start("recording");
+    } else {
+      control.start("noRecord");
+    }
+  }, [isRecording, isProcessing]);
+
   return (<IconButton
       as={motion.button}
       aria-label='record button'
       // @ts-ignore
       icon={isProcessing ? <ProcessButton isProcessing={isProcessing} /> : (isRecording ? <PiMicrophoneThin size='3rem' color='#fff' /> : <PiMicrophoneSlashThin size='3rem' color='#fff' />)}
       isRound
-      animate={{scale: isRecording ? [1, 0.5, 1.5, 0.5, 1] : 1}}
-      // @ts-ignore
-      transition={{ type: "spring", duration: 5, bounce: 0.6, repeat: Infinity }}
+      animate={control}
+      variants={variants}
       sx={{
         position: 'absolute',
         zIndex: 1000,
@@ -30,45 +55,19 @@ export const RecordButton = ({
         height: '150px',
         top: top,
         backgroundColor: isProcessing ? '#dae1d3' : (isRecording ? '#306604' : '#0080ff'),
-        _hover: { backgroundColor: isProcessing ? '#cce0b8' : (isRecording ? '#306604' : '#193f64') }
+        _hover: { 
+          backgroundColor: isProcessing ? '#cce0b8' : (isRecording ? '#306604' : '#193f64') ,
+          scale: (!isRecording && !isProcessing) ? 0.65 : 1,
+        }
       }}
+      // whileHover={{ scale: 0.85 }}
+      whileTap={{ scale: 0.85 }}
       onClick={handleClick}
       >
     </IconButton>)
 }
 
-const ProcessButtonRound = ({isProcessing}:{isProcessing: boolean}) => {
-  // const yRange = useTransform(isProcessing, [0, 0.9], [0, 1]);
-  // const pathLength = useSpring(yRange, { stiffness: 400, damping: 90 });
-  return (<svg className="progress-icon" viewBox="0 0 60 60">
-      <motion.path
-        fill="none"
-        strokeWidth="5"
-        stroke="white"
-        strokeDasharray="0 1"
-        d="M 0, 20 a 20, 20 0 1,0 40,0 a 20, 20 0 1,0 -40,0"
-        style={{
-          // pathLength,
-          rotate: 90,
-          translateX: 5,
-          translateY: 5,
-          scaleX: -1 // Reverse direction of line animation
-        }}
-      />
-      <motion.path
-        fill="none"
-        strokeWidth="5"
-        stroke="white"
-        d="M14,26 L 22,33 L 35,16"
-        initial={false}
-        strokeDasharray="0 1"
-        animate={{ pathLength: isProcessing ? 1 : 0 }}
-      />
-    </svg>
-  )
-}
-
-const ProcessButton = ({isProcessing}:{isProcessing: boolean}) => {
+const ProcessButton = () => {
 
   return (<Box
       sx={{
