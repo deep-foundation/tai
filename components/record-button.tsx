@@ -53,13 +53,13 @@ export const RecordButton = ({
         width: '150px',
         height: '150px',
         top: top,
+        boxShadow: isProcessing ? 'rgb(9, 32, 9) 0px 0px 25px 7px inset, rgb(9, 32, 9) 0px 0px 6px 1px' : (isRecording ? 'rgb(9, 32, 9) 0px 0px 25px 7px inset, rgb(9, 32, 9) 0px 0px 5px 0px' : 'inset 0px 0px 25px 7px #03001d, 0px 0px 2px 0px #03001d'),
         backgroundColor: isProcessing ? '#dae1d3' : (isRecording ? '#306604' : '#0080ff'),
         _hover: { 
-          backgroundColor: isProcessing ? '#cce0b8' : (isRecording ? '#306604' : '#193f64') ,
+          backgroundColor: isProcessing ? '#cce0b8' : (isRecording ? '#306604' : '#03001d') ,
           scale: (!isRecording && !isProcessing) ? 0.65 : 1,
         }
       }}
-      // whileHover={{ scale: 0.85 }}
       whileTap={{ scale: 0.85 }}
       onClick={handleClick}
       >
