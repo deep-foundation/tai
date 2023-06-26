@@ -66,7 +66,6 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
       width='100vw'
       bg='#03001da8'
       p={3}
-      borderRadius="0.5rem"
       _before={{ content: '""', position: 'absolute', top: 0, left: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderRight: '1.5rem solid transparent' }}
       _after={{ content: '""', position: 'absolute', top: 0, right: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderLeft: '1.5rem solid transparent' }}
       sx={{
