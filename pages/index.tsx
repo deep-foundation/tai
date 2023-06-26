@@ -27,11 +27,11 @@ export const Content = React.memo<any>(() => {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
-  const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
-const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   let deep = useDeep();
   const [lastPress, setLastPress] = useState<number>(0);
+  const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const startTime = useRef('');
@@ -192,9 +192,7 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
         const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
         setNewConversationLinkId(sortedData[0].id)      
         }
-        console.log("newConversationLinkId", newConversationLinkId)
-        
-        console.log("checkConversationLink", checkConversationLink)
+
         if (!checkConversationLink || checkConversationLink.length === 0 || !newConversationLinkId || newConversationLinkId === 0) {
           const { data: [{ id: conversationLinkId }] } = await deep.insert({
             type_id: conversationTypeLinkId,
@@ -206,8 +204,8 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
               },
             },
           });
+
           setNewConversationLinkId(conversationLinkId)
-          console.log("newConversationLinkId", newConversationLinkId)
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
@@ -382,7 +380,6 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
           setIsTimeEnded(true)
         }
       };
-      console.log("newConversationLinkId", newConversationLinkId)
       doAsyncStuff();
     }, 60000);
 
@@ -392,7 +389,7 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const handleCloseChat = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
-  
+
     const { data: [{ id: conversationLinkId }] } = await deep.insert({
       type_id: conversationTypeLinkId,
       string: { data: { value: "New chat" } },
@@ -405,7 +402,6 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
     });
     setNewConversationLinkId(conversationLinkId)
     setIsChatClosed(true);
-    console.log("newConversationLinkId", newConversationLinkId)
   };
 
   return (<VStack position='relative' width='100vw' height='100vh'>
