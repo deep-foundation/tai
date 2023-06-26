@@ -78,7 +78,7 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
       <Box position="absolute" right={3} top={3}>
         <IconButton variant='outline' borderColor='#909294' aria-label='Close chat' isRound icon={<TfiClose color='#909294' />} onClick={handleCloseChat} />
       </Box>
-      { messagesCount ? [<Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Conversation with {messagesCount} messages:</Text>] : null }
+      { messagesCount ? [<Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text>] : null }
       { messagesCount ? [
           messages.map(message => (
             <Message key={message.id}
