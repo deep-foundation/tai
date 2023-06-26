@@ -32,7 +32,6 @@ export function WithSetup({
     }
   }, [deep, isAuthorized, gqlPath, apiKey, googleAuth, systemMsg]);
 
-  console.log({ isAuthorized, gqlPath });
   return isAuthorized ? (
     renderChildren({deep})
   ) : null;

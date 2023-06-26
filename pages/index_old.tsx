@@ -1,37 +1,41 @@
+import React, { useEffect, useState, CSSProperties, useRef } from 'react';
+import { useLocalStore } from '@deep-foundation/store/local';
 import {
-  Box,
+  Text,
+  Stack,
   Heading,
-  VStack
+  Button,
+  Box,
 } from '@chakra-ui/react';
 import {
   DeepClient,
-  useDeep,
 } from '@deep-foundation/deeplinks/imports/client';
 import { generateApolloClient } from '@deep-foundation/hasura/client.js';
-import { useLocalStore } from '@deep-foundation/store/local';
+const assert = require('assert');
+import { useDeep } from '@deep-foundation/deeplinks/imports/client';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
-import React, { useEffect, useRef, useState } from 'react';
-import { BackgroundProbableQuestions } from '../components/background-probable-questions';
-import { ScreenChat } from '../components/chat/screen-chat';
 import { NavBar } from '../components/navbar';
 import { Page } from '../components/page';
-import { RecordButton } from '../components/record-button';
-import createContainer from '../imports/capacitor-voice-recorder/create-container';
-import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import startRecording from '../imports/capacitor-voice-recorder/strart-recording';
+import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
-const assert = require('assert');
+import createContainer from '../imports/capacitor-voice-recorder/create-container';
+import ChatBubble from '../components/ChatBubble';
 
+interface ContentParam {
+  deep: DeepClient;
+  deviceLinkId: number;
+}
 
-export const Content = React.memo<any>(() => {
+function Content() {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
-  const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
-const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   let deep = useDeep();
   const [lastPress, setLastPress] = useState<number>(0);
+  const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const startTime = useRef('');
@@ -46,6 +50,7 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
     ws: true,
     token: process.env.NEXT_PUBLIC_TOKEN,
   });
+
   let deepClient = new DeepClient({ apolloClient });
 
   const [containerLinkId, setContainerLinkId] = useLocalStore<number>(
@@ -190,12 +195,13 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
 
         if (checkConversationLink && checkConversationLink.length > 0) {
         const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
+          // console.log("before sortedData[0].id",sortedData[0].id)
+          // console.log("before newConversationLinkId", newConversationLinkId)
         setNewConversationLinkId(sortedData[0].id)      
         }
-        console.log("newConversationLinkId", newConversationLinkId)
-        
-        console.log("checkConversationLink", checkConversationLink)
+
         if (!checkConversationLink || checkConversationLink.length === 0 || !newConversationLinkId || newConversationLinkId === 0) {
+          // console.log("newConversationLinkId")
           const { data: [{ id: conversationLinkId }] } = await deep.insert({
             type_id: conversationTypeLinkId,
             string: { data: { value: "New chat" } },
@@ -206,8 +212,8 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
               },
             },
           });
+
           setNewConversationLinkId(conversationLinkId)
-          console.log("newConversationLinkId", newConversationLinkId)
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
@@ -219,7 +225,7 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
               }
             },
           });
-          
+
           const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
             type_id: systemTypeLinkId,
             from_id: systemMessageLinkId,
@@ -257,14 +263,13 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
           replyMessageLinkId = replyToMessageLinkId;
         } else {
           const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
+          // console.log("sortedData", sortedData)
           setNewConversationLinkId(sortedData[0].id)
         }
 
         if (newConversationLinkId && newConversationLinkId !== 0) {
           if (isTimeEnded || isChatClosed) {
-
             setIsChatClosed(false)
-
 
             const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
@@ -378,11 +383,10 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
               },
             },
           });
-          setNewConversationLinkId(conversationLinkId)
+          setNewConversationLinkId(conversationLinkId);
           setIsTimeEnded(true)
         }
       };
-      console.log("newConversationLinkId", newConversationLinkId)
       doAsyncStuff();
     }, 60000);
 
@@ -392,7 +396,7 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const handleCloseChat = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
-  
+
     const { data: [{ id: conversationLinkId }] } = await deep.insert({
       type_id: conversationTypeLinkId,
       string: { data: { value: "New chat" } },
@@ -403,22 +407,41 @@ const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
         },
       },
     });
-    setNewConversationLinkId(conversationLinkId)
+    setNewConversationLinkId(conversationLinkId);
     setIsChatClosed(true);
-    console.log("newConversationLinkId", newConversationLinkId)
   };
 
-  return (<VStack position='relative' width='100vw' height='100vh'>
-      <BackgroundProbableQuestions />
+  return (
+    <Stack alignItems={'center'}>
       <NavBar />
-      <Box sx={{color: 'antiquewhite', zIndex: 1}}>
-        <Heading as='h1' sx={{color: 'antiquewhite', zIndex: 1}}>Tai</Heading>
-      </Box>
-      <RecordButton isProcessing={isProcessing} isRecording={isRecording} handleClick={handleClick} />
+      <Heading as={'h1'}>Tai</Heading>
+
+      <Button
+        style={{
+          position: 'absolute',
+          zIndex: 1000,
+          width: '350px',
+          height: '350px',
+          borderRadius: '50%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          fontSize: '24px',
+          top: window.innerHeight / 2,
+          backgroundColor: isProcessing ? '#505050' : (isRecording ? '#505050' : '#B0B0B0'),
+        }}
+        onClick={handleClick}
+        isLoading={isProcessing}
+        >
+        {isProcessing ? 'IN PROCESSING' : (isRecording ? 'STOP RECORDING' : 'START RECORDING')}
+      </Button>
+
+
       <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat}/>
-    </VStack>
+      <ChatBubblesContainer>{generateRandomChatBubbles(10)}</ChatBubblesContainer>
+    </Stack>
   );
-})
+}
 
 export default function IndexPage() {
   return (
@@ -430,6 +453,14 @@ export default function IndexPage() {
   );
 }
 
+function Pages() {
+  return <Stack>
+    {/* <Link as={NextLink} href="/audiorecord">
+      Audiorecord
+    </Link> */}
+
+  </Stack>
+}
 
 export async function tryGetLink(deep, { selectData, delayMs, attemptsCount }) {
   let resultLink;
@@ -440,7 +471,6 @@ export async function tryGetLink(deep, { selectData, delayMs, attemptsCount }) {
 
     if (link) {
       resultLink = link;
-      break;
     }
 
     if (attemptsCount !== 0) {
@@ -453,3 +483,121 @@ export async function tryGetLink(deep, { selectData, delayMs, attemptsCount }) {
 export async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
+  const [messages, setMessages] = useState<Array<any>>([]);
+  const [messagesCount, setMessagesCount] = useState(0);
+  let chatGptLinkId;
+  async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
+      const messageTypeLinkId = await deep.id("@deep-foundation/messaging", "Message");
+      const authorTypeLinkId = await deep.id("@deep-foundation/messaging", "Author");
+      const result = await deep.select({
+        tree_id: { _eq: messagingTreeId },
+        link: { type_id: { _eq: messageTypeLinkId } },
+        root_id: { _eq: newConversationLinkId },
+        // @ts-ignore
+        self: { _eq: true }
+      }, {
+        table: 'tree',
+        variables: { order_by: { depth: "asc" } },
+        returning: `
+          id
+          depth
+          root_id
+          parent_id
+          link_id
+          link {
+            id
+            from_id
+            type_id
+            to_id
+            value
+            author: out (where: { type_id: { _eq: ${authorTypeLinkId}} }) {
+              id
+              from_id
+              type_id
+              to_id
+            }
+          }`
+      });
+      setMessages(result?.data);
+      setMessagesCount(result?.data.length);
+    };
+    fetchMessages();
+    const intervalId = setInterval(fetchMessages, 1000);
+    return () => clearInterval(intervalId);
+  }, [newConversationLinkId]);
+  return (
+    <Box
+      position="fixed"
+      bottom={0}
+      left={0}
+      zIndex={1000}
+      overflowY="scroll"
+      height='500px'
+      width='500px'
+      bg={"grey"}
+      p={3}
+      borderRadius="20px"
+    >
+      <Box position="absolute" right={3} top={3}>
+      <Button onClick={handleCloseChat}>X</Button>
+      </Box>
+      {messagesCount ?
+        [
+          <Text key="header" fontWeight="bold" fontSize="lg">Conversation with {messagesCount} messages:</Text>,
+          ...messages.map((message, index) => (
+            <Box key={index} mb={3} p={2} borderRadius="5px" bg={message?.link?.author?.[0]?.to_id === chatGptLinkId ? "blue.100" : "green.100"}>
+              <Text borderBottom="1px solid" pb={2}>
+                {message?.link?.author?.[0]?.to_id === chatGptLinkId ? "You" : "Online consultant"}:
+              </Text>
+              <Text>{message?.link?.value?.value}</Text>
+            </Box>
+          ))
+        ] : []
+      }
+    </Box>
+  );
+}
+
+const generateRandomChatBubbles = (count) => {
+  const messages = [
+    "Hello!",
+    "How are you?",
+    "What are you doing?",
+    "Nice to meet you!",
+    "Have a good day!",
+  ];
+
+  const sides = ["left", "right"];
+
+  const bubbles = Array.from({ length: count }, (_, i) => (
+    <ChatBubble
+      key={i}
+      text={getRandom(messages)}
+      side={getRandom(sides)}
+      top={Math.floor(Math.random() * (window.innerHeight - 150))}
+      left={Math.floor(Math.random() * (window.innerWidth - 150))}
+    />
+    
+  ));
+  return bubbles;
+};
+
+const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+
+const ChatBubblesContainer = ({ children }) => {
+  const containerStyle: CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+  };
+
+  return <div style={containerStyle}>{children}</div>;
+};

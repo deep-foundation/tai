@@ -9,6 +9,8 @@ import { WithPackagesInstalled } from '@deep-foundation/react-with-packages-inst
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { WithDeviceInsertionIfDoesNotExistAndSavingData,getAllDeviceInfo,insertDevice } from '@deep-foundation/capacitor-device';
 import delay from 'delay';
+import { ChakraProvider } from '@chakra-ui/react';
+import themeChakra from './theme/theme';
 
 export interface PageParam {
   renderChildren: (param: {
@@ -21,12 +23,14 @@ export function Page({ renderChildren }: PageParam) {
   const [processingPackage, setProcessingPackage] = useState(null);
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState(new Set());
 
+  const ThemeProviderCustom = ChakraProvider;
+  const themeCustom = themeChakra;
+  
   const installPackage = async (param: {
     packageName: string, deep: DeepClient
   }) => {
     const { packageName, deep } = param;
     setPackagesBeingInstalled(prevPackages => new Set([...prevPackages, packageName]));
-      console.log('if condition');
 
       const {data: [installLink]} = await deep.insert({
         type_id: await deep.id('@deep-foundation/npm-packager', 'Install'),
@@ -78,66 +82,68 @@ export function Page({ renderChildren }: PageParam) {
 
   return (
     <StoreProvider>
-      <WithProvidersAndSetup
-        renderChildren={({ deep }) => {
-          return (
-            <WithPackagesInstalled
-              deep={deep}
-              packageNames={[
-                '@deep-foundation/capacitor-voice-recorder',
-                '@deep-foundation/google-speech',
-                '@deep-foundation/chatgpt',
-                '@deep-foundation/capacitor-device',
-                '@deep-foundation/sound'
-              ]}
-              renderIfError={(error) => <div>{error.message}</div>}
-              renderIfNotInstalled={(packageNames) => {
-                return (
-                  <Stack>
-                    <Text>
-                    {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
-                    </Text>
-                    
-                    {packageNames
-                      .map((packageName) => {
-                        if (packageName === '@deep-foundation/capacitor-voice-recorder' || packageName === '@deep-foundation/google-speech') {
-                          if (packageNames.includes('@deep-foundation/sound')) {
-                            return null;
+      <ThemeProviderCustom theme={themeCustom}>
+        <WithProvidersAndSetup
+          renderChildren={({ deep }) => {
+            return (
+              <WithPackagesInstalled
+                deep={deep}
+                packageNames={[
+                  '@deep-foundation/capacitor-voice-recorder',
+                  '@deep-foundation/google-speech',
+                  '@deep-foundation/chatgpt',
+                  '@deep-foundation/capacitor-device',
+                  '@deep-foundation/sound'
+                ]}
+                renderIfError={(error) => <div>{error.message}</div>}
+                renderIfNotInstalled={(packageNames) => {
+                  return (
+                    <Stack>
+                      <Text>
+                      {`Install these deep packages to proceed: ${packageNames.join(', ')}`}
+                      </Text>
+                      
+                      {packageNames
+                        .map((packageName) => {
+                          if (packageName === '@deep-foundation/capacitor-voice-recorder' || packageName === '@deep-foundation/google-speech') {
+                            if (packageNames.includes('@deep-foundation/sound')) {
+                              return null;
+                            }
                           }
-                        }
-                        return (
-                          <Button
-                            key={packageName}
-                            onClick={async () => {
-                              if(!packagesBeingInstalled.has(packageName)) {
-                                await installPackage({packageName, deep});
-                              }
-                            }}
-                            isLoading={packagesBeingInstalled.has(packageName)}
-                          >
-                            Install {packageName}
-                          </Button>
-                        );
-                      })}
-                  </Stack>
-                );
-              }}
-              renderIfLoading={() => (
-                <Text>Checking if deep packages are installed...</Text>
-              )}
-            >
-              <WithPermissionsGranted>
-                <WithDeviceLinkId
-                  deep={deep}
-                  renderChildren={({ deviceLinkId }) =>
-                    renderChildren({ deep, deviceLinkId })
-                  }
-                />
-              </WithPermissionsGranted>
-            </WithPackagesInstalled>
-          );
-        }}
-      />
+                          return (
+                            <Button
+                              key={packageName}
+                              onClick={async () => {
+                                if(!packagesBeingInstalled.has(packageName)) {
+                                  await installPackage({packageName, deep});
+                                }
+                              }}
+                              isLoading={packagesBeingInstalled.has(packageName)}
+                            >
+                              Install {packageName}
+                            </Button>
+                          );
+                        })}
+                    </Stack>
+                  );
+                }}
+                renderIfLoading={() => (
+                  <Text>Checking if deep packages are installed...</Text>
+                )}
+              >
+                <WithPermissionsGranted>
+                  <WithDeviceLinkId
+                    deep={deep}
+                    renderChildren={({ deviceLinkId }) =>
+                      renderChildren({ deep, deviceLinkId })
+                    }
+                  />
+                </WithPermissionsGranted>
+              </WithPackagesInstalled>
+            );
+          }}
+        />
+      </ThemeProviderCustom>
     </StoreProvider>
   );
 }
