@@ -11,7 +11,6 @@ const variants = {
     scale: [1, 0.85, 1.15, 0.85, 1],
     transition: {
       repeat: Infinity,
-      // ease: "easeInOut",
       type: "spring",
       bounce: 0.5,
       duration: 3,
