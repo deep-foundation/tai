@@ -1,7 +1,8 @@
 import {
   Box,
   Heading,
-  VStack
+  VStack,
+  Button
 } from '@chakra-ui/react';
 import {
   DeepClient,
@@ -20,6 +21,7 @@ import createContainer from '../imports/capacitor-voice-recorder/create-containe
 import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import startRecording from '../imports/capacitor-voice-recorder/strart-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
+import ItemsModal from '../components/items-modal';
 const assert = require('assert');
 
 
@@ -34,6 +36,15 @@ export const Content = React.memo<any>(() => {
   const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);
+
+  const openItemsModal = () => {
+      setIsItemsModalOpen(true);
+  };
+
+  const closeItemsModal = () => {
+      setIsItemsModalOpen(false);
+  };
   const startTime = useRef('');
   let replyMessageLinkId;
   const path = process.env.NEXT_PUBLIC_GQL_PATH;
@@ -404,13 +415,146 @@ export const Content = React.memo<any>(() => {
     setIsChatClosed(true);
   };
 
+  const rawItems = [
+    {
+      "id": "362c1cb7-d429-437f-8f99-40b66b6db99e",
+      "handle": "dfdsfdsa",
+      "reference_id": null,
+      "item_name": "dfdsfdsa",
+      "description": "<p>GDFDSGFDSGFDS</p>",
+      "track_stock": false,
+      "sold_by_weight": false,
+      "is_composite": false,
+      "use_production": false,
+      "category_id": "2471e8be-bdc6-4d84-83c1-7ec88f908309",
+      "components": [],
+      "primary_supplier_id": null,
+      "tax_ids": [],
+      "modifier_ids": [],
+      "form": "SQUARE",
+      "color": "GREY",
+      "image_url": "https://api.loyverse.com/image/362c1cb7-d429-437f-8f99-40b66b6db99e",
+      "option1_name": null,
+      "option2_name": null,
+      "option3_name": null,
+      "created_at": "2023-08-05T23:05:56.000Z",
+      "updated_at": "2023-08-05T23:05:56.000Z",
+      "deleted_at": null,
+      "variants": [
+        {
+          "variant_id": "5126b0f8-39bf-4e42-ba12-4b72bfaf3c0d",
+          "item_id": "362c1cb7-d429-437f-8f99-40b66b6db99e",
+          "sku": "10000",
+          "reference_variant_id": null,
+          "option1_value": null,
+          "option2_value": null,
+          "option3_value": null,
+          "barcode": null,
+          "cost": 123,
+          "purchase_cost": null,
+          "default_pricing_type": "FIXED",
+          "default_price": 123,
+          "stores": [
+            {
+              "store_id": "242e0721-8b4b-423f-89b8-9200f23e8722",
+              "pricing_type": "FIXED",
+              "price": 123,
+              "available_for_sale": true,
+              "optimal_stock": null,
+              "low_stock": null
+            }
+          ],
+          "created_at": "2023-08-05T23:05:56.000Z",
+          "updated_at": "2023-08-05T23:05:56.000Z",
+          "deleted_at": null
+        }
+      ]
+    },
+    {
+      "id": "362c1cb7-d429-437f-8f99-40b66b6db99e",
+      "handle": "dfdsfdsa",
+      "reference_id": null,
+      "item_name": "dfdsfdsa",
+      "description": "<p>GDFDSGFDSGFDS</p>",
+      "track_stock": false,
+      "sold_by_weight": false,
+      "is_composite": false,
+      "use_production": false,
+      "category_id": "2471e8be-bdc6-4d84-83c1-7ec88f908309",
+      "components": [],
+      "primary_supplier_id": null,
+      "tax_ids": [],
+      "modifier_ids": [],
+      "form": "SQUARE",
+      "color": "GREY",
+      "image_url": "https://api.loyverse.com/image/362c1cb7-d429-437f-8f99-40b66b6db99e",
+      "option1_name": null,
+      "option2_name": null,
+      "option3_name": null,
+      "created_at": "2023-08-05T23:05:56.000Z",
+      "updated_at": "2023-08-05T23:05:56.000Z",
+      "deleted_at": null,
+      "variants": [
+        {
+          "variant_id": "5126b0f8-39bf-4e42-ba12-4b72bfaf3c0d",
+          "item_id": "362c1cb7-d429-437f-8f99-40b66b6db99e",
+          "sku": "10000",
+          "reference_variant_id": null,
+          "option1_value": null,
+          "option2_value": null,
+          "option3_value": null,
+          "barcode": null,
+          "cost": 123,
+          "purchase_cost": null,
+          "default_pricing_type": "FIXED",
+          "default_price": 123,
+          "stores": [
+            {
+              "store_id": "242e0721-8b4b-423f-89b8-9200f23e8722",
+              "pricing_type": "FIXED",
+              "price": 123,
+              "available_for_sale": true,
+              "optimal_stock": null,
+              "low_stock": null
+            }
+          ],
+          "created_at": "2023-08-05T23:05:56.000Z",
+          "updated_at": "2023-08-05T23:05:56.000Z",
+          "deleted_at": null
+        }
+      ]
+    }
+  ];
+  
+  const items = rawItems.map(item => ({
+    id: item.id,
+    handle: item.handle,
+    itemName: item.item_name,
+    description: item.description,
+    imageUrl: item.image_url,
+    price: item.variants[0]?.default_price || 0, // Extracting the price from the first variant
+  }));
+  
+
   return (<VStack position='relative' width='100vw' height='100vh'>
+     <button 
+  onClick={openItemsModal} 
+  style={{ position: 'fixed', right: '0px', top: '0px', zIndex:1 }}
+>
+  Items
+</button>
+      <ItemsModal
+                isOpen={isItemsModalOpen}
+                onRequestClose={closeItemsModal}
+                items={items}
+            />
       <BackgroundProbableQuestions />
       <Box sx={{color: 'antiquewhite', zIndex: 1}}>
         <Heading as='h1' sx={{color: 'antiquewhite', zIndex: 1}}>Diamond</Heading>
       </Box>
       <RecordButton isProcessing={isProcessing} isRecording={isRecording} handleClick={handleClick} />
       <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat}/>
+      
     </VStack>
   );
 })
