@@ -146,7 +146,37 @@ e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 0, 0, 0.3)';
 >
 Buy
 </button>
-
+{showChatNumber && (
+    <div
+      style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: '#A8D5BA',
+        padding: '20px',
+        borderRadius: '15px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        textAlign: 'center',
+      }}
+    >
+      <h2>Your Number:</h2>
+      <p style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{chatNumber}</p>
+      <button
+        onClick={() => setShowChatNumber(false)}
+        style={{
+          background: '#388E3C',
+          color: 'white',
+          padding: '10px 20px',
+          borderRadius: '25px',
+          border: 'none',
+          cursor: 'pointer',
+          fontSize: '1rem',
+          marginTop: '10px',
+        }}
+      >
+        Confirm
+      </button>
     </div>
   )}
 
