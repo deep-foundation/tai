@@ -429,7 +429,12 @@ export const Content = React.memo<any>(() => {
   }
 
   const items = rawItems.map(item => ({
-
+    id: item.id,
+    handle: item.handle,
+    itemName: item.item_name,
+    description: item.description,
+    imageUrl: item.image_url,
+    price: item.variants[0]?.default_price || 0, 
   }));
   
 
