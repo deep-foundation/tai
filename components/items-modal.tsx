@@ -7,6 +7,9 @@ const ItemsModal = ({ isOpen, onRequestClose, items }) => {
   const handleBuy = () => {
     setShowChatNumber(true);
   };
+  return (
+
+);
 };
 
 export default ItemsModal;
