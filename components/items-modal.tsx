@@ -8,7 +8,10 @@ const ItemsModal = ({ isOpen, onRequestClose, items }) => {
     setShowChatNumber(true);
   };
   return (
+      
+    <Modal
 
+    </Modal>
 );
 };
 
