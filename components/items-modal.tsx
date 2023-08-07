@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
-const ItemsModal = ({ isOpen, onRequestClose, items }) => {
-  const handleBuy = () => {
+const ItemsModal = ({ isOpen, addToCart, onRequestClose, items, style, chatNumber }) => {
+    const handleBuy = () => {
     setShowChatNumber(true);
   };
   return (
@@ -30,6 +30,21 @@ padding: '20px',
 zIndex:1001,
 overflowY: 'auto',
 }}>
+{items.map((item, index) => (
+<div key={item.id} style={{
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  backgroundColor: index % 2 === 0 ? '#E8F5E9' : '#F1F8E9',
+  borderRadius: '15px',
+  width: '80%',
+  margin: '15px',
+  padding: '15px',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  transition: '0.3s'
+}}>
+
     </div>
   )}
 
