@@ -87,6 +87,36 @@ style={{ borderRadius: '10px' }}
 </div>
 
 
+<button onClick={onRequestClose} style={{
+position: 'absolute',
+right: '7px',
+top: '7px',
+border: '2px solid #4caf50', 
+borderRadius: '50%', 
+background: 'transparent',
+fontSize: '1rem', 
+cursor: 'pointer',
+color: '#4caf50', 
+padding: '5px', 
+transition: '0.3s', 
+width: '20px',
+height: '20px',
+display: 'flex',
+alignItems: 'center',
+justifyContent: 'center',
+}}
+onMouseOver={(e) => {
+e.currentTarget.style.color = '#80e27e'; 
+e.currentTarget.style.borderColor = '#80e27e'; 
+}}
+onMouseOut={(e) => {
+e.currentTarget.style.color = '#4caf50'; 
+e.currentTarget.style.borderColor = '#4caf50'; 
+}}
+>
+x
+</button>
+
     </div>
   )}
 
