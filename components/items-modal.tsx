@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 import Modal from 'react-modal';
 
 const ItemsModal = ({ isOpen, onRequestClose, items }) => {
-
+  const handleBuy = () => {
+    setShowChatNumber(true);
+  };
 };
 
 export default ItemsModal;
