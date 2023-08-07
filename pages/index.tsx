@@ -420,7 +420,20 @@ export const Content = React.memo<any>(() => {
   ];
   
   const customStyles = {
-
+    content: {
+      height: '65vh', 
+      width: '70%', 
+      overflowY: 'auto',
+      borderRadius: '20px', 
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', 
+      border: 'none', 
+      padding: '20px', 
+      backgroundColor: '#f4f4f4',
+      zIndex: 1002, 
+      margin: '40px auto', 
+      position: 'relative',
+      top: '0',
+    },
   };
   
   
