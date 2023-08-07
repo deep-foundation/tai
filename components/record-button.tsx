@@ -47,7 +47,7 @@ export const RecordButton = ({
       variants={variants}
       sx={{
         position: 'absolute',
-        zIndex: 1000,
+        zIndex: 0,
         width: '150px',
         height: '150px',
         bottom: '35vh',
