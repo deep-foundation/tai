@@ -117,6 +117,36 @@ e.currentTarget.style.borderColor = '#4caf50';
 x
 </button>
 
+<button onClick={handleBuy} style={{
+background: 'linear-gradient(45deg, #006400, #228B22)', 
+color: 'white', 
+padding: '15px 30px', 
+borderRadius: '40px', 
+border: 'none', 
+cursor: 'pointer',
+fontSize: '1.4rem', 
+fontWeight: 'bold', 
+boxShadow: '0 0 15px rgba(0, 0, 0, 0.3)', 
+position: 'absolute',
+right: '40px',
+bottom: '20px',
+zIndex: 1001,
+transition: '0.3s'
+}}
+onMouseOver={(e) => {
+e.currentTarget.style.backgroundColor = '#4CAF50';
+e.currentTarget.style.transform = 'scale(1.08)'; 
+e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.4)'; 
+}}
+onMouseOut={(e) => {
+e.currentTarget.style.backgroundColor = '#006400'; 
+e.currentTarget.style.transform = 'scale(1)'; 
+e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 0, 0, 0.3)'; 
+}}
+>
+Buy
+</button>
+
     </div>
   )}
 
