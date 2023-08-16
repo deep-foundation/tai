@@ -51,6 +51,7 @@ export const Content = React.memo<any>(() => {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const googleAuth = process.env.NEXT_PUBLIC_GOOGLE_AUTH || '';
   const systemMsg = process.env.NEXT_PUBLIC_SYSTEM_MSG;
+  const authToken= process.env.NEXT_PUBLIC_AUTH_TOKEN;
   const apolloClient = generateApolloClient({
     path,
     ssl: true,
@@ -89,6 +90,7 @@ export const Content = React.memo<any>(() => {
   useEffect(() => {
     (async () => {
       const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
+      const authTokenTypeLinkId = await deep.id("@flakeed/loyverse", "AuthToken");
       const googleCloudAuthKeyTypeLink = await deep.id("@deep-foundation/google-speech", "GoogleCloudAuthFile");
       const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
       const { data: checkApiKeyLink } = await deep.select({
@@ -103,6 +105,27 @@ export const Content = React.memo<any>(() => {
         const { data: [{ id: apiKeyLinkId }] } = await deep.insert({
           type_id: apiKeyTypeLinkId,
           string: { data: { value: apiKey } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+      }
+
+      const { data: checkAuthTokenLink } = await deep.select({
+        type_id: authTokenTypeLinkId,
+        in: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
+        },
+      });
+
+      if (!checkAuthTokenLink || checkAuthTokenLink.length === 0) {
+        const { data: [{ id: authTokenLink }] } = await deep.insert({
+          type_id: authTokenTypeLinkId,
+          string: { data: { value: authToken } },
           in: {
             data: {
               type_id: containTypeLinkId,
