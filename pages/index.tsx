@@ -87,6 +87,33 @@ export const Content = React.memo<any>(() => {
     }
   }, [])
 
+//fix newconversation value === 0
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+      const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+      if (newConversationLinkId === 0 || !newConversationLinkId ) {
+        
+        const { data: [{ id: conversationLinkId }] } = await deep.insert({
+          type_id: conversationTypeLinkId,
+          string: { data: { value: "New chat" } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+        
+        setNewConversationLinkId(conversationLinkId);
+      }
+    }, 1000); 
+  
+    return () => clearInterval(interval);
+  }, [newConversationLinkId]);
+  
+
+
   useEffect(() => {
     (async () => {
       const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
@@ -213,22 +240,40 @@ export const Content = React.memo<any>(() => {
           },
         });
         assert.notEqual(transcribedTextLinkId, undefined);
-
+        console.log("checkConversationLin1")
         const { data: checkConversationLink } = await deep.select({
           type_id: conversationTypeLinkId,
           in: {
             type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          },
+            from_id: deep.linkId, 
+          }
+        }, {
+          returning: `
+            id
+            value
+            in(where: { type_id: { _eq: ${replyTypeLinkId} }, from: { type_id: { _eq: ${messageTypeLinkId} } } }) {
+              id
+              type_id
+              from_id
+              to_id
+              value
+            }
+          `
         });
-
+        
+        
+        console.log("checkConversationLin",checkConversationLink)
         if (checkConversationLink && checkConversationLink.length > 0) {
         const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
         setNewConversationLinkId(sortedData[0].id)      
         }
+        console.log("checkConversationLin",checkConversationLink)
+console.log("checkConversationLink.length",checkConversationLink.length)
+console.log("checkConversationLink[0].in.length",checkConversationLink[0].in.length)
 
-        if (!checkConversationLink || checkConversationLink.length === 0 || !newConversationLinkId || newConversationLinkId === 0) {
-          const { data: [{ id: conversationLinkId }] } = await deep.insert({
+
+if (!checkConversationLink || checkConversationLink.length === 0 || checkConversationLink[0].in.length === 0) {
+            const { data: [{ id: conversationLinkId }] } = await deep.insert({
             type_id: conversationTypeLinkId,
             string: { data: { value: "New chat" } },
             in: {
@@ -292,7 +337,7 @@ export const Content = React.memo<any>(() => {
           setNewConversationLinkId(sortedData[0].id)
         }
 
-        if (newConversationLinkId && newConversationLinkId !== 0) {
+        if (newConversationLinkId && newConversationLinkId !== 0 && checkConversationLink[0].in.length > 0) {
           if (isTimeEnded || isChatClosed) {
 
             setIsChatClosed(false)
