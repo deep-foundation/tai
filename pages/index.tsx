@@ -240,9 +240,9 @@ export const Content = React.memo<any>(() => {
           },
         });
         assert.notEqual(transcribedTextLinkId, undefined);
-        console.log("checkConversationLin1")
+        
         const { data: checkConversationLink } = await deep.select({
-          type_id: conversationTypeLinkId,
+          id: newConversationLinkId,
           in: {
             type_id: containTypeLinkId,
             from_id: deep.linkId, 
@@ -251,7 +251,7 @@ export const Content = React.memo<any>(() => {
           returning: `
             id
             value
-            in(where: { type_id: { _eq: ${replyTypeLinkId} }, from: { type_id: { _eq: ${messageTypeLinkId} } } }) {
+            in(where: { type_id: { _eq: ${systemTypeLinkId} }, from: { type_id: { _eq: ${messageTypeLinkId} } } }) {
               id
               type_id
               from_id
@@ -260,31 +260,12 @@ export const Content = React.memo<any>(() => {
             }
           `
         });
-        
-        
-        console.log("checkConversationLin",checkConversationLink)
-        if (checkConversationLink && checkConversationLink.length > 0) {
-        const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
-        setNewConversationLinkId(sortedData[0].id)      
-        }
         console.log("checkConversationLin",checkConversationLink)
 console.log("checkConversationLink.length",checkConversationLink.length)
 console.log("checkConversationLink[0].in.length",checkConversationLink[0].in.length)
 
 
-if (!checkConversationLink || checkConversationLink.length === 0 || checkConversationLink[0].in.length === 0) {
-            const { data: [{ id: conversationLinkId }] } = await deep.insert({
-            type_id: conversationTypeLinkId,
-            string: { data: { value: "New chat" } },
-            in: {
-              data: {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-              },
-            },
-          });
-
-          setNewConversationLinkId(conversationLinkId)
+if ( checkConversationLink[0].in.length === 0) {
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
@@ -300,7 +281,7 @@ if (!checkConversationLink || checkConversationLink.length === 0 || checkConvers
           const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
             type_id: systemTypeLinkId,
             from_id: systemMessageLinkId,
-            to_id: conversationLinkId,
+            to_id: newConversationLinkId,
             in: {
               data: {
                 type_id: containTypeLinkId,
@@ -323,7 +304,7 @@ if (!checkConversationLink || checkConversationLink.length === 0 || checkConvers
           const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
             type_id: replyTypeLinkId,
             from_id: messageLinkId,
-            to_id: conversationLinkId,
+            to_id: newConversationLinkId,
             in: {
               data: {
                 type_id: containTypeLinkId,
@@ -337,7 +318,7 @@ if (!checkConversationLink || checkConversationLink.length === 0 || checkConvers
           setNewConversationLinkId(sortedData[0].id)
         }
 
-        if (newConversationLinkId && newConversationLinkId !== 0 && checkConversationLink[0].in.length > 0) {
+        if (checkConversationLink[0].in.length > 0) {
           if (isTimeEnded || isChatClosed) {
 
             setIsChatClosed(false)
@@ -441,7 +422,7 @@ if (!checkConversationLink || checkConversationLink.length === 0 || checkConvers
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       const doAsyncStuff = async () => {
-        if (Date.now() - lastPress >= 60000 && !isRecording) {
+        if (Date.now() - lastPress >= 460000 && !isRecording) {
           const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
           const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
 
@@ -460,7 +441,7 @@ if (!checkConversationLink || checkConversationLink.length === 0 || checkConvers
         }
       };
       doAsyncStuff();
-    }, 60000);
+    }, 460000);
 
     return () => clearTimeout(timeoutId);
   }, [lastPress, isRecording]);
