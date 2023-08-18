@@ -93,7 +93,8 @@ export function Page({ renderChildren }: PageParam) {
                   '@deep-foundation/google-speech',
                   '@deep-foundation/chatgpt',
                   '@deep-foundation/capacitor-device',
-                  '@deep-foundation/sound'
+                  '@deep-foundation/sound',
+                  '@flakeed/loyverse'
                 ]}
                 renderIfError={(error) => <div>{error.message}</div>}
                 renderIfNotInstalled={(packageNames) => {
