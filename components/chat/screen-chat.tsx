@@ -6,12 +6,18 @@ import { Message } from './message';
 
 export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handleCloseChat }) => {
   const [messages, setMessages] = useState<Array<any>>([]);
-  const [messagesCount, setMessagesCount] = useState(0);
-  
-  let chatGptLinkId;
-  
-  async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
+  const [isWaitingResponse, setIsWaitingResponse] = useState(false);
+  const [chatGptLinkId, setChatGptLinkId] = useState(null);
 
+  useEffect(() => {
+    const fetchChatGptLinkId = async () => {
+      const id = await deep.id('@deep-foundation/chatgpt', 'ChatGPT');
+      setChatGptLinkId(id);
+    };
+
+    fetchChatGptLinkId(); 
+  }, [deep]);
+  
   useEffect(() => {
     const fetchMessages = async () => {
       const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
@@ -46,13 +52,20 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
             }
           }`
       });
+      const lastMessage = result?.data[result.data.length - 1];
+
+      if (lastMessage?.link?.author?.[0]?.to_id !== chatGptLinkId) {
+        setIsWaitingResponse(true);
+      } else {
+        setIsWaitingResponse(false);
+      }      
+
       setMessages(result?.data);
-      setMessagesCount(result?.data.length);
     };
     fetchMessages();
     const intervalId = setInterval(fetchMessages, 1000);
     return () => clearInterval(intervalId);
-  }, [newConversationLinkId]);
+  }, [newConversationLinkId, chatGptLinkId]);
   return (
     <Box
       display="flex"
@@ -73,34 +86,28 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
           mb: '1rem',
         },
       }}
-    >
-      {/* <Diamand /> */}
+      >
       <Box position="absolute" right={3} top={3}>
         <IconButton variant='outline' borderColor='#909294' aria-label='Close chat' isRound icon={<TfiClose color='#909294' />} onClick={handleCloseChat} />
       </Box>
-      { messagesCount ? [<Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text>] : null }
-      { messagesCount ? [
-          messages.map(message => (
-            <Message key={message.id}
-              text={message?.link?.value?.value}
-              align = {message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'right' : 'left'}
-              arrow = {message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'right' : 'left'}
-              fill = {message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right' ? '#dcdcdc' : '#cce4ff'}
-            />
-          ))
-        ] : []
-      }
+      {messages.length ? [<Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text>] : null}
+      {messages.map((message, index) => (
+        <Message key={message.id}
+          text={message?.link?.value?.value}
+          align={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
+          arrow={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
+          fill={message?.link?.author?.[0]?.to_id === chatGptLinkId ? '#dcdcdc' : '#cce4ff'}
+        />
+      ))}
+{isWaitingResponse && messages.length > 0 && (
+  <Message
+    text="Thinking..."
+    align='left'
+    arrow='left'
+    fill='#dcdcdc'
+  />
+)}
     </Box>
   );
-})
+});
 
-const Diamand = () => {
-  return (<Box
-    sx={{
-      bg: '#03001d',
-      clipPath: 'polygon(25% 0, 75% 0, 100% 20%, 50% 100%, 0 20%)',
-      allignSelf: 'center',
-      margin: 'auto',
-    }}/>
-  )
-}
