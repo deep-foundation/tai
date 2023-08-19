@@ -15,9 +15,9 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
       setChatGptLinkId(id);
     };
 
-    fetchChatGptLinkId(); 
+    fetchChatGptLinkId();
   }, [deep]);
-  
+
   useEffect(() => {
     const fetchMessages = async () => {
       const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
@@ -58,7 +58,7 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
         setIsWaitingResponse(true);
       } else {
         setIsWaitingResponse(false);
-      }      
+      }
 
       setMessages(result?.data);
     };
@@ -86,7 +86,7 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
           mb: '1rem',
         },
       }}
-      >
+    >
       <Box position="absolute" right={3} top={3}>
         <IconButton variant='outline' borderColor='#909294' aria-label='Close chat' isRound icon={<TfiClose color='#909294' />} onClick={handleCloseChat} />
       </Box>
@@ -99,14 +99,14 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
           fill={message?.link?.author?.[0]?.to_id === chatGptLinkId ? '#dcdcdc' : '#cce4ff'}
         />
       ))}
-{isWaitingResponse && messages.length > 0 && (
-  <Message
-    text="Thinking..."
-    align='left'
-    arrow='left'
-    fill='#dcdcdc'
-  />
-)}
+      {isWaitingResponse && messages.length > 0 && (
+        <Message
+          text="Thinking..."
+          align='left'
+          arrow='left'
+          fill='#dcdcdc'
+        />
+      )}
     </Box>
   );
 });
