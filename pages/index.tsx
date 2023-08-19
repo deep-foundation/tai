@@ -39,11 +39,11 @@ export const Content = React.memo<any>(() => {
   const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);
 
   const openItemsModal = () => {
-      setIsItemsModalOpen(true);
+    setIsItemsModalOpen(true);
   };
 
   const closeItemsModal = () => {
-      setIsItemsModalOpen(false);
+    setIsItemsModalOpen(false);
   };
   const startTime = useRef('');
   let replyMessageLinkId;
@@ -51,7 +51,7 @@ export const Content = React.memo<any>(() => {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const googleAuth = process.env.NEXT_PUBLIC_GOOGLE_AUTH || '';
   const systemMsg = process.env.NEXT_PUBLIC_SYSTEM_MSG;
-  const authToken= process.env.NEXT_PUBLIC_AUTH_TOKEN;
+  const authToken = process.env.NEXT_PUBLIC_AUTH_TOKEN;
   const apolloClient = generateApolloClient({
     path,
     ssl: true,
@@ -87,13 +87,13 @@ export const Content = React.memo<any>(() => {
     }
   }, [])
 
-//fix newconversation value === 0
+  //fix newconversation value === 0
   useEffect(() => {
     const interval = setInterval(async () => {
       const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
       const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
-      if (newConversationLinkId === 0 || !newConversationLinkId ) {
-        
+      if (newConversationLinkId === 0 || !newConversationLinkId) {
+
         const { data: [{ id: conversationLinkId }] } = await deep.insert({
           type_id: conversationTypeLinkId,
           string: { data: { value: "New chat" } },
@@ -104,14 +104,14 @@ export const Content = React.memo<any>(() => {
             },
           },
         });
-        
+
         setNewConversationLinkId(conversationLinkId);
       }
-    }, 1000); 
-  
+    }, 1000);
+
     return () => clearInterval(interval);
   }, [newConversationLinkId]);
-  
+
 
 
   useEffect(() => {
@@ -242,7 +242,7 @@ export const Content = React.memo<any>(() => {
         });
         assert.notEqual(transcribedTextLinkId, undefined);
 
-        const { data: result } = await deep.select({
+        const { data: messagesLinkId } = await deep.select({
           tree_id: { _eq: messagingTreeId },
           link: { type_id: { _eq: messageTypeLinkId } },
           root_id: { _eq: newConversationLinkId },
@@ -272,13 +272,13 @@ export const Content = React.memo<any>(() => {
               }
             }
           `
-        });     
+        });
 
         const { data: checkConversationLink } = await deep.select({
           id: newConversationLinkId,
           in: {
             type_id: containTypeLinkId,
-            from_id: deep.linkId, 
+            from_id: deep.linkId,
           }
         }, {
           returning: `
@@ -294,7 +294,7 @@ export const Content = React.memo<any>(() => {
           `
         });
 
-if ( checkConversationLink[0].systemMessages.length === 0) {
+        if (checkConversationLink[0].systemMessages.length === 0) {
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
@@ -306,7 +306,7 @@ if ( checkConversationLink[0].systemMessages.length === 0) {
               }
             },
           });
-          
+
           const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
             type_id: systemTypeLinkId,
             from_id: systemMessageLinkId,
@@ -399,7 +399,7 @@ if ( checkConversationLink[0].systemMessages.length === 0) {
             replyMessageLinkId = replyToMessageLinkId;
             setIsTimeEnded(false)
           } else {
-            const assistantMessageLinkId =result[0].link.id
+            const assistantMessageLinkId = messagesLinkId[0].link.id
             const { data: [{ id: messageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
               string: { data: { value: transcribedTextLinkId.value.value } },
@@ -751,26 +751,26 @@ if ( checkConversationLink[0].systemMessages.length === 0) {
       ]
     }
   ];
-  
+
   const customStyles = {
     content: {
-      height: '65vh', 
-      width: '70%', 
+      height: '65vh',
+      width: '70%',
       overflowY: 'auto',
-      borderRadius: '20px', 
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', 
-      border: 'none', 
-      padding: '20px', 
+      borderRadius: '20px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      border: 'none',
+      padding: '20px',
       backgroundColor: '#f4f4f4',
-      zIndex: 1002, 
-      margin: '40px auto', 
+      zIndex: 1002,
+      margin: '40px auto',
       position: 'relative',
       top: '0',
     },
   };
-  
-  
-  const addToCart= () =>{
+
+
+  const addToCart = () => {
 
   }
 
@@ -780,59 +780,59 @@ if ( checkConversationLink[0].systemMessages.length === 0) {
     itemName: item.item_name,
     description: item.description,
     imageUrl: item.image_url,
-    price: item.variants[0]?.default_price || 0, 
+    price: item.variants[0]?.default_price || 0,
   }));
-  
+
 
   return (<VStack position='relative' width='100vw' height='100vh'>
-{!isItemsModalOpen && (
-  <button
-    onClick={openItemsModal}
-    style={{
-        position: 'fixed',
-        right: '20px',
-        top: '20px',
-        background: 'linear-gradient(45deg, #4CAF50, #8BC34A)', 
-        color: 'white',
-        padding: '12px 24px',
-        borderRadius: '12px 30px', 
-        border: '2px solid #388E3C', 
-        cursor: 'pointer',
-        fontSize: '1rem',
-        fontWeight: 'bold',
-        boxShadow: '0 0 15px rgba(0, 0, 0, 0.2)',
-        transition: '0.5s', 
-        zIndex: 1
-    }}
-    onMouseOver={(e) => {
-        e.currentTarget.style.background = 'linear-gradient(45deg, #81C784, #C5E1A5)'; 
-        e.currentTarget.style.transform = 'scale(1.05)';
-    }}
-    onMouseOut={(e) => {
-        e.currentTarget.style.background = 'linear-gradient(45deg, #4CAF50, #8BC34A)'; 
-        e.currentTarget.style.transform = 'scale(1)'; 
-    }}
->
-    Products
-  </button>
-)}
+    {!isItemsModalOpen && (
+      <button
+        onClick={openItemsModal}
+        style={{
+          position: 'fixed',
+          right: '20px',
+          top: '20px',
+          background: 'linear-gradient(45deg, #4CAF50, #8BC34A)',
+          color: 'white',
+          padding: '12px 24px',
+          borderRadius: '12px 30px',
+          border: '2px solid #388E3C',
+          cursor: 'pointer',
+          fontSize: '1rem',
+          fontWeight: 'bold',
+          boxShadow: '0 0 15px rgba(0, 0, 0, 0.2)',
+          transition: '0.5s',
+          zIndex: 1
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.background = 'linear-gradient(45deg, #81C784, #C5E1A5)';
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.background = 'linear-gradient(45deg, #4CAF50, #8BC34A)';
+          e.currentTarget.style.transform = 'scale(1)';
+        }}
+      >
+        Products
+      </button>
+    )}
 
-      <ItemsModal
-                isOpen={isItemsModalOpen}
-                onRequestClose={closeItemsModal}
-                addToCart={addToCart}
-                items={items}
-                style={customStyles}
-                chatNumber={newConversationLinkId}
-            />
-      <BackgroundProbableQuestions />
-      <Box sx={{color: 'antiquewhite', zIndex: 1}}>
-        <Heading as='h1' sx={{color: 'antiquewhite', zIndex: 1}}>Diamond</Heading>
-      </Box>
-      <RecordButton isProcessing={isProcessing} isRecording={isRecording} handleClick={handleClick} />
-      <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat}/>
-      
-    </VStack>
+    <ItemsModal
+      isOpen={isItemsModalOpen}
+      onRequestClose={closeItemsModal}
+      addToCart={addToCart}
+      items={items}
+      style={customStyles}
+      chatNumber={newConversationLinkId}
+    />
+    <BackgroundProbableQuestions />
+    <Box sx={{ color: 'antiquewhite', zIndex: 1 }}>
+      <Heading as='h1' sx={{ color: 'antiquewhite', zIndex: 1 }}>Diamond</Heading>
+    </Box>
+    <RecordButton isProcessing={isProcessing} isRecording={isRecording} handleClick={handleClick} />
+    <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat} />
+
+  </VStack>
   );
 })
 
