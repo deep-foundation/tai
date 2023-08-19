@@ -65,7 +65,7 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
     fetchMessages();
     const intervalId = setInterval(fetchMessages, 1000);
     return () => clearInterval(intervalId);
-  }, [newConversationLinkId, chatGptLinkId]);
+  }, [newConversationLinkId]);
   return (
     <Box
       display="flex"
