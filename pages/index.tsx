@@ -191,6 +191,7 @@ export const Content = React.memo<any>(() => {
   const handleClick = async () => {
     if (!isRecording) {
       try {
+
         startTime.current = await startRecording();
         setIsRecording(true);
       } catch (error) {
@@ -240,7 +241,42 @@ export const Content = React.memo<any>(() => {
           },
         });
         assert.notEqual(transcribedTextLinkId, undefined);
-        
+
+
+        const chatId = newConversationLinkId; // Замените на ваше значение
+
+        const { data: result } = await deep.select({
+          tree_id: { _eq: messagingTreeId },
+          link: { type_id: { _eq: messageTypeLinkId } },
+          root_id: { _eq: newConversationLinkId },
+          // @ts-ignore
+          self: { _eq: true }
+        }, {
+          table: 'tree',
+          variables: { order_by: { depth: "desc" } },
+          returning: `
+            id
+            depth
+            root_id
+            parent_id
+            link_id
+            link {
+              id
+              from_id
+              type_id
+              to_id
+              value
+              replies: out (where: { type_id: { _eq: ${replyTypeLinkId} } }) {
+                id
+                type_id
+                from_id
+                to_id
+                value
+              }
+            }
+          `
+        });     
+
         const { data: checkConversationLink } = await deep.select({
           id: newConversationLinkId,
           in: {
@@ -251,7 +287,7 @@ export const Content = React.memo<any>(() => {
           returning: `
             id
             value
-            in(where: { type_id: { _eq: ${systemTypeLinkId} }, from: { type_id: { _eq: ${messageTypeLinkId} } } }) {
+            systemMessages: in(where: { type_id: { _eq: ${systemTypeLinkId} } }) {
               id
               type_id
               from_id
@@ -260,12 +296,8 @@ export const Content = React.memo<any>(() => {
             }
           `
         });
-        console.log("checkConversationLin",checkConversationLink)
-console.log("checkConversationLink.length",checkConversationLink.length)
-console.log("checkConversationLink[0].in.length",checkConversationLink[0].in.length)
 
-
-if ( checkConversationLink[0].in.length === 0) {
+if ( checkConversationLink[0].systemMessages.length === 0) {
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
@@ -313,12 +345,9 @@ if ( checkConversationLink[0].in.length === 0) {
             },
           });
           replyMessageLinkId = replyToMessageLinkId;
-        } else {
-          const sortedData = checkConversationLink.sort((a, b) => b.id - a.id);
-          setNewConversationLinkId(sortedData[0].id)
         }
 
-        if (checkConversationLink[0].in.length > 0) {
+        if (checkConversationLink[0].systemMessages.length > 0) {
           if (isTimeEnded || isChatClosed) {
 
             setIsChatClosed(false)
@@ -373,18 +402,7 @@ if ( checkConversationLink[0].in.length === 0) {
             replyMessageLinkId = replyToMessageLinkId;
             setIsTimeEnded(false)
           } else {
-            const { data: replyLinks } = await deep.select({
-              type_id: replyTypeLinkId,
-            });
-
-            const replyLink = replyLinks.sort((a, b) => {
-              if (b.id !== undefined && a.id !== undefined) {
-                return b.id - a.id;
-              } else {
-                return 0;
-              }
-            });
-
+            const assistantMessageLinkId =result[0].link.id
             const { data: [{ id: messageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
               string: { data: { value: transcribedTextLinkId.value.value } },
@@ -399,7 +417,7 @@ if ( checkConversationLink[0].in.length === 0) {
             const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
               type_id: replyTypeLinkId,
               from_id: messageLinkId,
-              to_id: replyLink[0].from_id,
+              to_id: assistantMessageLinkId,
               in: {
                 data: {
                   type_id: containTypeLinkId,
