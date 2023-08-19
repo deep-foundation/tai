@@ -242,9 +242,6 @@ export const Content = React.memo<any>(() => {
         });
         assert.notEqual(transcribedTextLinkId, undefined);
 
-
-        const chatId = newConversationLinkId; // Замените на ваше значение
-
         const { data: result } = await deep.select({
           tree_id: { _eq: messagingTreeId },
           link: { type_id: { _eq: messageTypeLinkId } },
