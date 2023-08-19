@@ -111,3 +111,13 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
   );
 });
 
+const Diamand = () => {
+  return (<Box
+    sx={{
+      bg: '#03001d',
+      clipPath: 'polygon(25% 0, 75% 0, 100% 20%, 50% 100%, 0 20%)',
+      allignSelf: 'center',
+      margin: 'auto',
+    }}/>
+  )
+}
