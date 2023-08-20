@@ -24,11 +24,11 @@ import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import ItemsModal from '../components/items-modal';
 const assert = require('assert');
 
-
 export const Content = React.memo<any>(() => {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
+
   let deep = useDeep();
   const [lastPress, setLastPress] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
@@ -87,86 +87,86 @@ export const Content = React.memo<any>(() => {
       initializeContainerLink();
     }
   }, [])
-  
- useEffect(() => {
+
+  useEffect(() => {
     const initializeData = async () => {
-        const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
-        const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
-        const getItemsTypeLinkId = await deep.id("@flakeed/loyverse", "GetItems");
-        let currentConversationId = newConversationLinkId;
+      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+      const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+      const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
+      const getItemsTypeLinkId = await deep.id("@flakeed/loyverse", "GetItems");
+      let currentConversationId = newConversationLinkId;
 
-        if (currentConversationId === 0 || !currentConversationId) {
-            const { data: [{ id: conversationLinkId }] } = await deep.insert({
-                type_id: conversationTypeLinkId,
-                string: { data: { value: "New chat" } },
-                in: {
-                    data: {
-                        type_id: containTypeLinkId,
-                        from_id: deep.linkId,
-                    },
-                },
-            });
-            setNewConversationLinkId(conversationLinkId);
-            currentConversationId = conversationLinkId;
+      if (currentConversationId === 0 || !currentConversationId) {
+        const { data: [{ id: conversationLinkId }] } = await deep.insert({
+          type_id: conversationTypeLinkId,
+          string: { data: { value: "New chat" } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+        setNewConversationLinkId(conversationLinkId);
+        currentConversationId = conversationLinkId;
+      }
+
+      const { data: checkConversationLink } = await deep.select({
+        id: currentConversationId,
+        in: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
         }
-
-        const { data: checkConversationLink } = await deep.select({
-            id: currentConversationId,
-            in: {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-            }
-        }, {
-            returning: `
+      }, {
+        returning: `
                 id
                 value
                 shoppingCart: in(where: { type_id: { _eq: ${shoppingCartTypeLinkId} } }) {
                     id
                 }
             `
+      });
+      if (!checkConversationLink || !checkConversationLink[0] || !checkConversationLink[0].shoppingCart || checkConversationLink[0].shoppingCart.length === 0) {
+        const { data: insertedShoppingCart } = await deep.insert({
+          type_id: shoppingCartTypeLinkId,
+          from_id: currentConversationId,
+          to_id: currentConversationId,
+          object: { data: { value: [] } }
         });
-        if (!checkConversationLink || !checkConversationLink[0] || !checkConversationLink[0].shoppingCart || checkConversationLink[0].shoppingCart.length === 0) {
-            const { data: insertedShoppingCart } = await deep.insert({
-                type_id: shoppingCartTypeLinkId,
-                from_id: currentConversationId,
-                to_id: currentConversationId,
-                object:{data:{value:[]}}
-            });
-            setShoppingCartId(insertedShoppingCart[0].id);
-        } else {
-            setShoppingCartId(checkConversationLink[0].shoppingCart[0].id);
-        }
-        const { data: checkGetItemsLink } = await deep.select({
-          type_id: getItemsTypeLinkId,
-          order_by: { id: "desc" }
+        setShoppingCartId(insertedShoppingCart[0].id);
+      } else {
+        setShoppingCartId(checkConversationLink[0].shoppingCart[0].id);
+      }
+      const { data: checkGetItemsLink } = await deep.select({
+        type_id: getItemsTypeLinkId,
+        order_by: { id: "desc" }
       });
 
       try {
         if (!checkGetItemsLink || checkGetItemsLink.length === 0) {
-            const { data: insertedGetItemsLink } = await deep.insert({
-                type_id: getItemsTypeLinkId,
-                in: {
-                    data: {
-                        type_id: containTypeLinkId,
-                        from_id: deep.linkId,
-                    },
-                },
-            });
-    
-            const processedData = await fetchAssociatedLinks(deep,insertedGetItemsLink[0].id);
-            setGetItemsData(processedData);
+          const { data: insertedGetItemsLink } = await deep.insert({
+            type_id: getItemsTypeLinkId,
+            in: {
+              data: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+              },
+            },
+          });
+
+          const processedData = await fetchAssociatedLinks(deep, insertedGetItemsLink[0].id);
+          setGetItemsData(processedData);
         } else {
-            const processedData = await fetchAssociatedLinks(deep,checkGetItemsLink[0].id);
-            setGetItemsData(processedData);
+          const processedData = await fetchAssociatedLinks(deep, checkGetItemsLink[0].id);
+          setGetItemsData(processedData);
         }
-    } catch (error) {
+      } catch (error) {
         console.error("An error occurred:", error.message);
-    }
+      }
     };
 
     initializeData();
-}, [newConversationLinkId]);
+  }, [newConversationLinkId]);
 
   useEffect(() => {
     (async () => {
@@ -245,7 +245,6 @@ export const Content = React.memo<any>(() => {
   const handleClick = async () => {
     if (!isRecording) {
       try {
-
         startTime.current = await startRecording();
         setIsRecording(true);
       } catch (error) {
@@ -339,7 +338,6 @@ export const Content = React.memo<any>(() => {
               to_id
               value
             }
-            
           `
         });
 
@@ -396,7 +394,6 @@ export const Content = React.memo<any>(() => {
           if (isTimeEnded || isChatClosed) {
 
             setIsChatClosed(false)
-
 
             const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
@@ -559,14 +556,13 @@ export const Content = React.memo<any>(() => {
 
   const items = getItemsData.map(item => ({
     // id: item.id,
-    linkId:item.linkId,
+    linkId: item.linkId,
     // handle: item.handle,
     itemName: item.item_name,
     // description: item.description,
     imageUrl: item.image_url,
     price: item.variants?.[0]?.default_price || 0,//price in $ or ฿
   }));
-
 
   return (<VStack position='relative' width='100vw' height='100vh'>
     {!isItemsModalOpen && (
@@ -602,10 +598,11 @@ export const Content = React.memo<any>(() => {
     )}
 
     <ItemsModal
+      deep={deep}
       isOpen={isItemsModalOpen}
       onRequestClose={closeItemsModal}
       addToCart={handleAddToCart}
-            items={items}
+      items={items}
       style={customStyles}
       chatNumber={newConversationLinkId}
     />
@@ -653,27 +650,27 @@ export async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchAssociatedLinks(deep,linkId) {
+async function fetchAssociatedLinks(deep, linkId) {
   const itemTypeLinkId = await deep.id("@flakeed/loyverse", "Item");
 
   const { data: associatedLinks } = await deep.select({
-      type_id: itemTypeLinkId,
-      from_id: linkId,
+    type_id: itemTypeLinkId,
+    from_id: linkId,
   }, {
-      returning: `
+    returning: `
           id
           value
       `
   });
   if (!associatedLinks || associatedLinks.length === 0) {
-      throw new Error("Error: The store has no items.");
+    throw new Error("Error: The store has no items.");
   }
 
   return associatedLinks.map(link => {
-      const itemData = typeof link.value.value === 'string' ? JSON.parse(link.value.value) : link.value.value;
-      return {
-          ...itemData,
-          linkId: link.id
-      };
+    const itemData = typeof link.value.value === 'string' ? JSON.parse(link.value.value) : link.value.value;
+    return {
+      ...itemData,
+      linkId: link.id
+    };
   });
 }
