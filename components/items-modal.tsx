@@ -62,7 +62,7 @@ const ItemsModal = ({ isOpen, addToCart, onRequestClose, items, style, chatNumbe
                 <h2 style={{ fontSize: '1.4rem', color: '#388E3C', marginBottom: '5px' }}>{item.itemName}</h2>
                 <p style={{ fontSize: '1.1rem', color: '#2E7D32', fontWeight: 'bold' }}>Price: {item.price || 'N/A'}</p>
               </div>
-              <button onClick={addToCart} style={{
+              <button onClick={() => addToCart(item.linkId)}  style={{
                 background: 'linear-gradient(90deg, #388E3C, #4CAF50)',
                 color: 'white',
                 padding: '10px 20px',
