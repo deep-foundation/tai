@@ -126,7 +126,6 @@ export const Content = React.memo<any>(() => {
                 }
             `
         });
-console.log("checkConversationLink",checkConversationLink)
         if (!checkConversationLink || !checkConversationLink[0] || !checkConversationLink[0].shoppingCart || checkConversationLink[0].shoppingCart.length === 0) {
             const { data: insertedShoppingCart } = await deep.insert({
                 type_id: shoppingCartTypeLinkId,
@@ -138,13 +137,10 @@ console.log("checkConversationLink",checkConversationLink)
         } else {
             setShoppingCartId(checkConversationLink[0].shoppingCart[0].id);
         }
-        console.log("shcart",shoppingCartId)
-        console.log("conv",newConversationLinkId)
         const { data: checkGetItemsLink } = await deep.select({
           type_id: getItemsTypeLinkId,
           order_by: { id: "desc" }
       });
-      console.log("checkGetItemsLink",checkGetItemsLink)
 
       try {
         if (!checkGetItemsLink || checkGetItemsLink.length === 0) {
@@ -258,8 +254,6 @@ console.log("checkConversationLink",checkConversationLink)
     } else {
       try {
         setIsProcessing(true);
-        console.log("btn conv",newConversationLinkId)
-        console.log("btn sh",shoppingCartId)
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
@@ -550,8 +544,6 @@ console.log("checkConversationLink",checkConversationLink)
   const handleAddToCart = async (itemId) => {
     const addToCartTypeLinkId = await deep.id("@flakeed/loyverse", "AddToCart");
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-console.log("itemId",itemId)
-    console.log("Selected Item ID:", itemId);
     const { data: addedToCartLink } = await deep.insert({
       type_id: addToCartTypeLinkId,
       from_id: itemId,
@@ -563,7 +555,6 @@ console.log("itemId",itemId)
         }
       },
     });
-    console.log("Link created:", addedToCartLink);
   }
 
   const items = getItemsData.map(item => ({
@@ -639,7 +630,6 @@ export default function IndexPage() {
   );
 }
 
-
 export async function tryGetLink(deep, { selectData, delayMs, attemptsCount }) {
   let resultLink;
   for (let i = 0; i < attemptsCount; i++) {
@@ -675,7 +665,6 @@ async function fetchAssociatedLinks(deep,linkId) {
           value
       `
   });
-console.log("associatedLinks",associatedLinks)
   if (!associatedLinks || associatedLinks.length === 0) {
       throw new Error("Error: The store has no items.");
   }
