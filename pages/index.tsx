@@ -37,6 +37,7 @@ export const Content = React.memo<any>(() => {
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);
+  const [shoppingCartId, setShoppingCartId] = useState(null);
 
   const openItemsModal = () => {
     setIsItemsModalOpen(true);
@@ -78,39 +79,64 @@ export const Content = React.memo<any>(() => {
     })
   }, [deep])
 
-  useEffect(() => {
-    if (!containerLinkId) {
-      const initializeContainerLink = async () => {
-        setContainerLinkId(await createContainer(deep));
-      };
-      initializeContainerLink();
-    }
-  }, [])
+ useEffect(() => {
+    const initializeData = async () => {
+        const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+        const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
 
-  //fix newconversation value === 0
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-      const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
-      if (newConversationLinkId === 0 || !newConversationLinkId) {
+        let currentConversationId = newConversationLinkId;
 
-        const { data: [{ id: conversationLinkId }] } = await deep.insert({
-          type_id: conversationTypeLinkId,
-          string: { data: { value: "New chat" } },
-          in: {
-            data: {
-              type_id: containTypeLinkId,
-              from_id: deep.linkId,
-            },
-          },
+        if (currentConversationId === 0 || !currentConversationId) {
+            const { data: [{ id: conversationLinkId }] } = await deep.insert({
+                type_id: conversationTypeLinkId,
+                string: { data: { value: "New chat" } },
+                in: {
+                    data: {
+                        type_id: containTypeLinkId,
+                        from_id: deep.linkId,
+                    },
+                },
+            });
+            setNewConversationLinkId(conversationLinkId);
+            currentConversationId = conversationLinkId;
+        }
+
+        const { data: checkConversationLink } = await deep.select({
+            id: currentConversationId,
+            in: {
+                type_id: containTypeLinkId,
+                from_id: deep.linkId,
+            }
+        }, {
+            returning: `
+                id
+                value
+                shoppingCart: in(where: { type_id: { _eq: ${shoppingCartTypeLinkId} } }) {
+                    id
+                }
+            `
         });
 
-        setNewConversationLinkId(conversationLinkId);
-      }
-    }, 1000);
+        if (!checkConversationLink || !checkConversationLink[0] || !checkConversationLink[0].shoppingCart || checkConversationLink[0].shoppingCart.length === 0) {
+            const { data: insertedShoppingCart } = await deep.insert({
+                type_id: shoppingCartTypeLinkId,
+                from_id: currentConversationId,
+                to_id: currentConversationId,
+            });
+            setShoppingCartId(insertedShoppingCart[0].id);
+        } else {
+            setShoppingCartId(checkConversationLink[0].shoppingCart[0].id);
+        }
+        console.log("shcart",shoppingCartId)
+        console.log("conv",newConversationLinkId)
+    };
 
-    return () => clearInterval(interval);
-  }, [newConversationLinkId]);
+    initializeData();
+}, [newConversationLinkId]);
+
+  
+  
 
 
 
@@ -200,6 +226,8 @@ export const Content = React.memo<any>(() => {
     } else {
       try {
         setIsProcessing(true);
+        console.log("btn conv",newConversationLinkId)
+        console.log("btn sh",shoppingCartId)
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
@@ -213,6 +241,7 @@ export const Content = React.memo<any>(() => {
         const soundTypelinkId = await deep.id("@deep-foundation/sound", "Sound");
         const formatTypelinkId = await deep.id("@deep-foundation/sound", "Format");
         const mimetypeTypelinkId = await deep.id("@deep-foundation/sound", "MIME/type");
+        const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
         const record = await stopRecording(deep, containerLinkId, startTime.current);
         const endTime = new Date().toLocaleDateString();
         const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }]);
@@ -291,8 +320,16 @@ export const Content = React.memo<any>(() => {
               to_id
               value
             }
+            shoppingCart: in(where: { type_id: { _eq: ${shoppingCartTypeLinkId} } }) {
+              id
+              type_id
+              from_id
+              to_id
+              value
+            }
           `
         });
+        console.log("checkConversationLink",checkConversationLink)
 
         if (checkConversationLink[0].systemMessages.length === 0) {
 
