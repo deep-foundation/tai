@@ -30,7 +30,6 @@ export const Content = React.memo<any>(() => {
     defineCustomElements(window);
   }, []);
   let deep = useDeep();
-  const addToCartTypeLinkId = await deep.id("@flakeed/loyverse", "AddToCart");
   const [lastPress, setLastPress] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -38,7 +37,8 @@ export const Content = React.memo<any>(() => {
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);
-  const [shoppingCartId, setShoppingCartId] = useState(null);
+  const [shoppingCartId, setShoppingCartId] = useState(0);
+  const [getItemsData, setGetItemsData] = useState<any[]>([]);
 
   const openItemsModal = () => {
     setIsItemsModalOpen(true);
@@ -94,7 +94,8 @@ export const Content = React.memo<any>(() => {
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
         const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
-
+        const getItemsTypeLinkId = await deep.id("@flakeed/loyverse", "GetItems");
+        const itemTypeLinkId = await deep.id("@flakeed/loyverse", "Item");
         let currentConversationId = newConversationLinkId;
 
         if (currentConversationId === 0 || !currentConversationId) {
@@ -127,12 +128,13 @@ export const Content = React.memo<any>(() => {
                 }
             `
         });
-
+console.log("checkConversationLink",checkConversationLink)
         if (!checkConversationLink || !checkConversationLink[0] || !checkConversationLink[0].shoppingCart || checkConversationLink[0].shoppingCart.length === 0) {
             const { data: insertedShoppingCart } = await deep.insert({
                 type_id: shoppingCartTypeLinkId,
                 from_id: currentConversationId,
                 to_id: currentConversationId,
+                object:{data:{value:[]}}
             });
             setShoppingCartId(insertedShoppingCart[0].id);
         } else {
@@ -140,6 +142,51 @@ export const Content = React.memo<any>(() => {
         }
         console.log("shcart",shoppingCartId)
         console.log("conv",newConversationLinkId)
+        const { data: checkGetItemsLink } = await deep.select({
+          type_id: getItemsTypeLinkId,
+          order_by: { id: "desc" }
+      });
+      console.log("checkGetItemsLink",checkGetItemsLink)
+
+      if (!checkGetItemsLink || checkGetItemsLink.length === 0) {
+          const { data: insertedGetItemsLink } = await deep.insert({
+              type_id: getItemsTypeLinkId,
+              in: {
+                  data: {
+                      type_id: containTypeLinkId,
+                      from_id: deep.linkId,
+                  },
+              },
+          });
+      }
+
+      const { data: associatedLinks } = await deep.select({
+        type_id:itemTypeLinkId,
+        from_id: checkGetItemsLink[0].id,
+    }, {
+        returning: `
+            id
+            value
+        `
+    });
+    
+      console.log("associatedLinks",associatedLinks)
+      
+      if (!associatedLinks || associatedLinks.length === 0) {
+        throw new Error("Error: The store has no items.");
+    } else {
+      const updatedItems = associatedLinks.map(link => {
+        const itemData = typeof link.value.value === 'string' ? JSON.parse(link.value.value) : link.value.value;
+        return {
+            ...itemData,  
+            linkId: link.id 
+        };
+    });
+    console.log("updatedItems", updatedItems);
+    setGetItemsData(updatedItems);
+    
+    }
+    
     };
 
     initializeData();
@@ -520,279 +567,6 @@ export const Content = React.memo<any>(() => {
     setIsChatClosed(true);
   };
 
-  const rawItems = [
-    {
-      "id": "362c1cb7-d429-437f-8f99-40b66b6db99e",
-      "handle": "dfdsfdsa",
-      "reference_id": null,
-      "item_name": "dfdsfdsa",
-      "description": "<p>GDFDSGFDSGFDS</p>",
-      "track_stock": false,
-      "sold_by_weight": false,
-      "is_composite": false,
-      "use_production": false,
-      "category_id": "2471e8be-bdc6-4d84-83c1-7ec88f908309",
-      "components": [],
-      "primary_supplier_id": null,
-      "tax_ids": [],
-      "modifier_ids": [],
-      "form": "SQUARE",
-      "color": "GREY",
-      "image_url": "https://api.loyverse.com/image/362c1cb7-d429-437f-8f99-40b66b6db99e",
-      "option1_name": null,
-      "option2_name": null,
-      "option3_name": null,
-      "created_at": "2023-08-05T23:05:56.000Z",
-      "updated_at": "2023-08-05T23:05:56.000Z",
-      "deleted_at": null,
-      "variants": [
-        {
-          "variant_id": "5126b0f8-39bf-4e42-ba12-4b72bfaf3c0d",
-          "item_id": "362c1cb7-d429-437f-8f99-40b66b6db99e",
-          "sku": "10000",
-          "reference_variant_id": null,
-          "option1_value": null,
-          "option2_value": null,
-          "option3_value": null,
-          "barcode": null,
-          "cost": 123,
-          "purchase_cost": null,
-          "default_pricing_type": "FIXED",
-          "default_price": 123,
-          "stores": [
-            {
-              "store_id": "242e0721-8b4b-423f-89b8-9200f23e8722",
-              "pricing_type": "FIXED",
-              "price": 123,
-              "available_for_sale": true,
-              "optimal_stock": null,
-              "low_stock": null
-            }
-          ],
-          "created_at": "2023-08-05T23:05:56.000Z",
-          "updated_at": "2023-08-05T23:05:56.000Z",
-          "deleted_at": null
-        }
-      ]
-    },
-    {
-      "id": "362c1cb7-d429-437f-8f99-40b66b6db99e",
-      "handle": "dfdsfdsa",
-      "reference_id": null,
-      "item_name": "dfdsfdsa",
-      "description": "<p>GDFDSGFDSGFDS</p>",
-      "track_stock": false,
-      "sold_by_weight": false,
-      "is_composite": false,
-      "use_production": false,
-      "category_id": "2471e8be-bdc6-4d84-83c1-7ec88f908309",
-      "components": [],
-      "primary_supplier_id": null,
-      "tax_ids": [],
-      "modifier_ids": [],
-      "form": "SQUARE",
-      "color": "GREY",
-      "image_url": "https://api.loyverse.com/image/362c1cb7-d429-437f-8f99-40b66b6db99e",
-      "option1_name": null,
-      "option2_name": null,
-      "option3_name": null,
-      "created_at": "2023-08-05T23:05:56.000Z",
-      "updated_at": "2023-08-05T23:05:56.000Z",
-      "deleted_at": null,
-      "variants": [
-        {
-          "variant_id": "5126b0f8-39bf-4e42-ba12-4b72bfaf3c0d",
-          "item_id": "362c1cb7-d429-437f-8f99-40b66b6db99e",
-          "sku": "10000",
-          "reference_variant_id": null,
-          "option1_value": null,
-          "option2_value": null,
-          "option3_value": null,
-          "barcode": null,
-          "cost": 123,
-          "purchase_cost": null,
-          "default_pricing_type": "FIXED",
-          "default_price": 123,
-          "stores": [
-            {
-              "store_id": "242e0721-8b4b-423f-89b8-9200f23e8722",
-              "pricing_type": "FIXED",
-              "price": 123,
-              "available_for_sale": true,
-              "optimal_stock": null,
-              "low_stock": null
-            }
-          ],
-          "created_at": "2023-08-05T23:05:56.000Z",
-          "updated_at": "2023-08-05T23:05:56.000Z",
-          "deleted_at": null
-        }
-      ]
-    },
-    {
-      "id": "067a4a41-20a9-4234-86b7-aef5304c0ac0",
-      "handle": "gfdgsdf",
-      "reference_id": null,
-      "item_name": "GFDGSDF",
-      "description": "<p>GDFGFDS</p>",
-      "track_stock": false,
-      "sold_by_weight": false,
-      "is_composite": false,
-      "use_production": false,
-      "category_id": "2471e8be-bdc6-4d84-83c1-7ec88f908309",
-      "components": [],
-      "primary_supplier_id": null,
-      "tax_ids": [],
-      "modifier_ids": [],
-      "form": "OCTAGON",
-      "color": "ORANGE",
-      "image_url": null,
-      "option1_name": null,
-      "option2_name": null,
-      "option3_name": null,
-      "created_at": "2023-08-05T23:06:15.000Z",
-      "updated_at": "2023-08-05T23:06:15.000Z",
-      "deleted_at": null,
-      "variants": [
-        {
-          "variant_id": "590b5410-a055-47a1-8a07-74edbea578f0",
-          "item_id": "067a4a41-20a9-4234-86b7-aef5304c0ac0",
-          "sku": "10001",
-          "reference_variant_id": null,
-          "option1_value": null,
-          "option2_value": null,
-          "option3_value": null,
-          "barcode": null,
-          "cost": 0,
-          "purchase_cost": null,
-          "default_pricing_type": "FIXED",
-          "default_price": 412,
-          "stores": [
-            {
-              "store_id": "242e0721-8b4b-423f-89b8-9200f23e8722",
-              "pricing_type": "FIXED",
-              "price": 412,
-              "available_for_sale": true,
-              "optimal_stock": null,
-              "low_stock": null
-            }
-          ],
-          "created_at": "2023-08-05T23:06:15.000Z",
-          "updated_at": "2023-08-05T23:06:15.000Z",
-          "deleted_at": null
-        }
-      ]
-    },
-    {
-      "id": "067a4a41-20a9-4234-86b7-aef5304c0ac0",
-      "handle": "gfdgsdf",
-      "reference_id": null,
-      "item_name": "GFDGSDF",
-      "description": "<p>GDFGFDS</p>",
-      "track_stock": false,
-      "sold_by_weight": false,
-      "is_composite": false,
-      "use_production": false,
-      "category_id": "2471e8be-bdc6-4d84-83c1-7ec88f908309",
-      "components": [],
-      "primary_supplier_id": null,
-      "tax_ids": [],
-      "modifier_ids": [],
-      "form": "OCTAGON",
-      "color": "ORANGE",
-      "image_url": null,
-      "option1_name": null,
-      "option2_name": null,
-      "option3_name": null,
-      "created_at": "2023-08-05T23:06:15.000Z",
-      "updated_at": "2023-08-05T23:06:15.000Z",
-      "deleted_at": null,
-      "variants": [
-        {
-          "variant_id": "590b5410-a055-47a1-8a07-74edbea578f0",
-          "item_id": "067a4a41-20a9-4234-86b7-aef5304c0ac0",
-          "sku": "10001",
-          "reference_variant_id": null,
-          "option1_value": null,
-          "option2_value": null,
-          "option3_value": null,
-          "barcode": null,
-          "cost": 0,
-          "purchase_cost": null,
-          "default_pricing_type": "FIXED",
-          "default_price": 412,
-          "stores": [
-            {
-              "store_id": "242e0721-8b4b-423f-89b8-9200f23e8722",
-              "pricing_type": "FIXED",
-              "price": 412,
-              "available_for_sale": true,
-              "optimal_stock": null,
-              "low_stock": null
-            }
-          ],
-          "created_at": "2023-08-05T23:06:15.000Z",
-          "updated_at": "2023-08-05T23:06:15.000Z",
-          "deleted_at": null
-        }
-      ]
-    },
-    {
-      "id": "067a4a41-20a9-4234-86b7-aef5304c0ac0",
-      "handle": "gfdgsdf",
-      "reference_id": null,
-      "item_name": "GFDGSDF",
-      "description": "<p>GDFGFDS</p>",
-      "track_stock": false,
-      "sold_by_weight": false,
-      "is_composite": false,
-      "use_production": false,
-      "category_id": "2471e8be-bdc6-4d84-83c1-7ec88f908309",
-      "components": [],
-      "primary_supplier_id": null,
-      "tax_ids": [],
-      "modifier_ids": [],
-      "form": "OCTAGON",
-      "color": "ORANGE",
-      "image_url": null,
-      "option1_name": null,
-      "option2_name": null,
-      "option3_name": null,
-      "created_at": "2023-08-05T23:06:15.000Z",
-      "updated_at": "2023-08-05T23:06:15.000Z",
-      "deleted_at": null,
-      "variants": [
-        {
-          "variant_id": "590b5410-a055-47a1-8a07-74edbea578f0",
-          "item_id": "067a4a41-20a9-4234-86b7-aef5304c0ac0",
-          "sku": "10001",
-          "reference_variant_id": null,
-          "option1_value": null,
-          "option2_value": null,
-          "option3_value": null,
-          "barcode": null,
-          "cost": 0,
-          "purchase_cost": null,
-          "default_pricing_type": "FIXED",
-          "default_price": 412,
-          "stores": [
-            {
-              "store_id": "242e0721-8b4b-423f-89b8-9200f23e8722",
-              "pricing_type": "FIXED",
-              "price": 412,
-              "available_for_sale": true,
-              "optimal_stock": null,
-              "low_stock": null
-            }
-          ],
-          "created_at": "2023-08-05T23:06:15.000Z",
-          "updated_at": "2023-08-05T23:06:15.000Z",
-          "deleted_at": null
-        }
-      ]
-    }
-  ];
-
   const customStyles = {
     content: {
       height: '65vh',
@@ -810,11 +584,6 @@ export const Content = React.memo<any>(() => {
     },
   };
 
-
-  const addToCart = () => {
-
-  }
-
   const handleAddToCart = async (itemId) => {
     const addToCartTypeLinkId = await deep.id("@flakeed/loyverse", "AddToCart");
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
@@ -823,7 +592,7 @@ export const Content = React.memo<any>(() => {
     const { data: addedToCartLink } = await deep.insert({
       type_id: addToCartTypeLinkId,
       from_id: itemId,
-      to_id: newConversationLinkId,
+      to_id: shoppingCartId,
       in: {
         data: {
           type_id: containTypeLinkId,
@@ -835,13 +604,13 @@ export const Content = React.memo<any>(() => {
     console.log("Link created:", addedToCartLink);
   }
 
-  const items = rawItems.map(item => ({
+  const items = getItemsData.map(item => ({
     id: item.id,
     handle: item.handle,
     itemName: item.item_name,
     description: item.description,
     imageUrl: item.image_url,
-    price: item.variants[0]?.default_price || 0,
+    price: item.variants?.default_price || 0,
   }));
 
 
@@ -882,7 +651,7 @@ export const Content = React.memo<any>(() => {
       isOpen={isItemsModalOpen}
       onRequestClose={closeItemsModal}
       addToCart={handleAddToCart}
-            items={items}
+            items={getItemsData}
       style={customStyles}
       chatNumber={newConversationLinkId}
     />
