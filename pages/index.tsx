@@ -148,44 +148,30 @@ console.log("checkConversationLink",checkConversationLink)
       });
       console.log("checkGetItemsLink",checkGetItemsLink)
 
-      if (!checkGetItemsLink || checkGetItemsLink.length === 0) {
-          const { data: insertedGetItemsLink } = await deep.insert({
-              type_id: getItemsTypeLinkId,
-              in: {
-                  data: {
-                      type_id: containTypeLinkId,
-                      from_id: deep.linkId,
-                  },
-              },
-          });
-      }
-
-      const { data: associatedLinks } = await deep.select({
-        type_id:itemTypeLinkId,
-        from_id: checkGetItemsLink[0].id,
-    }, {
-        returning: `
-            id
-            value
-        `
-    });
+      try {
+        if (!checkGetItemsLink || checkGetItemsLink.length === 0) {
+            const { data: insertedGetItemsLink } = await deep.insert({
+                type_id: getItemsTypeLinkId,
+                in: {
+                    data: {
+                        type_id: containTypeLinkId,
+                        from_id: deep.linkId,
+                    },
+                },
+            });
     
-      console.log("associatedLinks",associatedLinks)
-      
-      if (!associatedLinks || associatedLinks.length === 0) {
-        throw new Error("Error: The store has no items.");
-    } else {
-      const updatedItems = associatedLinks.map(link => {
-        const itemData = typeof link.value.value === 'string' ? JSON.parse(link.value.value) : link.value.value;
-        return {
-            ...itemData,  
-            linkId: link.id 
-        };
-    });
-    console.log("updatedItems", updatedItems);
-    setGetItemsData(updatedItems);
-    
+            const processedData = await fetchAssociatedLinks(deep,insertedGetItemsLink[0].id);
+            setGetItemsData(processedData);
+        } else {
+            const processedData = await fetchAssociatedLinks(deep,checkGetItemsLink[0].id);
+            setGetItemsData(processedData);
+        }
+    } catch (error) {
+        console.error("An error occurred:", error.message);
+        // Обработайте ошибку соответствующим образом, например, показав пользователю сообщение об ошибке
     }
+    
+      
     
     };
 
@@ -697,4 +683,30 @@ export async function tryGetLink(deep, { selectData, delayMs, attemptsCount }) {
 
 export async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchAssociatedLinks(deep,linkId) {
+  const itemTypeLinkId = await deep.id("@flakeed/loyverse", "Item");
+
+  const { data: associatedLinks } = await deep.select({
+      type_id: itemTypeLinkId,
+      from_id: linkId,
+  }, {
+      returning: `
+          id
+          value
+      `
+  });
+console.log("associatedLinks",associatedLinks)
+  if (!associatedLinks || associatedLinks.length === 0) {
+      throw new Error("Error: The store has no items.");
+  }
+
+  return associatedLinks.map(link => {
+      const itemData = typeof link.value.value === 'string' ? JSON.parse(link.value.value) : link.value.value;
+      return {
+          ...itemData,
+          linkId: link.id
+      };
+  });
 }
