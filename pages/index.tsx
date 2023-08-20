@@ -550,7 +550,7 @@ console.log("checkConversationLink",checkConversationLink)
   const handleAddToCart = async (itemId) => {
     const addToCartTypeLinkId = await deep.id("@flakeed/loyverse", "AddToCart");
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-
+console.log("itemId",itemId)
     console.log("Selected Item ID:", itemId);
     const { data: addedToCartLink } = await deep.insert({
       type_id: addToCartTypeLinkId,
@@ -568,6 +568,7 @@ console.log("checkConversationLink",checkConversationLink)
 
   const items = getItemsData.map(item => ({
     // id: item.id,
+    linkId:item.linkId,
     // handle: item.handle,
     itemName: item.item_name,
     // description: item.description,
