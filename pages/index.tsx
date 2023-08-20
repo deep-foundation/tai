@@ -79,6 +79,15 @@ export const Content = React.memo<any>(() => {
     })
   }, [deep])
 
+  useEffect(() => {
+    if (!containerLinkId) {
+      const initializeContainerLink = async () => {
+        setContainerLinkId(await createContainer(deep));
+      };
+      initializeContainerLink();
+    }
+  }, [])
+  
  useEffect(() => {
     const initializeData = async () => {
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
