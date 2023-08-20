@@ -320,16 +320,9 @@ export const Content = React.memo<any>(() => {
               to_id
               value
             }
-            shoppingCart: in(where: { type_id: { _eq: ${shoppingCartTypeLinkId} } }) {
-              id
-              type_id
-              from_id
-              to_id
-              value
-            }
+            
           `
         });
-        console.log("checkConversationLink",checkConversationLink)
 
         if (checkConversationLink[0].systemMessages.length === 0) {
 
