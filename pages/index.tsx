@@ -30,6 +30,7 @@ export const Content = React.memo<any>(() => {
     defineCustomElements(window);
   }, []);
   let deep = useDeep();
+  const addToCartTypeLinkId = await deep.id("@flakeed/loyverse", "AddToCart");
   const [lastPress, setLastPress] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -251,6 +252,7 @@ export const Content = React.memo<any>(() => {
         const formatTypelinkId = await deep.id("@deep-foundation/sound", "Format");
         const mimetypeTypelinkId = await deep.id("@deep-foundation/sound", "MIME/type");
         const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
+
         const record = await stopRecording(deep, containerLinkId, startTime.current);
         const endTime = new Date().toLocaleDateString();
         const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }]);
@@ -813,6 +815,26 @@ export const Content = React.memo<any>(() => {
 
   }
 
+  const handleAddToCart = async (itemId) => {
+    const addToCartTypeLinkId = await deep.id("@flakeed/loyverse", "AddToCart");
+    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+
+    console.log("Selected Item ID:", itemId);
+    const { data: addedToCartLink } = await deep.insert({
+      type_id: addToCartTypeLinkId,
+      from_id: itemId,
+      to_id: newConversationLinkId,
+      in: {
+        data: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
+        }
+      },
+    });
+  
+    console.log("Link created:", addedToCartLink);
+  }
+
   const items = rawItems.map(item => ({
     id: item.id,
     handle: item.handle,
@@ -859,8 +881,8 @@ export const Content = React.memo<any>(() => {
     <ItemsModal
       isOpen={isItemsModalOpen}
       onRequestClose={closeItemsModal}
-      addToCart={addToCart}
-      items={items}
+      addToCart={handleAddToCart}
+            items={items}
       style={customStyles}
       chatNumber={newConversationLinkId}
     />
