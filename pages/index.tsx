@@ -48,7 +48,6 @@ export const Content = React.memo<any>(() => {
     setIsItemsModalOpen(false);
   };
   const startTime = useRef('');
-  let replyMessageLinkId;
   const path = process.env.NEXT_PUBLIC_GQL_PATH;
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const googleAuth = process.env.NEXT_PUBLIC_GOOGLE_AUTH || '';
@@ -397,7 +396,6 @@ console.log("checkConversationLink",checkConversationLink)
               },
             },
           });
-          replyMessageLinkId = replyToMessageLinkId;
         }
 
         if (checkConversationLink[0].systemMessages.length > 0) {
@@ -451,8 +449,6 @@ console.log("checkConversationLink",checkConversationLink)
                 },
               },
             });
-
-            replyMessageLinkId = replyToMessageLinkId;
             setIsTimeEnded(false)
           } else {
             const assistantMessageLinkId = messagesLinkId[0].link.id
@@ -478,7 +474,6 @@ console.log("checkConversationLink",checkConversationLink)
                 },
               },
             });
-            replyMessageLinkId = replyToMessageLinkId;
           }
         }
 
