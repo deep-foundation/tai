@@ -95,7 +95,6 @@ export const Content = React.memo<any>(() => {
         const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
         const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
         const getItemsTypeLinkId = await deep.id("@flakeed/loyverse", "GetItems");
-        const itemTypeLinkId = await deep.id("@flakeed/loyverse", "Item");
         let currentConversationId = newConversationLinkId;
 
         if (currentConversationId === 0 || !currentConversationId) {
@@ -168,11 +167,7 @@ console.log("checkConversationLink",checkConversationLink)
         }
     } catch (error) {
         console.error("An error occurred:", error.message);
-        // Обработайте ошибку соответствующим образом, например, показав пользователю сообщение об ошибке
     }
-    
-      
-    
     };
 
     initializeData();
