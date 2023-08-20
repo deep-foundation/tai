@@ -1,20 +1,33 @@
 // components/ItemsModal.js
 // import qr code
+import { deepMapObject } from '@freephoenix888/deep-map-object';
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
-const ItemsModal = ({ isOpen, addToCart, onRequestClose, items, style, chatNumber }) => {
+const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chatNumber }) => {
   // const [showQRCode, setShowQRCode] = useState(false);
   // const [qrCodeValue, setQRCodeValue] = useState('');
   const [showChatNumber, setShowChatNumber] = useState(false);
 
-  const handleBuy = () => {
+  const handleBuy = async () => {
     setShowChatNumber(true);
-  };
+
+await deep.insert({
+    type_id: await deep.id("@flakeed/loyverse","WaitForConfirmPurchase"),
+    from_id: chatNumber,
+    to_id: chatNumber,
+    in: {
+      data: {
+        type_id: 3,
+        from_id: deep.linkId,
+      },
+    },
+  });
   // const handleBuy = () => {
   //     setQRCodeValue('newconversationlink');
   //     setShowQRCode(true);
   // };
+};
   return (
     <Modal
       isOpen={isOpen}
