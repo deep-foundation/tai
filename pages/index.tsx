@@ -173,11 +173,6 @@ console.log("checkConversationLink",checkConversationLink)
     initializeData();
 }, [newConversationLinkId]);
 
-  
-  
-
-
-
   useEffect(() => {
     (async () => {
       const apiKeyTypeLinkId = await deep.id("@deep-foundation/openai", "ApiKey");
@@ -271,16 +266,8 @@ console.log("checkConversationLink",checkConversationLink)
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
         const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
         const transcriptionTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcription");
-        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
         const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
-        const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
         const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
-        const tokensTypeLinkId = await deep.id("@deep-foundation/tokens", "Tokens")
-        const soundTypelinkId = await deep.id("@deep-foundation/sound", "Sound");
-        const formatTypelinkId = await deep.id("@deep-foundation/sound", "Format");
-        const mimetypeTypelinkId = await deep.id("@deep-foundation/sound", "MIME/type");
-        const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
-
         const record = await stopRecording(deep, containerLinkId, startTime.current);
         const endTime = new Date().toLocaleDateString();
         const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }]);
