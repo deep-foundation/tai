@@ -600,17 +600,16 @@ console.log("checkConversationLink",checkConversationLink)
         }
       },
     });
-  
     console.log("Link created:", addedToCartLink);
   }
 
   const items = getItemsData.map(item => ({
-    id: item.id,
-    handle: item.handle,
+    // id: item.id,
+    // handle: item.handle,
     itemName: item.item_name,
-    description: item.description,
+    // description: item.description,
     imageUrl: item.image_url,
-    price: item.variants?.default_price || 0,
+    price: item.variants?.[0]?.default_price || 0,//price in $ or ฿
   }));
 
 
@@ -651,7 +650,7 @@ console.log("checkConversationLink",checkConversationLink)
       isOpen={isItemsModalOpen}
       onRequestClose={closeItemsModal}
       addToCart={handleAddToCart}
-            items={getItemsData}
+            items={items}
       style={customStyles}
       chatNumber={newConversationLinkId}
     />
