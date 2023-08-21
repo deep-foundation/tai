@@ -8,17 +8,17 @@ const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chat
   // const [showQRCode, setShowQRCode] = useState(false);
   // const [qrCodeValue, setQRCodeValue] = useState('');
   const [showChatNumber, setShowChatNumber] = useState(false);
-  const [isButtonDisabled, setButtonDisabled] = useState(false);
+  const [loadingButtons, setLoadingButtons] = useState({});
 
   const addToCartWithDelay = async (itemLinkId) => {
-    setButtonDisabled(true); 
+    setLoadingButtons(prevState => ({ ...prevState, [itemLinkId]: true }));
     console.log("1");
 
     await addToCart(itemLinkId);
 
     setTimeout(() => {
         console.log("2");
-        setButtonDisabled(false); 
+        setLoadingButtons(prevState => ({ ...prevState, [itemLinkId]: false }));
     }, 1000);
 };
 
@@ -96,9 +96,7 @@ await deep.insert({
       contentLabel="Items"
       style={style}
     >
-      {/* {showQRCode && <QRCode value={qrCodeValue} />} */}
       <div style={{ width: '100%', height: '100%', overflowY: 'auto' }}>
-
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -138,38 +136,34 @@ await deep.insert({
               </div>
               <button 
                 onClick={() => addToCartWithDelay(item.linkId)}
-                disabled={isButtonDisabled}
+                disabled={loadingButtons[item.linkId]}
                 style={{
-                background: 'linear-gradient(90deg, #388E3C, #4CAF50)',
-                color: 'white',
-                padding: '10px 20px',
-                borderRadius: '25px',
-                border: '2px solid #2E7D32',
-                cursor: 'pointer',
-                fontSize: '1.2rem',
-                transition: '0.3s',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: '120px',
-                opacity: isButtonDisabled ? 0.5 : 1
-              }}
-              onMouseOver={(e) => {
-                if (!isButtonDisabled) {
+                  background: 'linear-gradient(90deg, #388E3C, #4CAF50)',
+                  color: 'white',
+                  padding: '10px 20px',
+                  borderRadius: '25px',
+                  border: '2px solid #2E7D32',
+                  cursor: 'pointer',
+                  fontSize: '1.2rem',
+                  transition: '0.3s',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: '120px',
+                  opacity: loadingButtons[item.linkId] ? 0.5 : 1
+                }}
+                onMouseOver={(e) => {
                   e.currentTarget.style.transform = 'scale(1.05)';
                   e.currentTarget.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.2)';
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!isButtonDisabled) {
+                }}
+                onMouseOut={(e) => {
                   e.currentTarget.style.transform = 'scale(1)';
                   e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                }
-              }}
-            >
-              {isButtonDisabled ? 'Loading...' : <><span style={{ fontSize: '1.5rem' }}>🛒</span> Add to Cart</>}
-            </button>
+                }}
+              >
+                {loadingButtons[item.linkId] ? 'Loading...' : <><span style={{ fontSize: '1.5rem' }}>🛒</span> Add to Cart</>}
+              </button>
             </div>
           ))}
         </div>
@@ -268,7 +262,7 @@ await deep.insert({
         )}
       </div>
     </Modal>
-  );
+);
 };
 
 export default ItemsModal;
