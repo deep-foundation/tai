@@ -137,18 +137,10 @@ useEffect(() => {
       });
     };
     
-    
-
-const groupedItems = extractShoppingCartData(shoppingCartData).reduce((acc, item) => {
-  if (!acc[item.chatId]) {
-      acc[item.chatId] = [];
-  }
-  acc[item.chatId].push(item);
-  return acc;
-}, {});
+    const fetchData = async () => {
+    };
 
 const itemsData = extractShoppingCartData(shoppingCartData);
-const totalPrice = calculateTotalPrice(itemsData);
 
 console.log("itemsData",itemsData)
 return (
@@ -173,7 +165,9 @@ return (
       <Container maxW="container.xl" p={5} bg="green.50" borderRadius="md">
         <VStack spacing={4} align="stretch">
           <Heading color="green.600" mb={4}>Shopping Carts</Heading>
-          
+          <Button onClick={fetchData} colorScheme="green" mb={4}>
+            Refresh Table
+          </Button>
           {itemsData.map(item => (
             <Box key={item.chatId} bg="green.100" p={4} borderRadius="md" mb={4}>
               <Heading size="md" color="green.700" mb={3}>Coversation ID: {item.chatId}</Heading>
