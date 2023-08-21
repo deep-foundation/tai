@@ -156,19 +156,24 @@ const [selectedChatId, setSelectedChatId] = useState(0);
 
   console.log("shoppingCartData",shoppingCartData)
       
-    const extractShoppingCartData = (cart) => {
-      return cart.map(item => {
-        const innerValue = item.value && item.value.value && item.value.value[0];
-        const variants = innerValue && innerValue.variants && innerValue.variants[0];
-    
+  const extractShoppingCartData = (carts) => {
+    return carts.map(cart => {
+        const innerValue = cart.value && cart.value.value;
+        const items = innerValue.map(itemValue => {
+            const variants = itemValue.variants && itemValue.variants[0];
+            return {
+                itemName: itemValue.item_name,
+                quantity: itemValue.quantity || 0,
+                price: variants ? variants.default_price || 0 : 0
+            };
+        });
         return {
-          chatId: item.from_id,
-          itemName: innerValue ? innerValue.item_name : undefined,
-          quantity: innerValue ? innerValue.quantity || 0 : 0,
-          price: variants ? variants.default_price || 0 : 0,
+            chatId: cart.from_id,
+            items
         };
-      });
-    };
+    });
+};
+
     
     const fetchData = async () => {
       setConversationTypeLinkId(0)
@@ -203,35 +208,37 @@ return (
           <Button onClick={fetchData} colorScheme="green" mb={4}>
             Refresh Table
           </Button>
-          {itemsData.map(item => (
-            <Box key={item.chatId} bg="green.100" p={4} borderRadius="md" mb={4}>
-              <Heading size="md" color="green.700" mb={3}>Coversation ID: {item.chatId}</Heading>
-              <Table variant="striped" colorScheme="green" size="sm">
-                <Thead>
-                  <Tr>
+          {itemsData.map(cart => (
+    <Box key={cart.chatId} bg="green.100" p={4} borderRadius="md" mb={4}>
+        <Heading size="md" color="green.700" mb={3}>Coversation ID: {cart.chatId}</Heading>
+        <Table variant="striped" colorScheme="green" size="sm">
+            <Thead>
+                <Tr>
                     <Th>Products</Th>
                     <Th>Quantity</Th>
                     <Th>Unit price</Th>
                     <Th>Total price</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  <Tr>
-                    <Td>{item.itemName}</Td>
-                    <Td>{item.quantity}</Td>
-                    <Td>{item.price}</Td>
-                    <Td>{item.price * item.quantity}</Td>
-                  </Tr>
-                </Tbody>
-              </Table>
-              <Text mt={3} fontWeight="bold" color="green.700">
-                Total Amount: {item.price * item.quantity}
-              </Text>
-              <Button colorScheme="green" mt={4} onClick={() => handleConfirmPurchase(item.chatId)} float="right">
-                Confirm Purchase
-              </Button>
-            </Box>
-          ))}
+                </Tr>
+            </Thead>
+            <Tbody>
+                {cart.items.map(item => (
+                    <Tr key={item.itemName}>
+                        <Td>{item.itemName}</Td>
+                        <Td>{item.quantity}</Td>
+                        <Td>{item.price}</Td>
+                        <Td>{item.price * item.quantity}</Td>
+                    </Tr>
+                ))}
+            </Tbody>
+        </Table>
+        <Text mt={3} fontWeight="bold" color="green.700">
+            Total Amount: {calculateTotalPrice(cart.items)}
+        </Text>
+        <Button colorScheme="green" mt={4} onClick={() => handleConfirmPurchase(cart.chatId)} float="right">
+            Confirm Purchase
+        </Button>
+    </Box>
+))}
         </VStack>
       </Container>
     </>
