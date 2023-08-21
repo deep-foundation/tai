@@ -2,7 +2,7 @@ import { deepMapObject } from '@freephoenix888/deep-map-object';
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
-const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chatNumber }) => {
+const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, chatNumber }) => {
   const [showChatNumber, setShowChatNumber] = useState(false);
   const [loadingButtons, setLoadingButtons] = useState({});
 
@@ -12,22 +12,22 @@ const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chat
     await addToCart(itemLinkId);
 
     setTimeout(() => {
-        setLoadingButtons(prevState => ({ ...prevState, [itemLinkId]: false }));
+      setLoadingButtons(prevState => ({ ...prevState, [itemLinkId]: false }));
     }, 1000);
-};
+  };
 
   const handleBuy = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
-    const waitForConfirmPurchaseTypeLinkId = await deep.id("@flakeed/loyverse","WaitForConfirmPurchase");
+    const waitForConfirmPurchaseTypeLinkId = await deep.id("@flakeed/loyverse", "WaitForConfirmPurchase");
     const { data: checkDataLinkId } = await deep.select({
       id: chatNumber,
       in: {
-          type_id: containTypeLinkId,
-          from_id: deep.linkId,
+        type_id: containTypeLinkId,
+        from_id: deep.linkId,
       },
       order_by: { id: 'asc' }
-  }, {
+    }, {
       returning: `
           id
           value
@@ -46,33 +46,33 @@ const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chat
             value
         }
       `
-  });
+    });
 
-const cartItems = checkDataLinkId[0]?.shoppingCart[0]?.value?.value;
-if (!cartItems || cartItems.length === 0) {
-  alert("Your shopping cart is empty. Please add items before purchase.");
-  return;
-}
+    const cartItems = checkDataLinkId[0]?.shoppingCart[0]?.value?.value;
+    if (!cartItems || cartItems.length === 0) {
+      alert("Your shopping cart is empty. Please add items before purchase.");
+      return;
+    }
 
-const purchaseRecords = checkDataLinkId[0]?.WaitForConfirmPurchase;
-if (purchaseRecords && purchaseRecords.length > 0) {
-    alert("You've already made a purchase. Go to the seller or remember your current number and continue in the new chat by clicking on the cross to make a purchase in a new session, then go to the seller with these 2 numbers");
-    return;
-}
+    const purchaseRecords = checkDataLinkId[0]?.WaitForConfirmPurchase;
+    if (purchaseRecords && purchaseRecords.length > 0) {
+      alert("You've already made a purchase. Go to the seller or remember your current number and continue in the new chat by clicking on the cross to make a purchase in a new session, then go to the seller with these 2 numbers");
+      return;
+    }
 
-setShowChatNumber(true);
-await deep.insert({
-    type_id: waitForConfirmPurchaseTypeLinkId,
-    from_id: chatNumber,
-    to_id: chatNumber,
-    in: {
-      data: {
-        type_id: containTypeLinkId,
-        from_id: deep.linkId,
+    setShowChatNumber(true);
+    await deep.insert({
+      type_id: waitForConfirmPurchaseTypeLinkId,
+      from_id: chatNumber,
+      to_id: chatNumber,
+      in: {
+        data: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
+        },
       },
-    },
-  });
-};
+    });
+  };
   return (
     <Modal
       isOpen={isOpen}
@@ -118,7 +118,7 @@ await deep.insert({
                 <h2 style={{ fontSize: '1.4rem', color: '#388E3C', marginBottom: '5px' }}>{item.itemName}</h2>
                 <p style={{ fontSize: '1.1rem', color: '#2E7D32', fontWeight: 'bold' }}>Price: {item.price || 'N/A'}</p>
               </div>
-              <button 
+              <button
                 onClick={() => addToCartWithDelay(item.linkId)}
                 disabled={loadingButtons[item.linkId]}
                 style={{
@@ -246,7 +246,7 @@ await deep.insert({
         )}
       </div>
     </Modal>
-);
+  );
 };
 
 export default ItemsModal;
