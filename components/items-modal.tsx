@@ -10,15 +10,46 @@ const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chat
   const [showChatNumber, setShowChatNumber] = useState(false);
 
   const handleBuy = async () => {
-    setShowChatNumber(true);
+    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+    const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
 
+    const { data: checkDataLinkId } = await deep.select({
+      id: chatNumber,
+      in: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
+      },
+      order_by: { id: 'asc' }
+  }, {
+      returning: `
+          id
+          value
+          shoppingCart: in(where: { type_id: { _eq: ${shoppingCartTypeLinkId} } }) {
+              id
+              type_id
+              from_id
+              to_id
+              value
+          }
+      `
+  });
+
+const cartItems = checkDataLinkId[0]?.shoppingCart[0]?.value?.value;
+if (!cartItems || cartItems.length === 0) {
+  alert("Your shopping cart is empty. Please add items before purchase.");
+  return;
+}
+
+
+
+setShowChatNumber(true);
 await deep.insert({
     type_id: await deep.id("@flakeed/loyverse","WaitForConfirmPurchase"),
     from_id: chatNumber,
     to_id: chatNumber,
     in: {
       data: {
-        type_id: 3,
+        type_id: containTypeLinkId,
         from_id: deep.linkId,
       },
     },
