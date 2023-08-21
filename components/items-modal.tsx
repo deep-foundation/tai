@@ -136,8 +136,10 @@ await deep.insert({
                 <h2 style={{ fontSize: '1.4rem', color: '#388E3C', marginBottom: '5px' }}>{item.itemName}</h2>
                 <p style={{ fontSize: '1.1rem', color: '#2E7D32', fontWeight: 'bold' }}>Price: {item.price || 'N/A'}</p>
               </div>
-              <button     onClick={() => addToCartWithDelay(item.linkId)}  
-    disabled={isButtonDisabled}  style={{
+              <button 
+                onClick={() => addToCartWithDelay(item.linkId)}
+                disabled={isButtonDisabled}
+                style={{
                 background: 'linear-gradient(90deg, #388E3C, #4CAF50)',
                 color: 'white',
                 padding: '10px 20px',
@@ -150,19 +152,24 @@ await deep.insert({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minWidth: '120px'
+                minWidth: '120px',
+                opacity: isButtonDisabled ? 0.5 : 1
               }}
-                onMouseOver={(e) => {
+              onMouseOver={(e) => {
+                if (!isButtonDisabled) {
                   e.currentTarget.style.transform = 'scale(1.05)';
                   e.currentTarget.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.2)';
-                }}
-                onMouseOut={(e) => {
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!isButtonDisabled) {
                   e.currentTarget.style.transform = 'scale(1)';
                   e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                }}
-              >
-                <span style={{ fontSize: '1.5rem' }}>🛒</span> Add to Cart
-              </button>
+                }
+              }}
+            >
+              {isButtonDisabled ? 'Loading...' : <><span style={{ fontSize: '1.5rem' }}>🛒</span> Add to Cart</>}
+            </button>
             </div>
           ))}
         </div>
