@@ -44,6 +44,7 @@ export const SellerWorkspace = React.memo<any>(() => {
   const [conversationTypeLinkId, setConversationTypeLinkId] = useState(0);
 const [waitForConfirmPurchaseTypeId, setWaitForConfirmPurchaseTypeId] = useState(0);
 const [confirmPurchaseTypeLinkId, setConfirmPurchaseTypeLinkId] = useState(0);
+const [selectedChatId, setSelectedChatId] = useState(0);
 
 
   const [shoppingCartData, setShoppingCartData] = useState<any[]>([]);
@@ -52,15 +53,43 @@ const [confirmPurchaseTypeLinkId, setConfirmPurchaseTypeLinkId] = useState(0);
     }, []);
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const handlePurchaseConfirmation = (chatId: string) => {
-        console.log(`Покупка подтверждена для чата с ID: ${chatId}`);
-        onClose(); 
-    };
-    const handleConfirmPurchase = (chatId: string) => {
-        onOpen(); 
-        console.log(`Подтверждение покупки для чата с ID: ${chatId}`);
-    };
-    
+    const handlePurchaseConfirmation = async() => {
+      if (!selectedChatId) return;
+  console.log("shoppingCartData",shoppingCartData)
+      const cartData = shoppingCartData.find(cart => cart.from_id === selectedChatId);
+      if (!cartData) {
+          console.error("Не удалось найти данные корзины для chatId:", selectedChatId);
+          return;
+      }
+  console.log("cartData",cartData)
+      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+  
+      console.log(`Покупка подтверждена для чата с ID: ${selectedChatId}`);
+      await deep.insert({
+          type_id: await deep.id("@flakeed/loyverse", "ConfirmPurchase"),
+          from_id: selectedChatId,
+          to_id: cartData.id,
+          in: {
+              data: {
+                  type_id: containTypeLinkId,
+                  from_id: deep.linkId,
+              }
+          },
+      });
+  
+      console.log("Данные корзины:", cartData);
+  
+      setSelectedChatId(0); 
+      onClose(); 
+  };
+  
+  
+    const handleConfirmPurchase = (chatId) => {
+      setSelectedChatId(chatId); 
+      onOpen(); 
+      console.log(`Подтверждение покупки для чата с ID: ${chatId}`);
+  };
+  
     
     let deep = useDeep();
 
@@ -70,7 +99,8 @@ useEffect(() => {
         const newWaitForConfirmPurchaseTypeId = await deep.id("@flakeed/loyverse", "WaitForConfirmPurchase");
         const shoppingCartTypeId = await deep.id("@flakeed/loyverse", "ShoppingCart");
         const newConversationTypeLinkId = await deep.id("@deep-foundation/chatgpt","Conversation");
-        
+        const confirmPurchaseTypeId = await deep.id("@flakeed/loyverse", "ConfirmPurchase");
+        setConfirmPurchaseTypeLinkId(confirmPurchaseTypeId)
         setConversationTypeLinkId(newConversationTypeLinkId);
         setWaitForConfirmPurchaseTypeId(newWaitForConfirmPurchaseTypeId);
 
@@ -112,14 +142,14 @@ useEffect(() => {
         console.log("checkDataLinkId", checkDataLinkId);
 
         if (checkDataLinkId && checkDataLinkId.length > 0) {
-            const validCarts = checkDataLinkId.filter(item => item.waitForConfirmPurchase && item.waitForConfirmPurchase.length > 0);
+            const validCarts = checkDataLinkId.filter(item => item.waitForConfirmPurchase && item.waitForConfirmPurchase.length > 0 && item.confirmPurchase && item.confirmPurchase.length===0);
             const updatedShoppingCartData = validCarts.map(item => item.shoppingCart).flat();
             setShoppingCartData(updatedShoppingCartData);
         }        
     };
 
     fetchData();
-}, [conversationTypeLinkId, waitForConfirmPurchaseTypeId, confirmPurchaseTypeLinkId]);
+}, [conversationTypeLinkId, waitForConfirmPurchaseTypeId, confirmPurchaseTypeLinkId,selectedChatId]);
 
   console.log("shoppingCartData",shoppingCartData)
       
@@ -138,6 +168,7 @@ useEffect(() => {
     };
     
     const fetchData = async () => {
+      setConversationTypeLinkId(0)
     };
 
 const itemsData = extractShoppingCartData(shoppingCartData);
@@ -155,10 +186,11 @@ return (
               </ModalBody>
   
               <ModalFooter>
-                  <Button colorScheme="green" mr={3} onClick={() => handlePurchaseConfirmation("1")}>
-                      Confirm
-                  </Button>
-                  <Button variant="ghost" onClick={onClose}>Cancel</Button>
+              <Button variant="ghost" onClick={onClose}>Cancel</Button>
+              <Button colorScheme="green" mr={3} onClick={handlePurchaseConfirmation}>
+    Confirm
+</Button>
+
               </ModalFooter>
           </ModalContent>
       </Modal>
