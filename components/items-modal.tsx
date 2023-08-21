@@ -1,28 +1,20 @@
-// components/ItemsModal.js
-// import qr code
 import { deepMapObject } from '@freephoenix888/deep-map-object';
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
 const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chatNumber }) => {
-  // const [showQRCode, setShowQRCode] = useState(false);
-  // const [qrCodeValue, setQRCodeValue] = useState('');
   const [showChatNumber, setShowChatNumber] = useState(false);
   const [loadingButtons, setLoadingButtons] = useState({});
 
   const addToCartWithDelay = async (itemLinkId) => {
     setLoadingButtons(prevState => ({ ...prevState, [itemLinkId]: true }));
-    console.log("1");
 
     await addToCart(itemLinkId);
 
     setTimeout(() => {
-        console.log("2");
         setLoadingButtons(prevState => ({ ...prevState, [itemLinkId]: false }));
     }, 1000);
 };
-
-
 
   const handleBuy = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
@@ -57,10 +49,6 @@ const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chat
   });
 
 const cartItems = checkDataLinkId[0]?.shoppingCart[0]?.value?.value;
-const cartValue = checkDataLinkId[0]?.shoppingCart[0]?.value;
-console.log("cartValue:", cartValue);
-console.log("Is cartValue an array?", Array.isArray(cartValue));
-console.log("cartValue length:", cartValue?.length);
 if (!cartItems || cartItems.length === 0) {
   alert("Your shopping cart is empty. Please add items before purchase.");
   return;
@@ -84,10 +72,6 @@ await deep.insert({
       },
     },
   });
-  // const handleBuy = () => {
-  //     setQRCodeValue('newconversationlink');
-  //     setShowQRCode(true);
-  // };
 };
   return (
     <Modal
