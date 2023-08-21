@@ -8,6 +8,21 @@ const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chat
   // const [showQRCode, setShowQRCode] = useState(false);
   // const [qrCodeValue, setQRCodeValue] = useState('');
   const [showChatNumber, setShowChatNumber] = useState(false);
+  const [isButtonDisabled, setButtonDisabled] = useState(false);
+
+  const addToCartWithDelay = async (itemLinkId) => {
+    setButtonDisabled(true); 
+    console.log("1");
+
+    await addToCart(itemLinkId);
+
+    setTimeout(() => {
+        console.log("2");
+        setButtonDisabled(false); 
+    }, 1000);
+};
+
+
 
   const handleBuy = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
@@ -42,6 +57,10 @@ const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chat
   });
 
 const cartItems = checkDataLinkId[0]?.shoppingCart[0]?.value?.value;
+const cartValue = checkDataLinkId[0]?.shoppingCart[0]?.value;
+console.log("cartValue:", cartValue);
+console.log("Is cartValue an array?", Array.isArray(cartValue));
+console.log("cartValue length:", cartValue?.length);
 if (!cartItems || cartItems.length === 0) {
   alert("Your shopping cart is empty. Please add items before purchase.");
   return;
@@ -117,7 +136,8 @@ await deep.insert({
                 <h2 style={{ fontSize: '1.4rem', color: '#388E3C', marginBottom: '5px' }}>{item.itemName}</h2>
                 <p style={{ fontSize: '1.1rem', color: '#2E7D32', fontWeight: 'bold' }}>Price: {item.price || 'N/A'}</p>
               </div>
-              <button onClick={() => addToCart(item.linkId)}  style={{
+              <button     onClick={() => addToCartWithDelay(item.linkId)}  
+    disabled={isButtonDisabled}  style={{
                 background: 'linear-gradient(90deg, #388E3C, #4CAF50)',
                 color: 'white',
                 padding: '10px 20px',
