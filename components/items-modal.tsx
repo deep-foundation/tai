@@ -12,7 +12,7 @@ const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chat
   const handleBuy = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
-
+    const waitForConfirmPurchaseTypeLinkId = await deep.id("@flakeed/loyverse","WaitForConfirmPurchase");
     const { data: checkDataLinkId } = await deep.select({
       id: chatNumber,
       in: {
@@ -31,6 +31,13 @@ const ItemsModal = ({ deep,isOpen, addToCart, onRequestClose, items, style, chat
               to_id
               value
           }
+          WaitForConfirmPurchase: in(where: { type_id: { _eq: ${waitForConfirmPurchaseTypeLinkId} } }) {
+            id
+            type_id
+            from_id
+            to_id
+            value
+        }
       `
   });
 
@@ -40,11 +47,15 @@ if (!cartItems || cartItems.length === 0) {
   return;
 }
 
-
+const purchaseRecords = checkDataLinkId[0]?.WaitForConfirmPurchase;
+if (purchaseRecords && purchaseRecords.length > 0) {
+    alert("You've already made a purchase. Go to the seller or remember your current number and continue in the new chat by clicking on the cross to make a purchase in a new session, then go to the seller with these 2 numbers");
+    return;
+}
 
 setShowChatNumber(true);
 await deep.insert({
-    type_id: await deep.id("@flakeed/loyverse","WaitForConfirmPurchase"),
+    type_id: waitForConfirmPurchaseTypeLinkId,
     from_id: chatNumber,
     to_id: chatNumber,
     in: {
