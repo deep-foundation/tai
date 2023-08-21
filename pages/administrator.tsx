@@ -92,64 +92,67 @@ const [selectedChatId, setSelectedChatId] = useState(0);
   
     
     let deep = useDeep();
+    useEffect(() => {
+      const fetchData = async () => {
+          const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+          const waitForConfirmPurchaseTypeId = await deep.id("@flakeed/loyverse", "WaitForConfirmPurchase");
+          const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
+          const conversationTypeId = await deep.id("@deep-foundation/chatgpt","Conversation");
+          const confirmPurchaseTypeId = await deep.id("@flakeed/loyverse","ConfirmPurchase");
+          
+          setConfirmPurchaseTypeLinkId(confirmPurchaseTypeId);
+          setConversationTypeLinkId(conversationTypeId);
+          setWaitForConfirmPurchaseTypeId(waitForConfirmPurchaseTypeId);
+  
+          const { data: confirmPurchases } = await deep.select({
+              type_id: confirmPurchaseTypeId,
+          });
+          console.log("confirmPurchases",confirmPurchases)
+          const confirmedChatIds = confirmPurchases.map(purchase => purchase.from_id);
+          console.log("confirmedChatIds",confirmedChatIds)
 
-useEffect(() => {
-    const fetchData = async () => {
-        const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-        const newWaitForConfirmPurchaseTypeId = await deep.id("@flakeed/loyverse", "WaitForConfirmPurchase");
-        const shoppingCartTypeId = await deep.id("@flakeed/loyverse", "ShoppingCart");
-        const newConversationTypeLinkId = await deep.id("@deep-foundation/chatgpt","Conversation");
-        const confirmPurchaseTypeId = await deep.id("@flakeed/loyverse", "ConfirmPurchase");
-        setConfirmPurchaseTypeLinkId(confirmPurchaseTypeId)
-        setConversationTypeLinkId(newConversationTypeLinkId);
-        setWaitForConfirmPurchaseTypeId(newWaitForConfirmPurchaseTypeId);
-
-        const { data: checkDataLinkId } = await deep.select({
-            type_id: conversationTypeLinkId,
-            in: {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-            },
-            order_by: { id: 'asc' }
-        }, {
-            returning: `
-                id
-                value
-                waitForConfirmPurchase: in(where: { type_id: { _eq: ${waitForConfirmPurchaseTypeId} } }) {
-                    id
-                    type_id
-                    from_id
-                    to_id
-                    value
-                }
-                shoppingCart: in(where: { type_id: { _eq: ${shoppingCartTypeId} } }) {
-                    id
-                    type_id
-                    from_id
-                    to_id
-                    value
-                }
-                confirmPurchase: in(where: { type_id: { _eq: ${confirmPurchaseTypeLinkId} } }) {
-                    id
-                    type_id
-                    from_id
-                    to_id
-                    value
-                }
-            `
-        });
-
-        console.log("checkDataLinkId", checkDataLinkId);
-
-        if (checkDataLinkId && checkDataLinkId.length > 0) {
-            const validCarts = checkDataLinkId.filter(item => item.waitForConfirmPurchase && item.waitForConfirmPurchase.length > 0 && item.confirmPurchase && item.confirmPurchase.length===0);
-            const updatedShoppingCartData = validCarts.map(item => item.shoppingCart).flat();
-            setShoppingCartData(updatedShoppingCartData);
-        }        
-    };
-
-    fetchData();
-}, [conversationTypeLinkId, waitForConfirmPurchaseTypeId, confirmPurchaseTypeLinkId,selectedChatId]);
+          const { data: checkDataLinkId } = await deep.select({
+              type_id: conversationTypeId,
+              in: {
+                  type_id: containTypeLinkId,
+                  from_id: deep.linkId,
+              },
+              order_by: { id: 'asc' }
+          }, {
+              returning: `
+                  id
+                  value
+                  waitForConfirmPurchase: in(where: { type_id: { _eq: ${waitForConfirmPurchaseTypeId} } }) {
+                      id
+                      type_id
+                      from_id
+                      to_id
+                      value
+                  }
+                  shoppingCart: in(where: { type_id: { _eq: ${shoppingCartTypeLinkId} } }) {
+                      id
+                      type_id
+                      from_id
+                      to_id
+                      value
+                  }
+              `
+          });
+          
+          const filteredChats = checkDataLinkId.filter(chat => !confirmedChatIds.includes(chat.id));
+          console.log("filteredChats", filteredChats);
+  
+          const validCarts = filteredChats.filter(item => {
+              const hasWaitForConfirm = item.waitForConfirmPurchase && item.waitForConfirmPurchase.length > 0;
+              return hasWaitForConfirm;
+          });
+          const updatedShoppingCartData = validCarts.map(item => item.shoppingCart).flat();
+          setShoppingCartData(updatedShoppingCartData);
+      };
+  
+      fetchData();
+  }, [conversationTypeLinkId, waitForConfirmPurchaseTypeId, confirmPurchaseTypeLinkId, selectedChatId]);
+  
 
   console.log("shoppingCartData",shoppingCartData)
       
