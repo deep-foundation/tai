@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, chatNumber }) => {
   const [showChatNumber, setShowChatNumber] = useState(false);
   const [loadingButtons, setLoadingButtons] = useState({});
+  const [isBuyButtonLoading, setBuyButtonLoading] = useState(false);
 
   const addToCartWithDelay = async (itemLinkId) => {
     setLoadingButtons(prevState => ({ ...prevState, [itemLinkId]: true }));
@@ -17,6 +18,8 @@ const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, cha
   };
 
   const handleBuy = async () => {
+    setBuyButtonLoading(true);
+    console.log("1")
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
     const waitForConfirmPurchaseTypeLinkId = await deep.id("@flakeed/loyverse", "WaitForConfirmPurchase");
@@ -51,12 +54,14 @@ const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, cha
     const cartItems = checkDataLinkId[0]?.shoppingCart[0]?.value?.value;
     if (!cartItems || cartItems.length === 0) {
       alert("Your shopping cart is empty. Please add items before purchase.");
+      setBuyButtonLoading(false);
       return;
     }
 
     const purchaseRecords = checkDataLinkId[0]?.WaitForConfirmPurchase;
     if (purchaseRecords && purchaseRecords.length > 0) {
       alert("You've already made a purchase. Go to the seller or remember your current number and continue in the new chat by clicking on the cross to make a purchase in a new session, then go to the seller with these 2 numbers");
+      setBuyButtonLoading(false);
       return;
     }
 
@@ -72,7 +77,13 @@ const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, cha
         },
       },
     });
-  };
+    setTimeout(() => {
+      console.log("2")
+
+      setBuyButtonLoading(false);
+  }, 1000);
+};
+
   return (
     <Modal
       isOpen={isOpen}
@@ -183,34 +194,40 @@ const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, cha
         </button>
 
         <button onClick={handleBuy} style={{
-          background: 'linear-gradient(45deg, #006400, #228B22)',
-          color: 'white',
-          padding: '15px 30px',
-          borderRadius: '40px',
-          border: 'none',
-          cursor: 'pointer',
-          fontSize: '1.4rem',
-          fontWeight: 'bold',
-          boxShadow: '0 0 15px rgba(0, 0, 0, 0.3)',
-          position: 'absolute',
-          right: '40px',
-          bottom: '20px',
-          zIndex: 1001,
-          transition: '0.3s'
-        }}
-          onMouseOver={(e) => {
+    background: 'linear-gradient(45deg, #006400, #228B22)',
+    color: 'white',
+    padding: '15px 30px',
+    borderRadius: '40px',
+    border: 'none',
+    cursor: isBuyButtonLoading ? 'not-allowed' : 'pointer',
+    fontSize: '1.4rem',
+    fontWeight: 'bold',
+    boxShadow: '0 0 15px rgba(0, 0, 0, 0.3)',
+    position: 'absolute',
+    right: '40px',
+    bottom: '20px',
+    zIndex: 1001,
+    transition: '0.3s',
+    opacity: isBuyButtonLoading ? 0.7 : 1
+}}
+    onMouseOver={(e) => {
+        if (!isBuyButtonLoading) {
             e.currentTarget.style.backgroundColor = '#4CAF50';
             e.currentTarget.style.transform = 'scale(1.08)';
             e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.4)';
-          }}
-          onMouseOut={(e) => {
+        }
+    }}
+    onMouseOut={(e) => {
+        if (!isBuyButtonLoading) {
             e.currentTarget.style.backgroundColor = '#006400';
             e.currentTarget.style.transform = 'scale(1)';
             e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 0, 0, 0.3)';
-          }}
-        >
-          Buy
-        </button>
+        }
+    }}
+>
+    Buy
+</button>
+
         {showChatNumber && (
           <div
             style={{
