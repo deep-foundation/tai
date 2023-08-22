@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Box, IconButton, Text } from '@chakra-ui/react';
 import { TfiClose } from 'react-icons/tfi';
 import { Message } from './message';
-
 
 export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handleCloseChat }) => {
   const [messages, setMessages] = useState<Array<any>>([]);
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const [chatGptLinkId, setChatGptLinkId] = useState(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchChatGptLinkId = async () => {
@@ -66,8 +66,17 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
     const intervalId = setInterval(fetchMessages, 1000);
     return () => clearInterval(intervalId);
   }, [newConversationLinkId]);
+
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <Box
+      ref={chatContainerRef}
       display="flex"
       flexDirection="column"
       position="fixed"
@@ -121,3 +130,4 @@ const Diamand = () => {
     }}/>
   )
 }
+
