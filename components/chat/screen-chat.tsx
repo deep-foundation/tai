@@ -78,49 +78,50 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
   
 
   return (
-    <Box
-      ref={chatContainerRef}
-      display="flex"
-      flexDirection="column"
-      position="fixed"
-      bottom={0}
-      left={0}
-      zIndex={1000}
-      overflowY="scroll"
-      height='30vh'
-      width='100vw'
-      bg='#03001da8'
-      p={3}
-      _before={{ content: '""', position: 'absolute', top: 0, left: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderRight: '1.5rem solid transparent' }}
-      _after={{ content: '""', position: 'absolute', top: 0, right: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderLeft: '1.5rem solid transparent' }}
-      sx={{
-        '& > *:not(:last-child)': {
-          mb: '1rem',
-        },
-      }}
-    >
-      <Box position="absolute" right={3} top={3}>
+    <Box position="fixed" bottom={0} left={0} zIndex={1000} width='100vw' height='30vh'>
+  
+      <Box position="absolute" right={6} top={3} zIndex={1001}>
         <IconButton variant='outline' borderColor='#909294' aria-label='Close chat' isRound icon={<TfiClose color='#909294' />} onClick={handleCloseChat} />
       </Box>
-      {messages.length ? [<Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text>] : null}
-      {messages.map((message, index) => (
-        <Message key={message.id}
-          text={message?.link?.value?.value}
-          align={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
-          arrow={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
-          fill={message?.link?.author?.[0]?.to_id === chatGptLinkId ? '#dcdcdc' : '#cce4ff'}
-        />
-      ))}
-      {isWaitingResponse && messages.length > 0 && (
-        <Message
-          text="Thinking..."
-          align='left'
-          arrow='left'
-          fill='#dcdcdc'
-        />
-      )}
+  
+      <Box
+        ref={chatContainerRef}
+        display="flex"
+        flexDirection="column"
+        overflowY="scroll"
+        height='100%'
+        bg='#03001da8'
+        p={3}
+        _before={{ content: '""', position: 'absolute', top: 0, left: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderRight: '1.5rem solid transparent' }}
+        _after={{ content: '""', position: 'absolute', top: 0, right: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderLeft: '1.5rem solid transparent' }}
+        sx={{
+          '& > *:not(:last-child)': {
+            mb: '1rem',
+          },
+        }}
+      >
+        {messages.length ? <Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text> : null}
+        {messages.map((message, index) => (
+          <Message key={message.id}
+            text={message?.link?.value?.value}
+            align={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
+            arrow={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
+            fill={message?.link?.author?.[0]?.to_id === chatGptLinkId ? '#dcdcdc' : '#cce4ff'}
+          />
+        ))}
+        {isWaitingResponse && messages.length > 0 && (
+          <Message
+            text="Thinking..."
+            align='left'
+            arrow='left'
+            fill='#dcdcdc'
+          />
+        )}
+      </Box>
     </Box>
   );
+  
+  
 });
 
 const Diamand = () => {
