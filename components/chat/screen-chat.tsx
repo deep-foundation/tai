@@ -8,6 +8,7 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const [chatGptLinkId, setChatGptLinkId] = useState(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const prevMessagesCount = useRef<number>(0);
 
   useEffect(() => {
     const fetchChatGptLinkId = async () => {
@@ -69,10 +70,12 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
 
 
   useEffect(() => {
-    if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
+      if (chatContainerRef.current && messages.length > prevMessagesCount.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+      prevMessagesCount.current = messages.length;
   }, [messages]);
+  
 
   return (
     <Box
