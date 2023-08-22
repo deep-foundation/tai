@@ -4,18 +4,20 @@ import Modal from 'react-modal';
 
 const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, chatNumber }) => {
   const [showChatNumber, setShowChatNumber] = useState(false);
-  const [loadingButtons, setLoadingButtons] = useState({});
+  const [disabledButtons, setDisabledButtons] = useState({});
   const [isBuyButtonLoading, setBuyButtonLoading] = useState(false);
 
   const addToCartWithDelay = async (itemLinkId) => {
-    setLoadingButtons(prevState => ({ ...prevState, [itemLinkId]: true }));
-
+    setDisabledButtons(prevState => ({ ...prevState, [itemLinkId]: true }));
+    console.log("!")
     await addToCart(itemLinkId);
-
     setTimeout(() => {
-      setLoadingButtons(prevState => ({ ...prevState, [itemLinkId]: false }));
+      console.log("?")
+
+        setDisabledButtons(prevState => ({ ...prevState, [itemLinkId]: false }));
     }, 1000);
-  };
+};
+
 
   const handleBuy = async () => {
     setBuyButtonLoading(true);
@@ -129,36 +131,41 @@ const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, cha
                 <h2 style={{ fontSize: '1.4rem', color: '#388E3C', marginBottom: '5px' }}>{item.itemName}</h2>
                 <p style={{ fontSize: '1.1rem', color: '#2E7D32', fontWeight: 'bold' }}>Price: {item.price || 'N/A'}</p>
               </div>
-              <button
-                onClick={() => addToCartWithDelay(item.linkId)}
-                disabled={loadingButtons[item.linkId]}
-                style={{
-                  background: 'linear-gradient(90deg, #388E3C, #4CAF50)',
-                  color: 'white',
-                  padding: '10px 20px',
-                  borderRadius: '25px',
-                  border: '2px solid #2E7D32',
-                  cursor: 'pointer',
-                  fontSize: '1.2rem',
-                  transition: '0.3s',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: '120px',
-                  opacity: loadingButtons[item.linkId] ? 0.5 : 1
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.2)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                }}
-              >
-                {loadingButtons[item.linkId] ? 'Loading...' : <><span style={{ fontSize: '1.5rem' }}>🛒</span> Add to Cart</>}
-              </button>
+              <button 
+    onClick={() => addToCartWithDelay(item.linkId)}  
+    disabled={disabledButtons[item.linkId]}
+    style={{
+        background: 'linear-gradient(90deg, #388E3C, #4CAF50)',
+        color: 'white',
+        padding: '10px 20px',
+        borderRadius: '25px',
+        border: '2px solid #2E7D32',
+        cursor: disabledButtons[item.linkId] ? 'not-allowed' : 'pointer',
+        fontSize: '1.2rem',
+        transition: '0.3s',
+        fontWeight: 'bold',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: '120px',
+        opacity: disabledButtons[item.linkId] ? 0.7 : 1
+    }}
+    onMouseOver={(e) => {
+        if (!disabledButtons[item.linkId]) {
+            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.2)';
+        }
+    }}
+    onMouseOut={(e) => {
+        if (!disabledButtons[item.linkId]) {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+        }
+    }}
+>
+    <span style={{ fontSize: '1.5rem' }}>🛒</span> Add to Cart
+</button>
+
             </div>
           ))}
         </div>
