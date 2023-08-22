@@ -9,19 +9,15 @@ const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, cha
 
   const addToCartWithDelay = async (itemLinkId) => {
     setDisabledButtons(prevState => ({ ...prevState, [itemLinkId]: true }));
-    console.log("!")
     await addToCart(itemLinkId);
     setTimeout(() => {
-      console.log("?")
-
-        setDisabledButtons(prevState => ({ ...prevState, [itemLinkId]: false }));
+      setDisabledButtons(prevState => ({ ...prevState, [itemLinkId]: false }));
     }, 1000);
-};
+  };
 
 
   const handleBuy = async () => {
     setBuyButtonLoading(true);
-    console.log("1")
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
     const waitForConfirmPurchaseTypeLinkId = await deep.id("@flakeed/loyverse", "WaitForConfirmPurchase");
@@ -80,11 +76,9 @@ const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, cha
       },
     });
     setTimeout(() => {
-      console.log("2")
-
       setBuyButtonLoading(false);
-  }, 1000);
-};
+    }, 1000);
+  };
 
   return (
     <Modal
@@ -131,40 +125,40 @@ const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, cha
                 <h2 style={{ fontSize: '1.4rem', color: '#388E3C', marginBottom: '5px' }}>{item.itemName}</h2>
                 <p style={{ fontSize: '1.1rem', color: '#2E7D32', fontWeight: 'bold' }}>Price: {item.price || 'N/A'}</p>
               </div>
-              <button 
-    onClick={() => addToCartWithDelay(item.linkId)}  
-    disabled={disabledButtons[item.linkId]}
-    style={{
-        background: 'linear-gradient(90deg, #388E3C, #4CAF50)',
-        color: 'white',
-        padding: '10px 20px',
-        borderRadius: '25px',
-        border: '2px solid #2E7D32',
-        cursor: disabledButtons[item.linkId] ? 'not-allowed' : 'pointer',
-        fontSize: '1.2rem',
-        transition: '0.3s',
-        fontWeight: 'bold',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: '120px',
-        opacity: disabledButtons[item.linkId] ? 0.7 : 1
-    }}
-    onMouseOver={(e) => {
-        if (!disabledButtons[item.linkId]) {
-            e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.2)';
-        }
-    }}
-    onMouseOut={(e) => {
-        if (!disabledButtons[item.linkId]) {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-        }
-    }}
->
-    <span style={{ fontSize: '1.5rem' }}>🛒</span> Add to Cart
-</button>
+              <button
+                onClick={() => addToCartWithDelay(item.linkId)}
+                disabled={disabledButtons[item.linkId]}
+                style={{
+                  background: 'linear-gradient(90deg, #388E3C, #4CAF50)',
+                  color: 'white',
+                  padding: '10px 20px',
+                  borderRadius: '25px',
+                  border: '2px solid #2E7D32',
+                  cursor: disabledButtons[item.linkId] ? 'not-allowed' : 'pointer',
+                  fontSize: '1.2rem',
+                  transition: '0.3s',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: '120px',
+                  opacity: disabledButtons[item.linkId] ? 0.7 : 1
+                }}
+                onMouseOver={(e) => {
+                  if (!disabledButtons[item.linkId]) {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 6px 8px rgba(0, 0, 0, 0.2)';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!disabledButtons[item.linkId]) {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                  }
+                }}
+              >
+                <span style={{ fontSize: '1.5rem' }}>🛒</span> Add to Cart
+              </button>
 
             </div>
           ))}
@@ -201,39 +195,39 @@ const ItemsModal = ({ deep, isOpen, addToCart, onRequestClose, items, style, cha
         </button>
 
         <button onClick={handleBuy} style={{
-    background: 'linear-gradient(45deg, #006400, #228B22)',
-    color: 'white',
-    padding: '15px 30px',
-    borderRadius: '40px',
-    border: 'none',
-    cursor: isBuyButtonLoading ? 'not-allowed' : 'pointer',
-    fontSize: '1.4rem',
-    fontWeight: 'bold',
-    boxShadow: '0 0 15px rgba(0, 0, 0, 0.3)',
-    position: 'absolute',
-    right: '40px',
-    bottom: '20px',
-    zIndex: 1001,
-    transition: '0.3s',
-    opacity: isBuyButtonLoading ? 0.7 : 1
-}}
-    onMouseOver={(e) => {
-        if (!isBuyButtonLoading) {
-            e.currentTarget.style.backgroundColor = '#4CAF50';
-            e.currentTarget.style.transform = 'scale(1.08)';
-            e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.4)';
-        }
-    }}
-    onMouseOut={(e) => {
-        if (!isBuyButtonLoading) {
-            e.currentTarget.style.backgroundColor = '#006400';
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 0, 0, 0.3)';
-        }
-    }}
->
-    Buy
-</button>
+          background: 'linear-gradient(45deg, #006400, #228B22)',
+          color: 'white',
+          padding: '15px 30px',
+          borderRadius: '40px',
+          border: 'none',
+          cursor: isBuyButtonLoading ? 'not-allowed' : 'pointer',
+          fontSize: '1.4rem',
+          fontWeight: 'bold',
+          boxShadow: '0 0 15px rgba(0, 0, 0, 0.3)',
+          position: 'absolute',
+          right: '40px',
+          bottom: '20px',
+          zIndex: 1001,
+          transition: '0.3s',
+          opacity: isBuyButtonLoading ? 0.7 : 1
+        }}
+          onMouseOver={(e) => {
+            if (!isBuyButtonLoading) {
+              e.currentTarget.style.backgroundColor = '#4CAF50';
+              e.currentTarget.style.transform = 'scale(1.08)';
+              e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.4)';
+            }
+          }}
+          onMouseOut={(e) => {
+            if (!isBuyButtonLoading) {
+              e.currentTarget.style.backgroundColor = '#006400';
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 0, 0, 0.3)';
+            }
+          }}
+        >
+          Buy
+        </button>
 
         {showChatNumber && (
           <div
