@@ -479,7 +479,7 @@ export const Content = React.memo<any>(() => {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       const doAsyncStuff = async () => {
-        if (Date.now() - lastPress >= 460000 && !isRecording) {
+        if (Date.now() - lastPress >= 120000 && !isRecording && !isItemsModalOpen) {
           const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
           const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
 
@@ -498,10 +498,10 @@ export const Content = React.memo<any>(() => {
         }
       };
       doAsyncStuff();
-    }, 460000);
-
+    }, 120000);
+  
     return () => clearTimeout(timeoutId);
-  }, [lastPress, isRecording]);
+  }, [lastPress, isRecording, isItemsModalOpen]);
 
   const handleCloseChat = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
