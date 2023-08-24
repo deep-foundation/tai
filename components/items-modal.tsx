@@ -1,4 +1,3 @@
-import { deepMapObject } from '@freephoenix888/deep-map-object';
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
