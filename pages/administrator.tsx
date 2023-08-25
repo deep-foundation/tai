@@ -152,10 +152,7 @@ const [selectedChatId, setSelectedChatId] = useState(0);
   
       fetchData();
   }, [conversationTypeLinkId, waitForConfirmPurchaseTypeId, confirmPurchaseTypeLinkId, selectedChatId]);
-  
-
-  console.log("shoppingCartData",shoppingCartData)
-      
+     
   const extractShoppingCartData = (carts) => {
     return carts.map(cart => {
         const innerValue = cart.value && cart.value.value;
