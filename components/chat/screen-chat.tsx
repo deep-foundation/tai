@@ -1,9 +1,52 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Box, IconButton, Text } from '@chakra-ui/react';
 import { TfiClose } from 'react-icons/tfi';
-import { Message } from './message';
+import { MemoizedMessage } from './message';
+import { motion } from 'framer-motion';
 
-export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handleCloseChat }) => {
+function Switcher() {
+  const [isOn, setIsOn] = useState(false);
+
+  const toggleSwitch = () => setIsOn(!isOn);
+
+  return (
+    <Box 
+      data-isOn={isOn} 
+      onClick={toggleSwitch}
+      sx={{
+        width: '12rem',
+        height: '8rem',
+        backgroundColor: 'rgba(255, 255, 255, 0.4)',
+        display: 'flex',
+        justifyContent: 'flex-start',
+        borderRadius: '25%',
+        padding: '8rem',
+        cursor: 'pointer',
+      }}
+    >
+      <Box 
+        as={motion.div} 
+        layout 
+        // @ts-ignore
+        transition={spring} 
+        sx={{
+          width: '7.5rem',
+          height: '7.5rem',
+          backgroundColor: 'white',
+          borderRadius: '25%',
+        }}
+      />
+    </Box>
+  );
+}
+
+const spring = {
+  type: "spring",
+  stiffness: 700,
+  damping: 30
+};
+
+function _ScreenChat({ newConversationLinkId, deep, handleCloseChat }:{ newConversationLinkId, deep, handleCloseChat }) {
   const [messages, setMessages] = useState<Array<any>>([]);
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const [chatGptLinkId, setChatGptLinkId] = useState(null);
@@ -102,7 +145,7 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
       >
         {messages.length ? <Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text> : null}
         {messages.map((message, index) => (
-          <Message key={message.id}
+          <MemoizedMessage key={message.id}
             text={message?.link?.value?.value}
             align={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
             arrow={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
@@ -110,7 +153,7 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
           />
         ))}
         {isWaitingResponse && messages.length > 0 && (
-          <Message
+          <MemoizedMessage
             text="Thinking..."
             align='left'
             arrow='left'
@@ -122,7 +165,9 @@ export const ScreenChat = React.memo<any>(({ newConversationLinkId, deep, handle
   );
   
   
-});
+};
+
+export const ScreenChat = React.memo(_ScreenChat);
 
 const Diamand = () => {
   return (<Box

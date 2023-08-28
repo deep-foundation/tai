@@ -5,7 +5,7 @@ import { GiHemp } from 'react-icons/gi';
 import { BubbleArrowLeft, BubbleArrowRight } from "./bubble-arrow";
 
 
-const CreatureAvatar = React.memo<any>(({
+function CreatureAvatar({
   emoji,
   name,
   src,
@@ -23,7 +23,7 @@ const CreatureAvatar = React.memo<any>(({
   bg?: string;
   fontSizeEmoji?: string;
   fontSizeName?: string;
-}) => {
+}) {
   return src
     ? <Avatar src={src} size={size} bg={bg} />
     : emoji
@@ -36,7 +36,9 @@ const CreatureAvatar = React.memo<any>(({
     : name
     ? <Avatar name={name} size={size} bg={bg} fontSize={fontSizeName} />
     : <Avatar icon={icon} size={size} bg={bg} />
-});
+};
+
+const MemoizedCreatureAvatar = React.memo(CreatureAvatar);
 
 const MotionBox = motion(Box);
 
@@ -59,7 +61,7 @@ const messageVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export const Message = React.memo<any>(({
+export function Message ({
   text='Hello',
   align = 'left',
   arrow = align,
@@ -69,7 +71,7 @@ export const Message = React.memo<any>(({
   name,
   flexDivProps = {},
   messageDivProps = {},
-}:IMessage) => {
+}:IMessage) {
 
   return (<MotionBox
       initial="hidden"
@@ -117,4 +119,6 @@ export const Message = React.memo<any>(({
       </HStack>
     </MotionBox>
   )
-})
+}
+
+export const MemoizedMessage = React.memo(Message);
