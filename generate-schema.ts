@@ -2,7 +2,7 @@ import * as TJS from 'typescript-json-schema';
 import * as path from 'path'
 import * as fs from 'fs'
 import * as _ from 'lodash';
-import {deepMapObject} from '@freephoenix888/deep-map-object';
+// import {deepMapObject} from '@freephoenix888/deep-map-object';
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
@@ -38,7 +38,7 @@ async function main () {
     'enum'
   ];
   // schema = await deepMapObject(schema, ({key, value}) => ({newKey: keyNamesNotToMap.includes(key) ? key : _.upperFirst(key), newValue: value}));
-  schema = await deepMapObject(schema, ({key, value}) => ({newKey: key, newValue: (key === 'title') ? _.upperFirst(value) : value}));
+  // schema = await deepMapObject(schema, ({key, value}) => ({newKey: key, newValue: (key === 'title') ? _.upperFirst(value) : value}));
   fs.writeFileSync(path.resolve(parsedArguments.outputJsonFilePath), JSON.stringify(schema, null, 2));
 }
 
