@@ -2,7 +2,8 @@ import {
   Box,
   Heading,
   VStack,
-  Button
+  Button,
+  useDisclosure
 } from '@chakra-ui/react';
 import {
   DeepClient,
@@ -11,20 +12,19 @@ import {
 import { generateApolloClient } from '@deep-foundation/hasura/client.js';
 import { useLocalStore } from '@deep-foundation/store/local';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { BackgroundProbableQuestions } from '../components/background-probable-questions';
 import { ScreenChat } from '../components/chat/screen-chat';
-import { NavBar } from '../components/navbar';
 import { Page } from '../components/page';
 import { RecordButton } from '../components/record-button';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
 import stopRecording from '../imports/capacitor-voice-recorder/stop-recording';
 import startRecording from '../imports/capacitor-voice-recorder/strart-recording';
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
-import ItemsModal from '../components/items-modal';
+import { MemoizedItemsModal } from '../components/product-bin/items-modal';
 const assert = require('assert');
 
-export const Content = React.memo<any>(() => {
+function Content() {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
@@ -36,17 +36,11 @@ export const Content = React.memo<any>(() => {
   const [isChatClosed, setIsChatClosed] = useState<boolean>(false);
   const [isTimeEnded, setIsTimeEnded] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);
   const [shoppingCartId, setShoppingCartId] = useState(0);
   const [getItemsData, setGetItemsData] = useState<any[]>([]);
 
-  const openItemsModal = () => {
-    setIsItemsModalOpen(true);
-  };
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const closeItemsModal = () => {
-    setIsItemsModalOpen(false);
-  };
   const startTime = useRef('');
   const path = process.env.NEXT_PUBLIC_GQL_PATH;
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
@@ -479,7 +473,7 @@ export const Content = React.memo<any>(() => {
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       const doAsyncStuff = async () => {
-        if (Date.now() - lastPress >= 120000 && !isRecording && !isItemsModalOpen) {
+        if (Date.now() - lastPress >= 120000 && !isRecording && !isOpen) {
           const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
           const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
 
@@ -501,9 +495,9 @@ export const Content = React.memo<any>(() => {
     }, 120000);
   
     return () => clearTimeout(timeoutId);
-  }, [lastPress, isRecording, isItemsModalOpen]);
+  }, [lastPress, isRecording, isOpen]);
 
-  const handleCloseChat = async () => {
+  const handleCloseChat = useMemo(async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
     const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
 
@@ -519,7 +513,7 @@ export const Content = React.memo<any>(() => {
     });
     setNewConversationLinkId(conversationLinkId)
     setIsChatClosed(true);
-  };
+  }, [deep]);
 
   const customStyles = {
     content: {
@@ -565,57 +559,58 @@ export const Content = React.memo<any>(() => {
   }));
 
   return (<VStack position='relative' width='100vw' height='100vh'>
-    {!isItemsModalOpen && (
-      <button
-        onClick={openItemsModal}
-        style={{
-          position: 'fixed',
-          right: '20px',
-          top: '20px',
-          background: 'linear-gradient(45deg, #4CAF50, #8BC34A)',
-          color: 'white',
-          padding: '12px 24px',
-          borderRadius: '12px 30px',
-          border: '2px solid #388E3C',
-          cursor: 'pointer',
-          fontSize: '1rem',
-          fontWeight: 'bold',
-          boxShadow: '0 0 15px rgba(0, 0, 0, 0.2)',
-          transition: '0.5s',
-          zIndex: 1
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.background = 'linear-gradient(45deg, #81C784, #C5E1A5)';
-          e.currentTarget.style.transform = 'scale(1.05)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.background = 'linear-gradient(45deg, #4CAF50, #8BC34A)';
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
-      >
-        Products
-      </button>
-    )}
+      {!isOpen && (
+        <Button
+          onClick={isOpen ? onClose : onOpen}
+          size='sm'
+          sx={{
+            position: 'fixed',
+            right: '1rem',
+            top: '1rem',
+            background: 'linear-gradient(45deg, #4CAF50, #8BC34A)',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            boxShadow: '0 0 15px rgba(0, 0, 0, 0.2)',
+            zIndex: 1001,
+            _hover: {
+              background: 'linear-gradient(45deg, #81C784, #C5E1A5)',
+              transform: 'scale(1.05)',
+            },
+          }}
+          // onMouseOver={(e) => {
+          //   e.currentTarget.style.background = 'linear-gradient(45deg, #81C784, #C5E1A5)';
+          //   e.currentTarget.style.transform = 'scale(1.05)';
+          // }}
+          // onMouseOut={(e) => {
+          //   e.currentTarget.style.background = 'linear-gradient(45deg, #4CAF50, #8BC34A)';
+          //   e.currentTarget.style.transform = 'scale(1)';
+          // }}
+        >
+          Products
+        </Button>
+      )}
 
-    <ItemsModal
-      deep={deep}
-      isOpen={isItemsModalOpen}
-      onRequestClose={closeItemsModal}
-      addToCart={handleAddToCart}
-      items={items}
-      style={customStyles}
-      chatNumber={newConversationLinkId}
-    />
-    <BackgroundProbableQuestions />
-    <Box sx={{ color: 'antiquewhite', zIndex: 1 }}>
-      <Heading as='h1' sx={{ color: 'antiquewhite', zIndex: 1 }}>Diamond</Heading>
-    </Box>
-    <RecordButton isProcessing={isProcessing} isRecording={isRecording} handleClick={handleClick} />
-    <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat} />
+      <MemoizedItemsModal
+        deep={deep}
+        addToCart={handleAddToCart}
+        items={items}
+        isOpen={isOpen}
+        onClose={onClose}
+        style={customStyles}
+        chatNumber={newConversationLinkId}
+      />
+      <BackgroundProbableQuestions />
+      <Box sx={{ color: 'antiquewhite', zIndex: 1 }}>
+        <Heading as='h1' sx={{ color: 'antiquewhite', zIndex: 1 }}>Diamond</Heading>
+      </Box>
+      <RecordButton isProcessing={isProcessing} isRecording={isRecording} handleClick={handleClick} />
+      <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat} />
 
-  </VStack>
+    </VStack>
   );
-})
+}
 
 export default function IndexPage() {
   return (
@@ -674,3 +669,5 @@ async function fetchAssociatedLinks(deep, linkId) {
     };
   });
 }
+
+export const MemoizedContent = React.memo(Content);
