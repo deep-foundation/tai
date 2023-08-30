@@ -9,7 +9,6 @@ function ItemsModal({
   addToCart, 
   // onRequestClose, 
   items, 
-  style, 
   onClose, 
   chatNumber, 
 }:{
@@ -18,7 +17,6 @@ function ItemsModal({
   addToCart: any;
   // onRequestClose: any;
   items: Array<any>;
-  style: any;
   onClose: any;
   chatNumber: number;
 }) {
@@ -139,7 +137,7 @@ function ItemsModal({
                   borderRadius: '1rem',
                   width: '100%',
                   padding: '1rem',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1), inset 0px 0px 9px 9px rgba(42,93,52,0.2)',
                 }}>
                   <Text as='h2' sx={{ fontSize: '1.4rem', color: '#388E3C', marginBottom: '0.5rem' }}>{item.itemName}</Text>
                   <Box
@@ -194,7 +192,7 @@ function ItemsModal({
         </ModalBody>
 
         <ModalFooter>
-          {!showChatNumber ? (
+          {showChatNumber ? (
             <Box
               sx={{
                 display: 'flex',

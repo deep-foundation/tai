@@ -3,50 +3,22 @@ import { Box, IconButton, Text } from '@chakra-ui/react';
 import { TfiClose } from 'react-icons/tfi';
 import { MemoizedMessage } from './message';
 import { motion } from 'framer-motion';
+import { MemoizedInputChat } from './input-chat';
+import { RecordButton } from '../record-button';
 
-function Switcher() {
-  const [isOn, setIsOn] = useState(false);
+const MotionBox = motion(Box);
 
-  const toggleSwitch = () => setIsOn(!isOn);
-
-  return (
-    <Box 
-      data-isOn={isOn} 
-      onClick={toggleSwitch}
-      sx={{
-        width: '12rem',
-        height: '8rem',
-        backgroundColor: 'rgba(255, 255, 255, 0.4)',
-        display: 'flex',
-        justifyContent: 'flex-start',
-        borderRadius: '25%',
-        padding: '8rem',
-        cursor: 'pointer',
-      }}
-    >
-      <Box 
-        as={motion.div} 
-        layout 
-        // @ts-ignore
-        transition={spring} 
-        sx={{
-          width: '7.5rem',
-          height: '7.5rem',
-          backgroundColor: 'white',
-          borderRadius: '25%',
-        }}
-      />
-    </Box>
-  );
-}
-
-const spring = {
-  type: "spring",
-  stiffness: 700,
-  damping: 30
-};
-
-function _ScreenChat({ newConversationLinkId, deep, handleCloseChat }:{ newConversationLinkId, deep, handleCloseChat }) {
+function _ScreenChat({ 
+  newConversationLinkId, 
+  deep, 
+  handleCloseChat, 
+  openInput 
+}:{ 
+  newConversationLinkId: number; 
+  deep: any; 
+  handleCloseChat;
+  openInput: boolean;
+}) {
   const [messages, setMessages] = useState<Array<any>>([]);
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const [chatGptLinkId, setChatGptLinkId] = useState(null);
@@ -119,7 +91,6 @@ function _ScreenChat({ newConversationLinkId, deep, handleCloseChat }:{ newConve
       prevMessagesCount.current = messages.length;
   }, [messages]);
   
-
   return (
     <Box position="fixed" bottom={0} left={0} zIndex={1000} width='100vw' height='30vh'>
   
@@ -133,6 +104,7 @@ function _ScreenChat({ newConversationLinkId, deep, handleCloseChat }:{ newConve
         flexDirection="column"
         overflowY="scroll"
         height='100%'
+        position='relative'
         bg='#03001da8'
         p={3}
         _before={{ content: '""', position: 'absolute', top: 0, left: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderRight: '1.5rem solid transparent' }}
@@ -145,7 +117,8 @@ function _ScreenChat({ newConversationLinkId, deep, handleCloseChat }:{ newConve
       >
         {messages.length ? <Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text> : null}
         {messages.map((message, index) => (
-          <MemoizedMessage key={message.id}
+          <MemoizedMessage 
+            key={message.id}
             text={message?.link?.value?.value}
             align={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
             arrow={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
@@ -160,6 +133,7 @@ function _ScreenChat({ newConversationLinkId, deep, handleCloseChat }:{ newConve
             fill='#dcdcdc'
           />
         )}
+        <MemoizedInputChat openInput={openInput} sendMessage={() => alert('send message')} />
       </Box>
     </Box>
   );
@@ -168,15 +142,3 @@ function _ScreenChat({ newConversationLinkId, deep, handleCloseChat }:{ newConve
 };
 
 export const ScreenChat = React.memo(_ScreenChat);
-
-const Diamand = () => {
-  return (<Box
-    sx={{
-      bg: '#03001d',
-      clipPath: 'polygon(25% 0, 75% 0, 100% 20%, 50% 100%, 0 20%)',
-      allignSelf: 'center',
-      margin: 'auto',
-    }}/>
-  )
-}
-

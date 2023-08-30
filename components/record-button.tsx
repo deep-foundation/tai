@@ -14,45 +14,62 @@ const variants = {
       type: "spring",
       bounce: 0.5,
       duration: 3,
-      times: [0, 0.16, 0.33, 0.5, 0.66, 0.83, 0.95, 1, 0.95, 0.83, 0.66, 0.5, 0.33, 0.16, 0]
+      times: [0, 0.16, 0.33, 0.5, 0.66, 0.83, 0.95, 1, 0.95, 0.83, 0.66, 0.5, 0.33, 0.16, 0],
+      scale: { type: "spring", bounce: 0.5, duration: 3 },
     }
    },
+   initial: { scale: 1 },
 };
-export const RecordButton = ({
+
+export function _RecordButton({
   isProcessing,
   isRecording,
   handleClick,
+  stateVoice,
 }:{
   isProcessing?: boolean;
   isRecording?: boolean;
   handleClick?: () => any;
-}) => {
+  stateVoice?: string;
+}) {
   const control = useAnimation();
 
+  // useEffect(() => {
+  //   if (isRecording && !isProcessing) {
+  //     control.start("recording");
+  //   } else {
+  //     control.start("noRecord");
+  //   }
+  // }, [isRecording, isProcessing]);
+
   useEffect(() => {
-    if (isRecording && !isProcessing) {
+    if (stateVoice === 'voice' && (isRecording && !isProcessing)) {
       control.start("recording");
     } else {
       control.start("noRecord");
     }
-  }, [isRecording, isProcessing]);
+  }, [isRecording, isProcessing, stateVoice, control]);
 
   return (<IconButton
       as={motion.button}
       aria-label='record button'
       // @ts-ignore
       icon={isProcessing ? <ProcessButton isProcessing={isProcessing} /> : (isRecording ? <PiMicrophoneThin size='3rem' color='#fff' /> : <PiMicrophoneSlashThin size='3rem' color='#fff' />)}
-      isRound
+      // isRound
       animate={control}
       variants={variants}
+      initial='initial'
       sx={{
-        position: 'absolute',
-        zIndex: 0,
-        width: '150px',
-        height: '150px',
-        bottom: '35vh',
+        zIndex: 1,
+        width: '7.4rem',
+        height: '7.4rem',
+        // bottom: '35vh',
         boxShadow: isProcessing ? 'rgb(9, 32, 9) 0px 0px 25px 7px inset, rgb(9, 32, 9) 0px 0px 6px 1px' : (isRecording ? 'rgb(9, 32, 9) 0px 0px 25px 7px inset, rgb(9, 32, 9) 0px 0px 5px 0px' : 'inset 0px 0px 25px 7px #03001d, 0px 0px 2px 0px #03001d'),
         backgroundColor: isProcessing ? '#dae1d3' : (isRecording ? '#306604' : '#0080ff'),
+        borderTopLeftRadius: '4rem',
+        borderTopRightRadius: 0,
+        borderBottomLeftRadius: '4rem',
+        borderBottomRightRadius: 0,
         _hover: { 
           backgroundColor: isProcessing ? '#cce0b8' : (isRecording ? '#306604' : '#03001d') ,
           scale: (!isRecording && !isProcessing) ? 0.65 : 1,
@@ -64,7 +81,9 @@ export const RecordButton = ({
     </IconButton>)
 }
 
-const ProcessButton = () => {
+export const RecordButton = React.memo(_RecordButton);
+
+function _ProcessButton() {
 
   return (<Box
       sx={{
@@ -109,3 +128,5 @@ const ProcessButton = () => {
     </Box>
   )
 }
+
+const ProcessButton = React.memo(_ProcessButton);

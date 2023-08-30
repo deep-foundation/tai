@@ -14,7 +14,6 @@ import { useLocalStore } from '@deep-foundation/store/local';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { BackgroundProbableQuestions } from '../components/background-probable-questions';
-import { ScreenChat } from '../components/chat/screen-chat';
 import { Page } from '../components/page';
 import { RecordButton } from '../components/record-button';
 import createContainer from '../imports/capacitor-voice-recorder/create-container';
@@ -23,8 +22,14 @@ import startRecording from '../imports/capacitor-voice-recorder/strart-recording
 import uploadRecords from '../imports/capacitor-voice-recorder/upload-records';
 import { MemoizedItemsModal } from '../components/product-bin/items-modal';
 const assert = require('assert');
+// import { Switcher } from '../components/chat/switcher';
+import { motion, useCycle } from 'framer-motion';
+import { Tab } from '../components/chat/switcher';
+import { ScreenChat } from '../components/chat/screen-chat';
 
-function Content() {
+const MotionBox = motion(Box);
+
+export const Content = React.memo(() => {
   useEffect(() => {
     defineCustomElements(window);
   }, []);
@@ -40,6 +45,7 @@ function Content() {
   const [getItemsData, setGetItemsData] = useState<any[]>([]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [state, nextState] = useCycle("voice", "keyboard");
 
   const startTime = useRef('');
   const path = process.env.NEXT_PUBLIC_GQL_PATH;
@@ -515,23 +521,6 @@ function Content() {
     setIsChatClosed(true);
   }, [deep]);
 
-  const customStyles = {
-    content: {
-      height: '65vh',
-      width: '70%',
-      overflowY: 'auto',
-      borderRadius: '20px',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      border: 'none',
-      padding: '20px',
-      backgroundColor: '#f4f4f4',
-      zIndex: 1002,
-      margin: '40px auto',
-      position: 'relative',
-      top: '0',
-    },
-  };
-
   const handleAddToCart = async (itemId) => {
     const addToCartTypeLinkId = await deep.id("@flakeed/loyverse", "AddToCart");
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
@@ -598,19 +587,25 @@ function Content() {
         items={items}
         isOpen={isOpen}
         onClose={onClose}
-        style={customStyles}
         chatNumber={newConversationLinkId}
       />
       <BackgroundProbableQuestions />
       <Box sx={{ color: 'antiquewhite', zIndex: 1 }}>
         <Heading as='h1' sx={{ color: 'antiquewhite', zIndex: 1 }}>Diamond</Heading>
       </Box>
-      <RecordButton isProcessing={isProcessing} isRecording={isRecording} handleClick={handleClick} />
-      <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat} />
+      <Tab 
+        isProcessing={isProcessing} 
+        isRecording={isRecording} 
+        handleClick={handleClick} 
+        state={state} 
+        stateVoice={state}
+        onClickKeyboard={() => nextState()} 
+      />
+      <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat} openInput={state === 'keyboard'} />
 
     </VStack>
   );
-}
+})
 
 export default function IndexPage() {
   return (
@@ -670,4 +665,3 @@ async function fetchAssociatedLinks(deep, linkId) {
   });
 }
 
-export const MemoizedContent = React.memo(Content);
