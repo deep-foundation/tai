@@ -18,7 +18,7 @@ const MotionBox = motion(Box);
 const variantsKeyboard = {
   noKB: { scale: 1 },
   keyboard: { 
-    scale: 1.05,
+    scale: 1,
     transition: {
       type: "spring", bounce: 0.5, duration: 3,
     }
