@@ -503,22 +503,26 @@ export const Content = React.memo(() => {
     return () => clearTimeout(timeoutId);
   }, [lastPress, isRecording, isOpen]);
 
-  const handleCloseChat = useMemo(async () => {
-    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-    const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
-
-    const { data: [{ id: conversationLinkId }] } = await deep.insert({
-      type_id: conversationTypeLinkId,
-      string: { data: { value: "New chat" } },
-      in: {
-        data: {
-          type_id: containTypeLinkId,
-          from_id: deep.linkId,
-        },
-      },
-    });
-    setNewConversationLinkId(conversationLinkId)
-    setIsChatClosed(true);
+  const handleCloseChat = useMemo(() => {
+    return () => {
+      (async () => {
+        const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+  
+        const { data: [{ id: conversationLinkId }] } = await deep.insert({
+          type_id: conversationTypeLinkId,
+          string: { data: { value: "New chat" } },
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            },
+          },
+        });
+        setNewConversationLinkId(conversationLinkId);
+        setIsChatClosed(true);
+      })();
+    };
   }, [deep]);
 
   const handleAddToCart = async (itemId) => {
