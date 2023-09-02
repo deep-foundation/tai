@@ -341,7 +341,7 @@ export const Content = React.memo(() => {
           `
         });
 
-        if (checkConversationLink[0].systemMessages.length === 0) {
+        if (isTimeEnded || isChatClosed || checkConversationLink[0].systemMessages.length === 0) {
 
           const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
             type_id: messageTypeLinkId,
@@ -390,58 +390,12 @@ export const Content = React.memo(() => {
           });
         }
 
-        if (checkConversationLink[0].systemMessages.length > 0) {
-          if (isTimeEnded || isChatClosed) {
+        if (newConversationLinkId && newConversationLinkId !== 0) {
+          try {
+            if (isTimeEnded || isChatClosed) {
+              //code if chat is closed or time is ended
+            } else {
 
-            setIsChatClosed(false)
-
-            const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
-              type_id: messageTypeLinkId,
-              string: { data: { value: systemMsg } },
-              in: {
-                data: {
-                  type_id: containTypeLinkId,
-                  from_id: deep.linkId,
-                }
-              },
-            });
-
-            const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
-              type_id: systemTypeLinkId,
-              from_id: systemMessageLinkId,
-              to_id: newConversationLinkId,
-              in: {
-                data: {
-                  type_id: containTypeLinkId,
-                  from_id: deep.linkId,
-                },
-              },
-            });
-
-            const { data: [{ id: messageLinkId }] } = await deep.insert({
-              type_id: messageTypeLinkId,
-              string: { data: { value: transcribedTextLinkId.value.value } },
-              in: {
-                data: {
-                  type_id: containTypeLinkId,
-                  from_id: deep.linkId,
-                }
-              },
-            });
-
-            const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
-              type_id: replyTypeLinkId,
-              from_id: messageLinkId,
-              to_id: newConversationLinkId,
-              in: {
-                data: {
-                  type_id: containTypeLinkId,
-                  from_id: deep.linkId,
-                },
-              },
-            });
-            setIsTimeEnded(false)
-          } else {
             const assistantMessageLinkId = messagesLinkId[0].link.id
             const { data: [{ id: messageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
@@ -466,13 +420,23 @@ export const Content = React.memo(() => {
               },
             });
           }
+        } catch (error) {
+          //if error - stop processing
+          console.error("An error occurred:", error);
+          setIsProcessing(false);
+          setIsRecording(false);
         }
-
+      }
+        //think about code here
+        setIsTimeEnded(false);
+        setIsChatClosed(false); 
         setLastPress(Date.now());
         setIsRecording(false);
         setIsProcessing(false);
       } catch (error) {
-      }
+        console.error(error);
+    }
+    
     }
   };
 
