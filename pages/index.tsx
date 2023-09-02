@@ -423,6 +423,9 @@ export const Content = React.memo(() => {
         } catch (error) {
           //if error - stop processing
           console.error("An error occurred:", error);
+          setIsTimeEnded(false);
+          setIsChatClosed(false); 
+          setLastPress(Date.now());
           setIsProcessing(false);
           setIsRecording(false);
         }
