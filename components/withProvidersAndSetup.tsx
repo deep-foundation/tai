@@ -5,6 +5,7 @@ import { useLocalStore } from '@deep-foundation/store/local';
 import { CapacitorStoreKeys } from '../imports/capacitor-store-keys';
 import { WithSetup } from './with-setup';
 import { ApolloClientTokenizedProvider } from '@deep-foundation/react-hasura/apollo-client-tokenized-provider';
+import themeChakra from './theme/theme';
 
 export function WithProvidersAndSetup({
   renderChildren,
@@ -16,10 +17,12 @@ export function WithProvidersAndSetup({
   const [apiKey, setApiKey] = useLocalStore<string>('apikey', '');
   const [googleAuth, setGoogleAuth] = useLocalStore<string>('googleAuth', '');
   const [systemMsg, setSystemMsg] = useLocalStore<string>('systemMsg', '');
+  const ThemeProviderCustom = ChakraProvider;
+  const themeCustom = themeChakra;
 
   return (
     <>
-      <ChakraProvider>
+      <ChakraProvider theme={themeCustom}>
         <TokenProvider>
           <ApolloClientTokenizedProvider
             options={{

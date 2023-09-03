@@ -16,10 +16,10 @@ const themeChakra = extendTheme({
     },
     colors: {
       error: 'red.500',
-      text: {
-        default: 'grayText',
-        _dark: 'whiteText',
-      },
+      // text: {
+      //   default: 'grayText',
+      //   _dark: 'whiteText',
+      // },
       borderColor: {
         default: '#d2cece',
         _dark: '#718096',
@@ -80,19 +80,19 @@ const themeChakra = extendTheme({
           justifyContent: 'center',
           padding: '1rem 0',
         },
-      },
-
-    },
-
-    IconButton: {
-      variants: {
         ghost: {  
           backgroundColor: 'transparent',
-          _hover: {
+          _focus: {
             backgroundColor: 'transparent',
           },
-        }
-      }        
+          _active: {
+            backgroundColor: 'transparent',
+          },
+          _hover: {
+            backgroundColor: '#426e4530',
+          },
+        },
+      },       
     }
   }
 })

@@ -56,7 +56,7 @@ export function InputChat ({
 					_focus: {
 						borderColor: 'white',
 						backgroundColor: '#2a4a3c',
-						color: 'text',
+						color: 'whiteText',
 					},
 				}}
 			/>
@@ -64,6 +64,9 @@ export function InputChat ({
 				<IconButton 
 					aria-label='send message button' 
 					isRound variant='ghost' size="md" 
+					sx={{
+						
+					}}
 					color="white" 
 					background='transparent'
 					onClick={sendMessage} icon={<TbSend />} 

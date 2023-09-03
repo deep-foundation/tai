@@ -23,8 +23,8 @@ export function Page({ renderChildren }: PageParam) {
   const [processingPackage, setProcessingPackage] = useState(null);
   const [packagesBeingInstalled, setPackagesBeingInstalled] = useState(new Set());
 
-  const ThemeProviderCustom = ChakraProvider;
-  const themeCustom = themeChakra;
+  // const ThemeProviderCustom = ChakraProvider;
+  // const themeCustom = themeChakra;
   
   const installPackage = async (param: {
     packageName: string, deep: DeepClient
@@ -82,7 +82,7 @@ export function Page({ renderChildren }: PageParam) {
 
   return (
     <StoreProvider>
-      <ThemeProviderCustom theme={themeCustom}>
+      {/* <ThemeProviderCustom theme={themeCustom}> */}
         <WithProvidersAndSetup
           renderChildren={({ deep }) => {
             return (
@@ -144,7 +144,7 @@ export function Page({ renderChildren }: PageParam) {
             );
           }}
         />
-      </ThemeProviderCustom>
+      {/* </ThemeProviderCustom> */}
     </StoreProvider>
   );
 }
