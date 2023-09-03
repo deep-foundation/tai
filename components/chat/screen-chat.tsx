@@ -97,48 +97,54 @@ function _ScreenChat({
       prevMessagesCount.current = messages.length;
   }, [messages]);
   
-  return (
-    <Box position="fixed" bottom={0} left={0} zIndex={1000} width='100vw' height='30vh' display='grid' gridAutoRows='1fr max-content' bg='#03001da8' p='1rem' boxShadow='0 5px 5px 5px #386018'>
-  
-      <Box position="absolute" right={6} top={3} zIndex={1001}>
+  return (<Box position="fixed" bottom={0} left={0} zIndex={1000} width='100vw' height='34.7vh'>
+      <Box position="relative" textAlign='end'>
         <IconButton 
-          variant='outline' 
+          variant='solid'
+          background='#03001da8' 
           borderColor='#909294' 
           boxShadow='inset 0 0 3px 1px #386018'
           aria-label='Close chat' 
-          isRound icon={<TfiClose color='#909294' />} 
+           
+          icon={<TfiClose color='#909294' />} 
           onClick={handleCloseChat} 
         />
       </Box>
-  
-      <Box
-        ref={chatContainerRef}
-        display="flex"
-        flexDirection="column"
-        overflowY="scroll"
-        height='100%'
-        position='relative'
-      >
-        {messages.length ? <Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text> : null}
-        {messages.map((message, index) => (
-          <MemoizedMessage 
-            key={message.id}
-            text={message?.link?.value?.value}
-            align={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
-            arrow={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
-            fill={message?.link?.author?.[0]?.to_id === chatGptLinkId ? '#dcdcdc' : '#cce4ff'}
-          />
-        ))}
-        {isWaitingResponse && messages.length > 0 && (
-          <MemoizedMessage
-            text="Thinking..."
-            align='left'
-            arrow='left'
-            fill='#dcdcdc'
-          />
-        )}
+      <Box position='relative' display='grid' gridAutoRows='1fr max-content' bg='#03001da8' p='1rem' boxShadow='0 5px 5px 5px #386018' width='100vw' height='30vh'>
+        <Box
+          ref={chatContainerRef}
+          display="flex"
+          flexDirection="column"
+          overflowY="scroll"
+          height='100%'
+          position='relative'
+          sx={{
+            '&>*': {
+              marginBottom: '1rem',
+            }
+          }}
+        >
+          {messages.length ? <Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text> : null}
+          {messages.map((message, index) => (
+            <MemoizedMessage 
+              key={message.id}
+              text={message?.link?.value?.value}
+              align={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
+              arrow={message?.link?.author?.[0]?.to_id === chatGptLinkId ? 'left' : 'right'}
+              fill={message?.link?.author?.[0]?.to_id === chatGptLinkId ? '#dcdcdc' : '#cce4ff'}
+            />
+          ))}
+          {isWaitingResponse && messages.length > 0 && (
+            <MemoizedMessage
+              text="Thinking..."
+              align='left'
+              arrow='left'
+              fill='#dcdcdc'
+            />
+          )}
+        </Box>
+        <MemoizedInputChat openInput={openInput} sendMessage={sendMessage} value={value} onChange={onChange} />
       </Box>
-      <MemoizedInputChat openInput={openInput} sendMessage={sendMessage} value={value} onChange={onChange} />
     </Box>
   );
   

@@ -80,9 +80,16 @@ export function Message ({
       variants={messageVariants}
       // @ts-ignore
       transition={{ duration: 0.3 }}
-      width="calc(100% - 2.5rem)"
+      width="100%"
+      // width="calc(100% - 2.5rem)"
     > 
-      <HStack w='100%' display='flex' alignItems='flex-end' spacing={2}>
+      <HStack 
+        w='100%' 
+        display='flex' 
+        alignItems='flex-end'
+        justifyContent={ align === 'left' ? 'flex-start' : 'flex-end'}
+        spacing={2}
+      >
         {align === 'left' && <CreatureAvatar icon={<GiHemp />} bg='#306604' />}
         <Box {...flexDivProps} sx={{
           ...flexDivProps.style,

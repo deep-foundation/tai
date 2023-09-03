@@ -278,7 +278,6 @@ const handleInputChange = (e) => {
       try {
         startTime.current = await startRecording();
         setIsRecording(true);
-        nextState();
         setInputValue('')
       } catch (error) {
         console.log('Error starting recording:', error);
@@ -299,6 +298,7 @@ const handleInputChange = (e) => {
       setIsProcessing(false);
       setIsRecording(false);
     }
+    nextState();
   };
 
 
