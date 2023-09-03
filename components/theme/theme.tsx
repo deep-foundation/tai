@@ -39,6 +39,10 @@ const themeChakra = extendTheme({
       sendMessagePlane: {
         default: 'gray.700',
         _dark: 'whiteText',
+      },
+      modalConfirm: {
+        default: '#d8e9d8',
+        _dark: '#004d00',
       }
     },
   },

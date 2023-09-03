@@ -183,7 +183,7 @@ return (
   <>
 <Modal isOpen={isOpen} onClose={onClose} isCentered>
     <ModalOverlay />
-    <ModalContent bgColor="#004d00">
+    <ModalContent bgColor="modalConfirm">
         <ModalHeader>Purchase confirmation</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
