@@ -12,12 +12,18 @@ function _ScreenChat({
   newConversationLinkId, 
   deep, 
   handleCloseChat, 
-  openInput 
+  openInput,
+  value,
+  onChange,
+  sendMessage
 }:{ 
   newConversationLinkId: number; 
   deep: any; 
   handleCloseChat;
   openInput: boolean;
+  value: any;
+  onChange: any;
+  sendMessage: any;
 }) {
   const [messages, setMessages] = useState<Array<any>>([]);
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
@@ -133,7 +139,7 @@ function _ScreenChat({
             fill='#dcdcdc'
           />
         )}
-        <MemoizedInputChat openInput={openInput} sendMessage={() => alert('send message')} />
+        <MemoizedInputChat openInput={openInput} sendMessage={sendMessage} value={value} onChange={onChange} />
       </Box>
     </Box>
   );
