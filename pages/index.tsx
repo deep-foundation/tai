@@ -48,10 +48,20 @@ export const Content = React.memo(() => {
   const [inputValue, setInputValue] = useState('');
 
   const handleSendMessage = async () => {
-    if (inputValue.trim() === '') return; 
+    console.log("inputValue",inputValue)
 
-    // await sendMessage(inputValue);
-
+    if (inputValue.trim() === '') return;
+    await processDataAndSend({
+      isRecording: false,
+      deep,
+      containerLinkId,
+      newConversationLinkId,
+      isTimeEnded,
+      isChatClosed,
+      startTime: null, 
+      systemMsg,
+      inputData: inputValue
+    });
     setInputValue('');
   };
 
@@ -262,6 +272,7 @@ const handleInputChange = (e) => {
   }, []);
 
   const handleClick = async () => {
+    console.log("inputValue",inputValue)
     if (!isRecording) {
       try {
         startTime.current = await startRecording();
@@ -270,197 +281,23 @@ const handleInputChange = (e) => {
         console.log('Error starting recording:', error);
       }
     } else {
-      try {
-        setIsProcessing(true);
-        const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-        const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
-        const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
-        const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
-        const transcriptionTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcription");
-        const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
-        const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
-        const record = await stopRecording(deep, containerLinkId, startTime.current);
-        const endTime = new Date().toLocaleDateString();
-        const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime, endTime }]);
-
-        const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
-          type_id: transcribeTypeLinkId,
-          from_id: deep.linkId,
-          to_id: soundLinkId,
-          in: {
-            data: {
-              type_id: containTypeLinkId,
-              from_id: deep.linkId,
-            }
-          }
-        });
-
-        const { link: transcribedTextLinkId } = await tryGetLink(deep, {
-          delayMs: 1000,
-          attemptsCount: 20,
-          selectData: {
-            type_id: transcriptionTypeLinkId,
-            in: {
-              type_id: containTypeLinkId,
-              from_id: soundLinkId
-            },
-          },
-        });
-        assert.notEqual(transcribedTextLinkId, undefined);
-
-        const { data: messagesLinkId } = await deep.select({
-          tree_id: { _eq: messagingTreeId },
-          link: { type_id: { _eq: messageTypeLinkId } },
-          root_id: { _eq: newConversationLinkId },
-          // @ts-ignore
-          self: { _eq: true }
-        }, {
-          table: 'tree',
-          variables: { order_by: { depth: "desc" } },
-          returning: `
-            id
-            depth
-            root_id
-            parent_id
-            link_id
-            link {
-              id
-              from_id
-              type_id
-              to_id
-              value
-              replies: out (where: { type_id: { _eq: ${replyTypeLinkId} } }) {
-                id
-                type_id
-                from_id
-                to_id
-                value
-              }
-            }
-          `
-        });
-
-        const { data: checkConversationLink } = await deep.select({
-          id: newConversationLinkId,
-          in: {
-            type_id: containTypeLinkId,
-            from_id: deep.linkId,
-          }
-        }, {
-          returning: `
-            id
-            value
-            systemMessages: in(where: { type_id: { _eq: ${systemTypeLinkId} } }) {
-              id
-              type_id
-              from_id
-              to_id
-              value
-            }
-          `
-        });
-
-        if (isTimeEnded || isChatClosed || checkConversationLink[0].systemMessages.length === 0) {
-
-          const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
-            type_id: messageTypeLinkId,
-            string: { data: { value: systemMsg } },
-            in: {
-              data: {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-              }
-            },
-          });
-
-          const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
-            type_id: systemTypeLinkId,
-            from_id: systemMessageLinkId,
-            to_id: newConversationLinkId,
-            in: {
-              data: {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-              },
-            },
-          });
-
-          const { data: [{ id: messageLinkId }] } = await deep.insert({
-            type_id: messageTypeLinkId,
-            string: { data: { value: transcribedTextLinkId.value.value } },
-            in: {
-              data: {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-              }
-            },
-          });
-
-          const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
-            type_id: replyTypeLinkId,
-            from_id: messageLinkId,
-            to_id: newConversationLinkId,
-            in: {
-              data: {
-                type_id: containTypeLinkId,
-                from_id: deep.linkId,
-              },
-            },
-          });
-        }
-
-        if (newConversationLinkId && newConversationLinkId !== 0) {
-          try {
-            if (isTimeEnded || isChatClosed) {
-              //code if chat is closed or time is ended
-            } else {
-
-            const assistantMessageLinkId = messagesLinkId[0].link.id
-            const { data: [{ id: messageLinkId }] } = await deep.insert({
-              type_id: messageTypeLinkId,
-              string: { data: { value: transcribedTextLinkId.value.value } },
-              in: {
-                data: {
-                  type_id: containTypeLinkId,
-                  from_id: deep.linkId,
-                }
-              },
-            });
-
-            const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
-              type_id: replyTypeLinkId,
-              from_id: messageLinkId,
-              to_id: assistantMessageLinkId,
-              in: {
-                data: {
-                  type_id: containTypeLinkId,
-                  from_id: deep.linkId,
-                },
-              },
-            });
-          }
-        } catch (error) {
-          //if error - stop processing
-          console.error("An error occurred:", error);
-          setIsTimeEnded(false);
-          setIsChatClosed(false); 
-          setLastPress(Date.now());
-          setIsProcessing(false);
-          setIsRecording(false);
-        }
-      }
-        //think about code here
-        setIsTimeEnded(false);
-        setIsChatClosed(false); 
-        setLastPress(Date.now());
-        setIsRecording(false);
-        setIsProcessing(false);
-      } catch (error) {
-        console.error(error);
-    }
-    
+      setIsProcessing(true);
+      await processDataAndSend({
+        isRecording: true,
+        deep,
+        containerLinkId,
+        newConversationLinkId,
+        isTimeEnded,
+        isChatClosed,
+        startTime: startTime,
+        systemMsg,
+        inputData: null
+      });
+      setIsProcessing(false);
+      setIsRecording(false);
     }
   };
+
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -536,6 +373,229 @@ const handleInputChange = (e) => {
     imageUrl: item.image_url,
     price: item.variants?.[0]?.default_price || 0,//price in $ or ฿
   }));
+
+
+
+
+  const processDataAndSend = async ({
+    isRecording,
+    deep,
+    containerLinkId,
+    newConversationLinkId,
+    isTimeEnded,
+    isChatClosed,
+    startTime,
+    systemMsg,
+    inputData
+  }) => {
+    try {
+      let messageValue;
+  console.log("isRecording",isRecording)
+      if (isRecording) {
+        // handle recording
+        const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+        const transcribeTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcribe");
+        const transcriptionTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcription");
+        const record = await stopRecording(deep, containerLinkId, startTime.current);
+        console.log("Record:", record);
+        const endTime = new Date().toLocaleDateString();
+console.log("endTime",endTime)
+console.log("soundlink",{ record, startTime: startTime.current, endTime })
+
+        const soundLinkId = await uploadRecords(deep, containerLinkId, [{ record, startTime: startTime, endTime }]);
+        console.log("Sound Link ID:", soundLinkId);
+        const { data: [{ id: transcribeTextLinkId }] } = await deep.insert({
+          type_id: transcribeTypeLinkId,
+          from_id: deep.linkId,
+          to_id: soundLinkId,
+          in: {
+            data: {
+              type_id: containTypeLinkId,
+              from_id: deep.linkId,
+            }
+          }
+        });
+
+  console.log("transcribeTextLinkId",transcribeTextLinkId)
+        const { link: transcribedTextLinkId } = await tryGetLink(deep, {
+          delayMs: 1000,
+          attemptsCount: 20,
+          selectData: {
+            type_id: transcriptionTypeLinkId,
+            in: {
+              type_id: containTypeLinkId,
+              from_id: soundLinkId
+            },
+          },
+        });
+        console.log("Transcribed Text Link ID:", transcribedTextLinkId);
+        assert.notEqual(transcribedTextLinkId, undefined);
+  
+        messageValue = transcribedTextLinkId.value.value;
+      } else {
+        
+        // get value from input
+        messageValue = inputData;
+      }
+      console.log("inputValue",inputValue)
+      console.log("messageValue",messageValue)
+
+      // send message
+      const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
+      const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
+      const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
+      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+      const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
+  
+          const { data: messagesLinkId } = await deep.select({
+            tree_id: { _eq: messagingTreeId },
+            link: { type_id: { _eq: messageTypeLinkId } },
+            root_id: { _eq: newConversationLinkId },
+            // @ts-ignore
+            self: { _eq: true }
+          }, {
+            table: 'tree',
+            variables: { order_by: { depth: "desc" } },
+            returning: `
+              id
+              depth
+              root_id
+              parent_id
+              link_id
+              link {
+                id
+                from_id
+                type_id
+                to_id
+                value
+                replies: out (where: { type_id: { _eq: ${replyTypeLinkId} } }) {
+                  id
+                  type_id
+                  from_id
+                  to_id
+                  value
+                }
+              }
+            `
+          });
+  
+      const { data: checkConversationLink } = await deep.select({
+        id: newConversationLinkId,
+        in: {
+          type_id: containTypeLinkId,
+          from_id: deep.linkId,
+        }
+      }, {
+        returning: `
+          id
+          value
+          systemMessages: in(where: { type_id: { _eq: ${systemTypeLinkId} } }) {
+            id
+            type_id
+            from_id
+            to_id
+            value
+          }
+        `
+      });
+  
+  
+      if (newConversationLinkId && newConversationLinkId !== 0) {
+        try {
+          if (isTimeEnded || isChatClosed || checkConversationLink[0].systemMessages.length === 0) {
+              const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
+              type_id:messageTypeLinkId,
+              string: { data: { value: systemMsg } },
+              in: {
+                data: {
+                  type_id: containTypeLinkId,
+                  from_id: deep.linkId,
+                }
+              },
+            });
+      
+            const { data: [{ id: systemMessageToConversationLinkId }] } = await deep.insert({
+              type_id: systemTypeLinkId,
+              from_id: systemMessageLinkId,
+              to_id: newConversationLinkId,
+              in: {
+                data: {
+                  type_id: containTypeLinkId,
+                  from_id: deep.linkId,
+                },
+              },
+            });
+
+            const { data: [{ id: messageLinkId }] } = await deep.insert({
+              type_id: messageTypeLinkId,
+              string: { data: { value: messageValue } },
+              in: {
+                data: {
+                  type_id: containTypeLinkId,
+                  from_id: deep.linkId,
+                }
+              },
+            });
+  
+            const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
+              type_id: replyTypeLinkId,
+              from_id: messageLinkId,
+              to_id: newConversationLinkId,
+              in: {
+                data: {
+                  type_id: containTypeLinkId,
+                  from_id: deep.linkId,
+                },
+              },
+            });
+          } else {
+            const assistantMessageLinkId = messagesLinkId[0].link.id;
+            const { data: [{ id: messageLinkId }] } = await deep.insert({
+              type_id: messageTypeLinkId,
+              string: { data: { value: messageValue } },
+              in: {
+                data: {
+                  type_id: containTypeLinkId,
+                  from_id: deep.linkId,
+                }
+              },
+            });
+  
+            const { data: [{ id: replyToMessageLinkId }] } = await deep.insert({
+              type_id: replyTypeLinkId,
+              from_id: messageLinkId,
+              to_id: assistantMessageLinkId,
+              in: {
+                data: {
+                  type_id: containTypeLinkId,
+                  from_id: deep.linkId,
+                },
+              },
+            });
+          }
+        } catch (error) {
+          console.error("An error occurred:", error);
+          setIsTimeEnded(false);
+          setIsChatClosed(false); 
+          setLastPress(Date.now());
+          setIsProcessing(false);
+          setIsRecording(false);
+        }
+      }
+      
+      } catch (error) {
+      console.error("An error occurred:", error);
+      setIsTimeEnded(false);
+      setIsChatClosed(false); 
+      setLastPress(Date.now());
+      setIsProcessing(false);
+      setIsRecording(false);
+      }
+      };
+      
+  
+
+
 
   return (<VStack position='relative' width='100vw' height='100vh'>
       {!isOpen && (
@@ -653,4 +713,3 @@ async function fetchAssociatedLinks(deep, linkId) {
     };
   });
 }
-
