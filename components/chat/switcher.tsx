@@ -23,7 +23,7 @@ const variantsKeyboard = {
       type: "spring", bounce: 0.5, duration: 3,
     }
    },
-	 initally: { scale: 1 },
+	 initially: { scale: 1 },
 };
 
 function _Tab ({
@@ -67,13 +67,13 @@ function _Tab ({
 				as={motion.button}
 				aria-label='keyboard button'
 				animate={control}
-				initial='initally'
+				initial='initially'
 				variants={variantsKeyboard}
 				onClick={onClickKeyboard}
 				sx={{
 					width: '7.4rem',
 					height: '7.4rem',
-					backgroundColor: 'red',
+					backgroundColor: state === 'keyboard' ? '#ff0000' : '#03001d',
 					borderTopLeftRadius: 0,
 					borderTopRightRadius: '4rem',
 					borderBottomLeftRadius: 0,

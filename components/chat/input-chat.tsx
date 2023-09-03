@@ -39,8 +39,8 @@ export function InputChat ({
 			size='md'
 			variants={variants}
 			sx={{
-				position: 'absolute',
-				bottom: '1rem',
+				// position: 'absolute',
+				// bottom: '1rem',
 				width: 'calc(100% - 1.5rem)',
 				color: 'white',
 			}}

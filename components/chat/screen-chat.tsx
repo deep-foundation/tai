@@ -98,10 +98,17 @@ function _ScreenChat({
   }, [messages]);
   
   return (
-    <Box position="fixed" bottom={0} left={0} zIndex={1000} width='100vw' height='30vh'>
+    <Box position="fixed" bottom={0} left={0} zIndex={1000} width='100vw' height='30vh' display='grid' gridAutoRows='1fr max-content' bg='#03001da8' p='1rem' boxShadow='0 5px 5px 5px #386018'>
   
       <Box position="absolute" right={6} top={3} zIndex={1001}>
-        <IconButton variant='outline' borderColor='#909294' aria-label='Close chat' isRound icon={<TfiClose color='#909294' />} onClick={handleCloseChat} />
+        <IconButton 
+          variant='outline' 
+          borderColor='#909294' 
+          boxShadow='inset 0 0 3px 1px #386018'
+          aria-label='Close chat' 
+          isRound icon={<TfiClose color='#909294' />} 
+          onClick={handleCloseChat} 
+        />
       </Box>
   
       <Box
@@ -111,15 +118,6 @@ function _ScreenChat({
         overflowY="scroll"
         height='100%'
         position='relative'
-        bg='#03001da8'
-        p={3}
-        _before={{ content: '""', position: 'absolute', top: 0, left: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderRight: '1.5rem solid transparent' }}
-        _after={{ content: '""', position: 'absolute', top: 0, right: 0, width: 0, borderTop: '1.5rem solid #0c3b01', borderLeft: '1.5rem solid transparent' }}
-        sx={{
-          '& > *:not(:last-child)': {
-            mb: '1rem',
-          },
-        }}
       >
         {messages.length ? <Text key="header" fontWeight="bold" align='center' fontSize="lg" color='#deffee'>Online consultant</Text> : null}
         {messages.map((message, index) => (
@@ -139,8 +137,8 @@ function _ScreenChat({
             fill='#dcdcdc'
           />
         )}
-        <MemoizedInputChat openInput={openInput} sendMessage={sendMessage} value={value} onChange={onChange} />
       </Box>
+      <MemoizedInputChat openInput={openInput} sendMessage={sendMessage} value={value} onChange={onChange} />
     </Box>
   );
   

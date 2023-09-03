@@ -66,6 +66,8 @@ const handleInputChange = (e) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [state, nextState] = useCycle("voice", "keyboard");
 
+  console.log('state', state);
+
   const startTime = useRef('');
   const path = process.env.NEXT_PUBLIC_GQL_PATH;
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
@@ -266,6 +268,7 @@ const handleInputChange = (e) => {
       try {
         startTime.current = await startRecording();
         setIsRecording(true);
+        nextState();
       } catch (error) {
         console.log('Error starting recording:', error);
       }
@@ -558,14 +561,6 @@ const handleInputChange = (e) => {
               transform: 'scale(1.05)',
             },
           }}
-          // onMouseOver={(e) => {
-          //   e.currentTarget.style.background = 'linear-gradient(45deg, #81C784, #C5E1A5)';
-          //   e.currentTarget.style.transform = 'scale(1.05)';
-          // }}
-          // onMouseOut={(e) => {
-          //   e.currentTarget.style.background = 'linear-gradient(45deg, #4CAF50, #8BC34A)';
-          //   e.currentTarget.style.transform = 'scale(1)';
-          // }}
         >
           Products
         </Button>
