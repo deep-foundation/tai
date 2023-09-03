@@ -75,9 +75,8 @@ const handleInputChange = (e) => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [state, nextState] = useCycle("voice", "keyboard");
-
   console.log('state', state);
-
+  
   const startTime = useRef('');
   const path = process.env.NEXT_PUBLIC_GQL_PATH;
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
@@ -440,72 +439,80 @@ console.log("soundlink",{ record, startTime: startTime.current, endTime })
         // get value from input
         messageValue = inputData;
       }
-      console.log("inputValue",inputValue)
-      console.log("messageValue",messageValue)
 
-      // send message
-      const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
-      const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
-      const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
-      const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-      const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
-  
-          const { data: messagesLinkId } = await deep.select({
-            tree_id: { _eq: messagingTreeId },
-            link: { type_id: { _eq: messageTypeLinkId } },
-            root_id: { _eq: newConversationLinkId },
-            // @ts-ignore
-            self: { _eq: true }
-          }, {
-            table: 'tree',
-            variables: { order_by: { depth: "desc" } },
-            returning: `
-              id
-              depth
-              root_id
-              parent_id
-              link_id
-              link {
-                id
-                from_id
-                type_id
-                to_id
-                value
-                replies: out (where: { type_id: { _eq: ${replyTypeLinkId} } }) {
-                  id
-                  type_id
-                  from_id
-                  to_id
-                  value
-                }
-              }
-            `
-          });
-  
-      const { data: checkConversationLink } = await deep.select({
-        id: newConversationLinkId,
-        in: {
-          type_id: containTypeLinkId,
-          from_id: deep.linkId,
-        }
-      }, {
-        returning: `
-          id
-          value
-          systemMessages: in(where: { type_id: { _eq: ${systemTypeLinkId} } }) {
-            id
-            type_id
-            from_id
-            to_id
-            value
-          }
-        `
-      });
   
   
       if (newConversationLinkId && newConversationLinkId !== 0) {
+        console.log("inputValue",inputValue)
+        console.log("messageValue",messageValue)
+  
+        // send message
+        const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
+        const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
+        const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
+        const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
+        const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
+    
+            const { data: messagesLinkId } = await deep.select({
+              tree_id: { _eq: messagingTreeId },
+              link: { type_id: { _eq: messageTypeLinkId } },
+              root_id: { _eq: newConversationLinkId },
+              // @ts-ignore
+              self: { _eq: true }
+            }, {
+              table: 'tree',
+              variables: { order_by: { depth: "desc" } },
+              returning: `
+                id
+                depth
+                root_id
+                parent_id
+                link_id
+                link {
+                  id
+                  from_id
+                  type_id
+                  to_id
+                  value
+                  replies: out (where: { type_id: { _eq: ${replyTypeLinkId} } }) {
+                    id
+                    type_id
+                    from_id
+                    to_id
+                    value
+                  }
+                }
+              `
+            });
+    
+        const { data: checkConversationLink } = await deep.select({
+          id: newConversationLinkId,
+          in: {
+            type_id: containTypeLinkId,
+            from_id: deep.linkId,
+          }
+        }, {
+          returning: `
+            id
+            value
+            systemMessages: in(where: { type_id: { _eq: ${systemTypeLinkId} } }) {
+              id
+              type_id
+              from_id
+              to_id
+              value
+            }
+          `
+        });
+        console.log("System Messages:", checkConversationLink[0].systemMessages);
+        console.log("Messages Link ID:", messagesLinkId);
+
         try {
           if (isTimeEnded || isChatClosed || checkConversationLink[0].systemMessages.length === 0) {
+            console.log("Inside first if block");
+            console.log("isTimeEnded:", isTimeEnded);
+console.log("isChatClosed:", isChatClosed);
+
               const { data: [{ id: systemMessageLinkId }] } = await deep.insert({
               type_id:messageTypeLinkId,
               string: { data: { value: systemMsg } },
@@ -552,7 +559,13 @@ console.log("soundlink",{ record, startTime: startTime.current, endTime })
               },
             });
           } else {
+            console.log("Inside else block");
+            console.log("isTimeEnded:", isTimeEnded);
+console.log("isChatClosed:", isChatClosed);
+
             const assistantMessageLinkId = messagesLinkId[0].link.id;
+            console.log("Assistant Message Link ID:", assistantMessageLinkId);
+
             const { data: [{ id: messageLinkId }] } = await deep.insert({
               type_id: messageTypeLinkId,
               string: { data: { value: messageValue } },
@@ -585,7 +598,11 @@ console.log("soundlink",{ record, startTime: startTime.current, endTime })
           setIsRecording(false);
         }
       }
-      
+      setIsTimeEnded(false);
+        setIsChatClosed(false); 
+        setLastPress(Date.now());
+        setIsRecording(false);
+        setIsProcessing(false);
       } catch (error) {
       console.error("An error occurred:", error);
       setIsTimeEnded(false);
