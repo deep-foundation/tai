@@ -26,7 +26,6 @@ const assert = require('assert');
 import { motion, useCycle } from 'framer-motion';
 import { Tab } from '../components/chat/switcher';
 import { ScreenChat } from '../components/chat/screen-chat';
-
 const MotionBox = motion(Box);
 
 export const Content = React.memo(() => {
@@ -43,6 +42,26 @@ export const Content = React.memo(() => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [shoppingCartId, setShoppingCartId] = useState(0);
   const [getItemsData, setGetItemsData] = useState<any[]>([]);
+
+
+
+  const [inputValue, setInputValue] = useState('');
+
+  const handleSendMessage = async () => {
+    if (inputValue.trim() === '') return; 
+
+    // await sendMessage(inputValue);
+
+    setInputValue('');
+  };
+
+const handleInputChange = (e) => {
+  const newValue = e.target.value;
+
+  setInputValue(newValue);
+};
+
+
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [state, nextState] = useCycle("voice", "keyboard");
@@ -572,8 +591,7 @@ export const Content = React.memo(() => {
         stateVoice={state}
         onClickKeyboard={() => nextState()} 
       />
-      <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat} openInput={state === 'keyboard'} />
-
+      <ScreenChat deep={deep} newConversationLinkId={newConversationLinkId} handleCloseChat={handleCloseChat} openInput={state === 'keyboard'} sendMessage={handleSendMessage} value={inputValue} onChange={handleInputChange}/>
     </VStack>
   );
 })
