@@ -76,7 +76,7 @@ const handleInputChange = (e) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [state, nextState] = useCycle("voice", "keyboard");
   console.log('state', state);
-  
+
   const startTime = useRef('');
   const path = process.env.NEXT_PUBLIC_GQL_PATH;
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
@@ -279,6 +279,7 @@ const handleInputChange = (e) => {
         startTime.current = await startRecording();
         setIsRecording(true);
         nextState();
+        setInputValue('')
       } catch (error) {
         console.log('Error starting recording:', error);
       }
@@ -331,6 +332,9 @@ const handleInputChange = (e) => {
   const handleCloseChat = useMemo(() => {
     return () => {
       (async () => {
+        nextState();
+        setInputValue('')
+
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
   
