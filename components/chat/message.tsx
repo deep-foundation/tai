@@ -96,11 +96,11 @@ export function Message ({
             position='relative'
             w='auto'
             maxW='100%'
-            wordWrap='break-word'
-            wordBreak='break-word'
             borderRadius='2xl'
             boxSizing='border-box'
             sx={{
+              wordWrap: 'break-word',
+              wordBreak: 'break-word',
               clear: 'both',
               'hyphens': 'auto',
             }}  

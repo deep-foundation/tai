@@ -83,6 +83,17 @@ const themeChakra = extendTheme({
       },
 
     },
+
+    IconButton: {
+      variants: {
+        ghost: {  
+          backgroundColor: 'transparent',
+          _hover: {
+            backgroundColor: 'transparent',
+          },
+        }
+      }        
+    }
   }
 })
 

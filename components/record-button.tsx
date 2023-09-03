@@ -8,7 +8,7 @@ import { PiMicrophoneSlashThin, PiMicrophoneThin } from "react-icons/pi";
 const variants = {
   noRecord: { scale: 1 },
   recording: { 
-    scale: [1, 0.85, 1.15, 0.85, 1],
+    scale: [1, 0.95, 1.05, 0.95, 1],
     transition: {
       repeat: Infinity,
       type: "spring",
@@ -77,11 +77,9 @@ export function _RecordButton({
       }}
       whileTap={{ scale: 0.85 }}
       onClick={handleClick}
-      >
-    </IconButton>)
+    />
+  )
 }
-
-export const RecordButton = React.memo(_RecordButton);
 
 function _ProcessButton() {
 
@@ -130,3 +128,4 @@ function _ProcessButton() {
 }
 
 const ProcessButton = React.memo(_ProcessButton);
+export const RecordButton = React.memo(_RecordButton);

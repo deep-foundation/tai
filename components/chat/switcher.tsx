@@ -16,14 +16,16 @@ function IconKeyboard() {
 const MotionBox = motion(Box);
 
 const variantsKeyboard = {
-  noKB: { scale: 1 },
+  noKB: { background: '#03001d' },
   keyboard: { 
-    scale: 1,
+		background: '#ff0000',
     transition: {
       type: "spring", bounce: 0.5, duration: 3,
     }
    },
-	 initially: { scale: 1 },
+	 initially: { 
+		background: '#ff0000',
+	},
 };
 
 function _Tab ({
@@ -73,7 +75,11 @@ function _Tab ({
 				sx={{
 					width: '7.4rem',
 					height: '7.4rem',
-					backgroundColor: state === 'keyboard' ? '#ff0000' : '#03001d',
+					_hover: {
+						backgroundColor: '#03001d',
+						scale: 0.65,
+					},
+					// backgroundColor: state === 'keyboard' ? '#ff0000' : '#03001d',
 					borderTopLeftRadius: 0,
 					borderTopRightRadius: '4rem',
 					borderBottomLeftRadius: 0,
@@ -82,10 +88,6 @@ function _Tab ({
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
-					_hover: {
-						backgroundColor: '#03001d',
-						scale: 0.65,
-					}
 				}}
 			>{<IconKeyboard />}</MotionBox>
 		</Box>

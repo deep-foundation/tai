@@ -24,6 +24,8 @@ function ItemsModal({
   const [disabledButtons, setDisabledButtons] = useState({});
   const [isBuyButtonLoading, setBuyButtonLoading] = useState(false);
 
+  console.log('items', items)
+
   const initialRef = useRef(null);
   const finalRef = useRef(null);
 
@@ -128,7 +130,7 @@ function ItemsModal({
               },
             }}>
               {items.map((item, index) => (
-                <Box key={item.id} sx={{
+                <Box key={item.linkId} sx={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'flex-start',

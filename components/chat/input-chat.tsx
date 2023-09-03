@@ -34,14 +34,14 @@ export function InputChat ({
 	}, [openInput, control]);
 
 	return (<InputGroup 
-			as={motion.button} 
+			as={motion.div} 
 			animate={control} 
 			size='md'
 			variants={variants}
 			sx={{
 				// position: 'absolute',
 				// bottom: '1rem',
-				width: 'calc(100% - 1.5rem)',
+				width: '100%',
 				color: 'white',
 			}}
 			initial={false}
@@ -65,6 +65,7 @@ export function InputChat ({
 					aria-label='send message button' 
 					isRound variant='ghost' size="md" 
 					color="white" 
+					background='transparent'
 					onClick={sendMessage} icon={<TbSend />} 
 				/>
       </InputRightElement>
