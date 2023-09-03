@@ -181,24 +181,24 @@ const itemsData = extractShoppingCartData(shoppingCartData);
 console.log("itemsData",itemsData)
 return (
   <>
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-          <ModalOverlay />
-          <ModalContent>
-              <ModalHeader>Purchase confirmation</ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                  Are you sure you want to confirm this purchase?
-              </ModalBody>
-  
-              <ModalFooter>
-              <Button variant="ghost" onClick={onClose}>Cancel</Button>
-              <Button colorScheme="green" mr={3} onClick={handlePurchaseConfirmation}>
-    Confirm
-</Button>
+<Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <ModalOverlay />
+    <ModalContent bgColor="#004d00">
+        <ModalHeader>Purchase confirmation</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+            Are you sure you want to confirm this purchase?
+        </ModalBody>
 
-              </ModalFooter>
-          </ModalContent>
-      </Modal>
+        <ModalFooter>
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button colorScheme="green" mr={3} onClick={handlePurchaseConfirmation}>
+                Confirm
+            </Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
       <Container maxW="container.xl" p={5} bg="green.50" borderRadius="md">
         <VStack spacing={4} align="stretch">
           <Heading color="green.600" mb={4}>Shopping Carts</Heading>
