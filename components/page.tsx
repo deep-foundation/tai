@@ -58,7 +58,7 @@ export function Page({ renderChildren }: PageParam) {
         await deep.insert([
           {
             type_id: await deep.id('@deep-foundation/core', 'Join'),
-            from_id: await deep.id('@deep-foundation/chatgpt-tokens-gpt-3-encoder'),
+            from_id: await deep.id('@deep-foundation/chatgpt-tokens-gpt-4-encoder'),
             to_id: await deep.id('deep', 'admin'),
           },
         ]);
