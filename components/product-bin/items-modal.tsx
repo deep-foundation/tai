@@ -30,12 +30,12 @@ function ItemsModal({
   const finalRef = useRef(null);
 
   const addToCartWithDelay = async (itemLinkId) => {
-    setDisabledButtons(prevState => ({ ...prevState, [itemLinkId]: true }));
+    setDisabledButtons(items.reduce((acc, item) => ({ ...acc, [item.linkId]: true }), {}));
+
     await addToCart(itemLinkId);
-    setTimeout(() => {
-      setDisabledButtons(prevState => ({ ...prevState, [itemLinkId]: false }));
-    }, 1000);
-  };
+    
+    setDisabledButtons(items.reduce((acc, item) => ({ ...acc, [item.linkId]: false }), {}));
+};
 
 
   const handleBuy = async () => {
