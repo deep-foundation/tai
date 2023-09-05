@@ -355,20 +355,22 @@ const handleInputChange = (e) => {
   }, [deep]);
 
   const handleAddToCart = async (itemId) => {
-    const addToCartTypeLinkId = await deep.id("@flakeed/loyverse", "AddToCart");
-    const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-    const { data: addedToCartLink } = await deep.insert({
-      type_id: addToCartTypeLinkId,
+    console.log("itemId", itemId);
+
+    const { data: [{ id: addedToCartLink }] } = await deep.insert({
+      type_id: await deep.id("@flakeed/loyverse", "AddToCart"),
       from_id: itemId,
       to_id: shoppingCartId,
       in: {
         data: {
-          type_id: containTypeLinkId,
+          type_id: await deep.id("@deep-foundation/core", "Contain"),
           from_id: deep.linkId,
         }
       },
     });
-  }
+    await deep.await(addedToCartLink);
+    console.log("addedToCartLink", addedToCartLink);
+}
 
   const items = getItemsData.map(item => ({
     // id: item.id,
