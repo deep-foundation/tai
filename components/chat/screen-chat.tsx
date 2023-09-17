@@ -15,6 +15,14 @@ function _ScreenChat({
   value,
   onChange,
   sendMessage
+}: {
+  newConversationLinkId: number;
+  deep: any;
+  handleCloseChat: () => void;
+  openInput: boolean;
+  value: any;
+  onChange: any;
+  sendMessage: any;
 }) {
   const [messages, setMessages] = useState<Array<any>>([]);
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
