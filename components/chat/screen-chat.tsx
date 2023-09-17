@@ -27,9 +27,9 @@ function _ScreenChat({
   const [messages, setMessages] = useState<Array<any>>([]);
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
   const [linkData, setLinkData] = useState({
-    messageTypeLinkId: null,
-    authorTypeLinkId: null,
-    messagingTreeId: null
+    messageTypeLinkId: 0,
+    authorTypeLinkId: 0,
+    messagingTreeId: 0
   });
   const { messageTypeLinkId, authorTypeLinkId, messagingTreeId } = linkData;
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -63,7 +63,7 @@ function _ScreenChat({
   });
 
   const result = allLinks.data;
-  const filteredMessages = deep.minilinks.byType[1057] || [];
+  const filteredMessages = deep.minilinks.byType[messageTypeLinkId] || [];
 
   const messagesWithReplies = result.filter(message =>
     result.some(link => link.from_id === message.id)
