@@ -454,10 +454,10 @@ console.log("soundlink",{ record, startTime: startTime.current, endTime })
   
         // send message
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
-        const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
+        const replyTypeLinkId = await deep.id('@deep-foundation/chatgpt', 'Reply');
         const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-        const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
+        const messagingTreeId = await deep.id('@deep-foundation/messaging', 'messagingTree');
     
             const { data: messagesLinkId } = await deep.select({
               tree_id: { _eq: messagingTreeId },
