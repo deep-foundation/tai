@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Box, IconButton, Text } from '@chakra-ui/react';
 import { TfiClose } from 'react-icons/tfi';
 import { MemoizedMessage } from './message';
-import { m, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { MemoizedInputChat } from './input-chat';
 
 const MotionBox = motion(Box);
