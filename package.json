@@ -63,7 +63,7 @@
     "yargs": "^17.7.2"
   },
   "engines": {
-    "node": "^16.20.0"
+    "node": "^18.16.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.149",
