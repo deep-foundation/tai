@@ -26,11 +26,13 @@ export function _RecordButton({
   isRecording,
   handleClick,
   stateVoice,
+  isDisabled,
 }:{
   isProcessing?: boolean;
   isRecording?: boolean;
   handleClick?: () => any;
   stateVoice?: string;
+  isDisabled?: boolean;
 }) {
   const control = useAnimation();
 
@@ -58,6 +60,8 @@ export function _RecordButton({
       // isRound
       animate={control}
       variants={variants}
+      disabled={isDisabled}
+      style={isDisabled ? { opacity: 0.5, pointerEvents: 'none' } : {}}
       initial='initial'
       sx={{
         zIndex: 1,
