@@ -42,6 +42,7 @@ export const Content = React.memo(() => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [shoppingCartId, setShoppingCartId] = useState(0);
   const [getItemsData, setGetItemsData] = useState<any[]>([]);
+  // const [isMessageSent, setIsMessageSent] = useState<boolean>(false);
 
 
 
@@ -51,6 +52,7 @@ export const Content = React.memo(() => {
     console.log("inputValue",inputValue)
 
     if (inputValue.trim() === '') return;
+    setIsProcessing(true);
     await processDataAndSend({
       isRecording: false,
       deep,
@@ -62,7 +64,7 @@ export const Content = React.memo(() => {
       systemMsg,
       inputData: inputValue
     });
-    setInputValue('');
+    setIsProcessing(false);
   };
 
 const handleInputChange = (e) => {
@@ -298,7 +300,7 @@ const handleInputChange = (e) => {
       setIsProcessing(false);
       setIsRecording(false);
     }
-    nextState();
+    //nextState();
   };
 
 
@@ -328,11 +330,12 @@ const handleInputChange = (e) => {
   
     return () => clearTimeout(timeoutId);
   }, [lastPress, isRecording, isOpen]);
-
+console.log("newConversationLinkId",newConversationLinkId)
   const handleCloseChat = useMemo(() => {
     return () => {
       (async () => {
-        nextState();
+        state === 'keyboard' && nextState();
+
         setInputValue('')
 
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
@@ -352,7 +355,7 @@ const handleInputChange = (e) => {
         setIsChatClosed(true);
       })();
     };
-  }, [deep]);
+  }, [deep,state]);
 
   const handleAddToCart = async (itemId) => {
     console.log("itemId", itemId);
@@ -398,6 +401,7 @@ const handleInputChange = (e) => {
   }) => {
     try {
       let messageValue;
+      setInputValue('');
   console.log("isRecording",isRecording)
       if (isRecording) {
         // handle recording
@@ -564,6 +568,8 @@ console.log("isChatClosed:", isChatClosed);
                 },
               },
             });
+            await deep.await(replyToMessageLinkId)
+
           } else {
             console.log("Inside else block");
             console.log("isTimeEnded:", isTimeEnded);
@@ -594,28 +600,23 @@ console.log("isChatClosed:", isChatClosed);
                 },
               },
             });
+            await deep.await(replyToMessageLinkId)
           }
         } catch (error) {
           console.error("An error occurred:", error);
           setIsTimeEnded(false);
           setIsChatClosed(false); 
           setLastPress(Date.now());
-          setIsProcessing(false);
-          setIsRecording(false);
         }
       }
       setIsTimeEnded(false);
         setIsChatClosed(false); 
         setLastPress(Date.now());
-        setIsRecording(false);
-        setIsProcessing(false);
       } catch (error) {
       console.error("An error occurred:", error);
       setIsTimeEnded(false);
       setIsChatClosed(false); 
       setLastPress(Date.now());
-      setIsProcessing(false);
-      setIsRecording(false);
       }
       };
       
@@ -664,6 +665,7 @@ console.log("isChatClosed:", isChatClosed);
       <Tab 
         isProcessing={isProcessing} 
         isRecording={isRecording} 
+        isDisabled={isProcessing}
         handleClick={handleClick} 
         state={state} 
         stateVoice={state}
