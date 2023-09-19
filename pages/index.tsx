@@ -52,6 +52,7 @@ export const Content = React.memo(() => {
     console.log("inputValue",inputValue)
 
     if (inputValue.trim() === '') return;
+    if (isProcessing) return;
     setIsProcessing(true);
     await processDataAndSend({
       isRecording: false,
