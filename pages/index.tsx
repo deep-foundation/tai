@@ -26,6 +26,7 @@ const assert = require('assert');
 import { motion, useCycle } from 'framer-motion';
 import { Tab } from '../components/chat/switcher';
 import { ScreenChat } from '../components/chat/screen-chat';
+import * as Sentry from "@sentry/nextjs";
 const MotionBox = motion(Box);
 
 export const Content = React.memo(() => {
@@ -33,6 +34,12 @@ export const Content = React.memo(() => {
     defineCustomElements(window);
   }, []);
 
+  Sentry.init({
+    dsn: "https://95d66fb0261d86cf76cec7fd2f4b6a18@o4505925688426496.ingest.sentry.io/4505925717590016",
+
+    tracesSampleRate: 1.0,
+  });
+  
   let deep = useDeep();
   const [lastPress, setLastPress] = useState<number>(0);
   const [newConversationLinkId, setNewConversationLinkId] = useState<number>(0);
@@ -49,24 +56,36 @@ export const Content = React.memo(() => {
   const [inputValue, setInputValue] = useState('');
 
   const handleSendMessage = async () => {
-    console.log("inputValue",inputValue)
+    console.log("inputValue", inputValue);
 
     if (inputValue.trim() === '') return;
     if (isProcessing) return;
+
     setIsProcessing(true);
-    await processDataAndSend({
-      isRecording: false,
-      deep,
-      containerLinkId,
-      newConversationLinkId,
-      isTimeEnded,
-      isChatClosed,
-      startTime: null, 
-      systemMsg,
-      inputData: inputValue
-    });
-    setIsProcessing(false);
-  };
+
+    try {
+        await processDataAndSend({
+            isRecording: false,
+            deep,
+            containerLinkId,
+            newConversationLinkId,
+            isTimeEnded,
+            isChatClosed,
+            startTime: null, 
+            systemMsg,
+            inputData: inputValue
+        });
+    } catch (error) {
+      handleErrors(error)
+    } finally {
+        setIsProcessing(false);
+    }
+};
+
+const handleErrors = (error) => {
+  console.error("An error occurred:", error);
+  Sentry.captureException(error);
+};
 
 const handleInputChange = (e) => {
   const newValue = e.target.value;
@@ -194,7 +213,7 @@ const handleInputChange = (e) => {
           setGetItemsData(processedData);
         }
       } catch (error) {
-        console.error("An error occurred:", error.message);
+        handleErrors(error)
       }
     };
 
@@ -283,7 +302,7 @@ const handleInputChange = (e) => {
         setIsRecording(true);
         setInputValue('')
       } catch (error) {
-        console.log('Error starting recording:', error);
+        handleErrors(error)
       }
     } else {
       setIsProcessing(true);
@@ -604,7 +623,7 @@ console.log("isChatClosed:", isChatClosed);
             await deep.await(replyToMessageLinkId)
           }
         } catch (error) {
-          console.error("An error occurred:", error);
+          handleErrors(error)
           setIsTimeEnded(false);
           setIsChatClosed(false); 
           setLastPress(Date.now());
@@ -614,8 +633,8 @@ console.log("isChatClosed:", isChatClosed);
         setIsChatClosed(false); 
         setLastPress(Date.now());
       } catch (error) {
-      console.error("An error occurred:", error);
-      setIsTimeEnded(false);
+        handleErrors(error)
+        setIsTimeEnded(false);
       setIsChatClosed(false); 
       setLastPress(Date.now());
       }
