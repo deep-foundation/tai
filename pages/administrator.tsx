@@ -97,7 +97,7 @@ const [selectedChatId, setSelectedChatId] = useState(0);
           const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
           const waitForConfirmPurchaseTypeId = await deep.id("@flakeed/loyverse", "WaitForConfirmPurchase");
           const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
-          const conversationTypeId = await deep.id("@deep-foundation/chatgpt","Conversation");
+          const conversationTypeId = await deep.id("@deep-foundation/chatgpt-azure","Conversation");
           const confirmPurchaseTypeId = await deep.id("@flakeed/loyverse","ConfirmPurchase");
           
           setConfirmPurchaseTypeLinkId(confirmPurchaseTypeId);

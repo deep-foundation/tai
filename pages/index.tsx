@@ -143,7 +143,7 @@ const handleInputChange = (e) => {
   useEffect(() => {
     const initializeData = async () => {
       const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-      const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+      const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt-azure", "Conversation");
       const shoppingCartTypeLinkId = await deep.id("@flakeed/loyverse", "ShoppingCart");
       const getItemsTypeLinkId = await deep.id("@flakeed/loyverse", "GetItems");
       let currentConversationId = newConversationLinkId;
@@ -329,7 +329,7 @@ const handleInputChange = (e) => {
       const doAsyncStuff = async () => {
         if (Date.now() - lastPress >= 120000 && !isRecording && !isOpen) {
           const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-          const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+          const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt-azure", "Conversation");
 
           const { data: [{ id: conversationLinkId }] } = await deep.insert({
             type_id: conversationTypeLinkId,
@@ -359,7 +359,7 @@ console.log("newConversationLinkId",newConversationLinkId)
         setInputValue('')
 
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt-azure", "Conversation");
   
         const { data: [{ id: conversationLinkId }] } = await deep.insert({
           type_id: conversationTypeLinkId,
@@ -478,8 +478,8 @@ console.log("soundlink",{ record, startTime: startTime.current, endTime })
   
         // send message
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
-        const replyTypeLinkId = await deep.id('@deep-foundation/chatgpt', 'Reply');
-        const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
+        const replyTypeLinkId = await deep.id('@deep-foundation/chatgpt-azure', 'Reply');
+        const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt-azure", "System");
         const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
         const messagingTreeId = await deep.id('@deep-foundation/messaging', 'messagingTree');
     
@@ -684,7 +684,7 @@ console.log("isChatClosed:", isChatClosed);
       </Box>
       <Tab 
         isProcessing={isProcessing} 
-        isRecording={isRecording}
+        isRecording={isRecording} 
         handleClick={handleClick} 
         state={state} 
         stateVoice={state}

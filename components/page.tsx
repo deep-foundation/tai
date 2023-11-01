@@ -54,7 +54,7 @@ export function Page({ renderChildren }: PageParam) {
         },
       ]);
 
-      if (packageName == '@deep-foundation/chatgpt') {
+      if (packageName == '@deep-foundation/chatgpt-azure') {
         await deep.insert([
           {
             type_id: await deep.id('@deep-foundation/core', 'Join'),
@@ -91,7 +91,7 @@ export function Page({ renderChildren }: PageParam) {
                 packageNames={[
                   '@deep-foundation/capacitor-voice-recorder',
                   '@deep-foundation/google-speech',
-                  '@deep-foundation/chatgpt',
+                  '@deep-foundation/chatgpt-azure',
                   '@deep-foundation/capacitor-device',
                   '@deep-foundation/sound',
                   '@flakeed/loyverse'

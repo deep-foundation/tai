@@ -148,8 +148,8 @@ function Content() {
         const messageTypeLinkId = await deep.id('@deep-foundation/messaging', 'Message');
         const replyTypeLinkId = await deep.id('@deep-foundation/messaging', 'Reply');
         const transcriptionTypeLinkId = await deep.id("@deep-foundation/google-speech", "Transcription");
-        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
-        const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt", "System");
+        const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt-azure", "Conversation");
+        const systemTypeLinkId = await deep.id("@deep-foundation/chatgpt-azure", "System");
         const authorTypeLinkId = await deep.id('@deep-foundation/messaging', 'Author');
         const messagingTreeId = await deep.id('@deep-foundation/messaging', 'MessagingTree');
         const tokensTypeLinkId = await deep.id("@deep-foundation/tokens", "Tokens")
@@ -371,7 +371,7 @@ function Content() {
       const doAsyncStuff = async () => {
         if (Date.now() - lastPress >= 60000 && !isRecording) {
           const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-          const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+          const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt-azure", "Conversation");
 
           const { data: [{ id: conversationLinkId }] } = await deep.insert({
             type_id: conversationTypeLinkId,
@@ -395,7 +395,7 @@ function Content() {
 
   const handleCloseChat = async () => {
     const containTypeLinkId = await deep.id("@deep-foundation/core", "Contain");
-    const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt", "Conversation");
+    const conversationTypeLinkId = await deep.id("@deep-foundation/chatgpt-azure", "Conversation");
 
     const { data: [{ id: conversationLinkId }] } = await deep.insert({
       type_id: conversationTypeLinkId,
@@ -488,7 +488,7 @@ const ScreenChat = ({ newConversationLinkId,deep,handleCloseChat }) => {
   const [messages, setMessages] = useState<Array<any>>([]);
   const [messagesCount, setMessagesCount] = useState(0);
   let chatGptLinkId;
-  async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt', 'ChatGPT') }
+  async () => { chatGptLinkId = await deep.id('@deep-foundation/chatgpt-azure', 'ChatGPT') }
   useEffect(() => {
     const fetchMessages = async () => {
       const messagingTreeId = await deep.id("@deep-foundation/messaging", "MessagingTree");
