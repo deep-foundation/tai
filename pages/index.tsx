@@ -684,8 +684,7 @@ console.log("isChatClosed:", isChatClosed);
       </Box>
       <Tab 
         isProcessing={isProcessing} 
-        isRecording={isRecording} 
-        isDisabled={isProcessing}
+        isRecording={isRecording}
         handleClick={handleClick} 
         state={state} 
         stateVoice={state}
